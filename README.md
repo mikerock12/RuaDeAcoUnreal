@@ -49,18 +49,17 @@ O pacote de teste fica em `Saved\Packages\Windows\` (exe + `Content` + `raylib.d
 
 ## Unreal Engine 5.8
 
-A Unreal **não estava instalada** na máquina de desenvolvimento no momento do protótipo 0.1. O módulo `Source/RuaDeAco` já segue o plano (PaperCharacter, componentes, GameMode, Enhanced Input, Data Assets).
+A Unreal Engine **5.8.2** está em `D:\Epic\Launcher\UE_5.8` (o plano citava `D:\Epic\UE_5.8`; o Launcher instalou neste caminho). O módulo `Source/RuaDeAco` já segue o plano (PaperCharacter, componentes, GameMode, Enhanced Input, Data Assets).
 
-Quando a engine estiver em `D:\Epic\UE_5.8`:
+Para abrir o editor:
 
 1. Abrir `RuaDeAco.uproject` (ou gerar project files).
 2. Compilar o editor:
 
 ```powershell
-& "$env:UE_ROOT\Engine\Build\BatchFiles\Build.bat" `
-    RuaDeAcoEditor Win64 Development `
-    "D:\PROJETOS\RuaDeAcoUnreal\RuaDeAco.uproject" `
-    -WaitMutex
+$env:UE_ROOT = "D:\Epic\Launcher\UE_5.8"
+powershell -ExecutionPolicy Bypass -File .\Scripts\Build-UnrealEditor.ps1
+& "$env:UE_ROOT\Engine\Binaries\Win64\UnrealEditor.exe" "D:\PROJETOS\RuaDeAcoUnreal\RuaDeAco.uproject"
 ```
 
 A simulação de combate do protótipo vive em `Source/RuaDeAcoRuntime` e deve ser reutilizada pelos actors Unreal, em vez de reescrever as regras.
