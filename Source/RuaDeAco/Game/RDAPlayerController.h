@@ -11,4 +11,5 @@ class RUADEACO_API ARDAPlayerController : public APlayerController
 
 public:
 	ARDAPlayerController();
+	virtual void BeginPlay() override;
 };

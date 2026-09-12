@@ -6,8 +6,12 @@
 #include "UI/RDAHUD.h"
 #include "RDACombatWorld.h"
 
+#include "Engine/GameViewportClient.h"
+#include "GameFramework/GameStateBase.h"
+#include "GameFramework/HUD.h"
 #include "GameFramework/SpectatorPawn.h"
 #include "InputCoreTypes.h"
+#include "Kismet/GameplayStatics.h"
 
 ARDAGameMode::ARDAGameMode()
 {
@@ -31,6 +35,46 @@ void ARDAGameMode::BeginPlay()
 	bTitleScreen = true;
 	TitleTicks = 0;
 	StepAccumulator = 0.0f;
+
+	if (UGameViewportClient* Viewport = GetWorld() ? GetWorld()->GetGameViewport() : nullptr)
+	{
+		Viewport->bDisableWorldRendering = true;
+	}
+
+	if (APlayerController* PC = GetWorld() ? GetWorld()->GetFirstPlayerController() : nullptr)
+	{
+		PC->bAutoManageActiveCameraTarget = false;
+		PC->ConsoleCommand(TEXT("r.VSync 0"));
+		PC->ConsoleCommand(TEXT("t.MaxFPS 60"));
+		PC->ConsoleCommand(TEXT("sg.ViewDistanceQuality 0"));
+		PC->ConsoleCommand(TEXT("sg.ShadowQuality 0"));
+		PC->ConsoleCommand(TEXT("sg.GlobalIlluminationQuality 0"));
+		PC->ConsoleCommand(TEXT("sg.PostProcessQuality 0"));
+		PC->ConsoleCommand(TEXT("sg.EffectsQuality 0"));
+		PC->ConsoleCommand(TEXT("r.Streaming.PoolSize 256"));
+		if (APawn* Pawn = PC->GetPawn())
+		{
+			Pawn->SetActorHiddenInGame(true);
+			Pawn->SetActorTickEnabled(false);
+			Pawn->SetActorEnableCollision(false);
+		}
+	}
+
+	TArray<AActor*> Actors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AActor::StaticClass(), Actors);
+	for (AActor* Actor : Actors)
+	{
+		if (!Actor || Actor == this
+			|| Actor->IsA(APlayerController::StaticClass())
+			|| Actor->IsA(AHUD::StaticClass())
+			|| Actor->IsA(AGameStateBase::StaticClass())
+			|| Actor->IsA(APawn::StaticClass()))
+		{
+			continue;
+		}
+		Actor->SetActorTickEnabled(false);
+		Actor->SetActorHiddenInGame(true);
+	}
 }
 
 void ARDAGameMode::EndPlay(const EEndPlayReason::Type EndPlayReason)
