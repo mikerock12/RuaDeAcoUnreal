@@ -9,6 +9,8 @@ Build/
 *.opendb
 *.sdf
 *.sln
+*.slnx
+.vsconfig
 *.suo
 *.xcodeproj
 *.xcworkspace
