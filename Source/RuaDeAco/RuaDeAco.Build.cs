@@ -7,11 +7,7 @@ public class RuaDeAco : ModuleRules
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 		CppStandard = CppStandardVersion.Cpp20;
 
-		PublicIncludePaths.AddRange(new string[]
-		{
-			ModuleDirectory,
-			System.IO.Path.Combine(ModuleDirectory, "..", "RuaDeAcoRuntime", "Public")
-		});
+		PublicIncludePaths.Add(ModuleDirectory);
 
 		PublicDependencyModuleNames.AddRange(new string[]
 		{
@@ -23,12 +19,16 @@ public class RuaDeAco : ModuleRules
 			"Paper2D",
 			"UMG",
 			"Slate",
-			"SlateCore"
+			"SlateCore",
+			"RuaDeAcoRuntime",
+			"ImageWrapper"
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[]
 		{
-			"DeveloperSettings"
+			"DeveloperSettings",
+			"RHI",
+			"RenderCore"
 		});
 	}
 }

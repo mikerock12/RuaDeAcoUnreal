@@ -8,6 +8,7 @@ public class RuaDeAcoTarget : TargetRules
 		DefaultBuildSettings = BuildSettingsVersion.Latest;
 		IncludeOrderVersion = EngineIncludeOrderVersion.Latest;
 		CppStandard = CppStandardVersion.Cpp20;
+		ExtraModuleNames.Add("RuaDeAcoRuntime");
 		ExtraModuleNames.Add("RuaDeAco");
 	}
 }

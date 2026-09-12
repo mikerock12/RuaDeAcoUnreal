@@ -4,7 +4,7 @@
 
 namespace RDA
 {
-    class CombatWorld
+    class RDA_API CombatWorld
     {
     public:
         CombatWorld(const FighterDef& playerOne, const FighterDef& playerTwo);

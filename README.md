@@ -45,11 +45,17 @@ powershell -ExecutionPolicy Bypass -File .\Scripts\Build-Windows.ps1
 Start-Process .\Saved\Packages\Windows\RuaDeAcoUnreal.exe
 ```
 
-O pacote de teste fica em `Saved\Packages\Windows\` (exe + `Content` + `raylib.dll`).
+O pacote de teste (runtime C++ leve) fica em `Saved\Packages\Windows\` (exe + `Content` + `raylib.dll`).
+
+Pacote **Unreal Engine 5.8** (empacotado com UAT):
+
+```text
+Saved\Packages\UnrealWin64\Windows\RuaDeAco.exe
+```
 
 ## Unreal Engine 5.8
 
-A Unreal Engine **5.8.2** está em `D:\Epic\Launcher\UE_5.8` (o plano citava `D:\Epic\UE_5.8`; o Launcher instalou neste caminho). O módulo `Source/RuaDeAco` já segue o plano (PaperCharacter, componentes, GameMode, Enhanced Input, Data Assets).
+A Unreal Engine **5.8.2** está em `D:\Epic\Launcher\UE_5.8` (o plano citava `D:\Epic\UE_5.8`; o Launcher instalou neste caminho). O módulo `Source/RuaDeAco` liga o combate (`RuaDeAcoRuntime`) ao `ARDAGameMode` e ao HUD 2D.
 
 Para abrir o editor:
 

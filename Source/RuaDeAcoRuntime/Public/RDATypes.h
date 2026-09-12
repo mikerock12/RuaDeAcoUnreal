@@ -4,6 +4,12 @@
 #include <string>
 #include <vector>
 
+#if defined(RUADEACORUNTIME_API)
+#define RDA_API RUADEACORUNTIME_API
+#else
+#define RDA_API
+#endif
+
 namespace RDA
 {
     constexpr int kLogicalWidth = 640;
@@ -340,7 +346,7 @@ namespace RDA
         return elapsed < (prep < 1 ? 1 : prep) ? 0 : 1;
     }
 
-    const FighterDef& GetGutoBarba();
-    const FighterDef& GetRafaMare();
-    const FighterDef& GetFighterDef(FighterId id);
+    RDA_API const FighterDef& GetGutoBarba();
+    RDA_API const FighterDef& GetRafaMare();
+    RDA_API const FighterDef& GetFighterDef(FighterId id);
 }

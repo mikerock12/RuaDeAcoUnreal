@@ -5,6 +5,11 @@
 	"Description": "Rua de Aco Unreal C++ — nova implementacao independente do projeto Phaser.",
 	"Modules": [
 		{
+			"Name": "RuaDeAcoRuntime",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		},
+		{
 			"Name": "RuaDeAco",
 			"Type": "Runtime",
 			"LoadingPhase": "Default",
@@ -21,6 +26,14 @@
 		},
 		{
 			"Name": "EnhancedInput",
+			"Enabled": true
+		},
+		{
+			"Name": "PythonScriptPlugin",
+			"Enabled": true
+		},
+		{
+			"Name": "EditorScriptingUtilities",
 			"Enabled": true
 		}
 	]

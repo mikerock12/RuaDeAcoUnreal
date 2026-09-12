@@ -4,7 +4,7 @@
 
 namespace RDA
 {
-    class Fighter
+    class RDA_API Fighter
     {
     public:
         Fighter(const FighterDef& definition, float startX, int facing);
