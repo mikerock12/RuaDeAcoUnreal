@@ -29,7 +29,7 @@ if(ANDROID)
     set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
     FetchContent_Declare(raylib
         URL https://github.com/raysan5/raylib/archive/refs/tags/5.5.tar.gz
-        URL_HASH SHA256=00e8a7c85f7a5221e56ee8e4e1c6642b773eae73d29379a91c8ac5149e803f42)
+        URL_HASH SHA256=aea98ecf5bc5c5e0b789a76de0083a21a70457050ea4cc2aec7566935f5e258e)
     FetchContent_MakeAvailable(raylib)
     add_library(ruadeaco SHARED Source/Prototype/PrototypeMain.cpp)
     target_compile_definitions(ruadeaco PRIVATE PLATFORM_ANDROID GRAPHICS_API_OPENGL_ES2)
