@@ -1,0 +1,23 @@
+name: C++20 Combat Runtime & Parity CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure CMake (MSVC Release)
+        run: cmake --preset windows-msvc-release
+
+      - name: Build Runtime, Prototype & Golden Tests
+        run: cmake --build --preset windows-msvc-release
+
+      - name: Run CTest (44 Golden Parity Checks + Headless Smoke)
+        run: ctest --preset windows-msvc-release --output-on-failure
