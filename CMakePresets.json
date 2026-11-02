@@ -11,6 +11,7 @@
       "displayName": "Windows x64 Release (Ninja / MSVC)",
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/build/windows-msvc-release",
+      "environment": {"VSLANG": "1033"},
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release"
       }

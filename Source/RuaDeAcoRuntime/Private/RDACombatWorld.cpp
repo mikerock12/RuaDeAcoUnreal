@@ -5,949 +5,1112 @@
 
 namespace RDA
 {
-	CombatWorld::CombatWorld(
-		const FighterDef& PlayerOne,
-		const FighterDef& PlayerTwo,
-		GameMode InMode,
-		StageId InStage)
-		: fighters{FighterRuntime(PlayerOne, 188.0f, 1), FighterRuntime(PlayerTwo, 452.0f, -1)}
-		, mode(InMode)
-		, stage(InStage)
-	{
-		if (mode == GameMode::Training)
-		{
-			fighters[0].ForceMeter(kMaxMeter);
-			fighters[1].ForceMeter(kMaxMeter);
-		}
-	}
-
-	void CombatWorld::RestartMatch()
-	{
-		frame = 0;
-		phase = CombatPhase::Intro;
-		phaseFrame = 0;
-		round = 1;
-		timeFrames = kRoundTimeFrames;
-		paused = false;
-		roundDraw = false;
-		roundWinner = -1;
-		matchWinner = -1;
-		finisherWinner = -1;
-		finisherCompleted = false;
-		lastDamage = 0;
-		comboCounts = {0, 0};
-		comboTimers = {0, 0};
-		projectiles.clear();
-		activeGrab = ActiveGrabState{};
-		fighters[0].ResetForRound(188.0f, 1);
-		fighters[1].ResetForRound(452.0f, -1);
-		fighters[0].roundWins = 0;
-		fighters[1].roundWins = 0;
-		fighters[0].meter = mode == GameMode::Training ? kMaxMeter : 0;
-		fighters[1].meter = mode == GameMode::Training ? kMaxMeter : 0;
-	}
-
-	void CombatWorld::ResetTrainingPositions()
-	{
-		if (mode != GameMode::Training) return;
-		activeGrab = ActiveGrabState{};
-		projectiles.clear();
-		fighters[0].ResetForRound(220.0f, 1);
-		fighters[1].ResetForRound(420.0f, -1);
-		fighters[0].ForceMeter(kMaxMeter);
-		fighters[1].ForceMeter(kMaxMeter);
-		comboCounts = {0, 0};
-		comboTimers = {0, 0};
-		lastDamage = 0;
-	}
-
-	void CombatWorld::TogglePause()
-	{
-		paused = !paused;
-	}
-
-	void CombatWorld::ToggleDebugBoxes()
-	{
-		debugBoxes = !debugBoxes;
-	}
-
-	std::vector<SoundEvent> CombatWorld::DrainSounds()
-	{
-		std::vector<SoundEvent> Out;
-		Out.swap(soundEvents);
-		return Out;
-	}
-
-	void CombatWorld::Step(const InputFrame& P1Input, const InputFrame& P2Input)
-	{
-		if (P1Input.debugPressed || P2Input.debugPressed)
-		{
-			debugBoxes = !debugBoxes;
-		}
-		if (paused)
-		{
-			return;
-		}
-
-		frame += 1;
-		phaseFrame += 1;
-
-		if (phase == CombatPhase::Intro)
-		{
-			StepIntro();
-			return;
-		}
-		if (phase == CombatPhase::FinishReady)
-		{
-			StepFinishReady(P1Input, P2Input);
-			return;
-		}
-		if (phase == CombatPhase::StageFinish)
-		{
-			StepStageFinish();
-			return;
-		}
-		if (phase == CombatPhase::RoundOver)
-		{
-			StepRoundOver();
-			return;
-		}
-		if (phase == CombatPhase::MatchOver)
-		{
-			fighters[0].FinishFrame();
-			fighters[1].FinishFrame();
-			return;
-		}
-
-		StepActive(P1Input, P2Input);
-	}
-
-	void CombatWorld::StepIntro()
-	{
-		InputFrame Empty{};
-		fighters[0].facing = fighters[0].x <= fighters[1].x ? 1 : -1;
-		fighters[1].facing = fighters[1].x <= fighters[0].x ? 1 : -1;
-		fighters[0].BeginFrame(Empty, frame);
-		fighters[1].BeginFrame(Empty, frame);
-		fighters[0].FinishFrame();
-		fighters[1].FinishFrame();
-
-		if (phaseFrame == 60)
-		{
-			soundEvents.push_back(SoundEvent::Fight);
-		}
-		if (phaseFrame >= 105)
-		{
-			phase = CombatPhase::Active;
-			phaseFrame = 0;
-		}
-	}
-
-	void CombatWorld::StepActive(const InputFrame& P1Input, const InputFrame& P2Input)
-	{
-		FighterRuntime& One = fighters[0];
-		FighterRuntime& Two = fighters[1];
-
-		if (One.grounded && !One.currentMove && !activeGrab.active)
-		{
-			One.facing = One.x <= Two.x ? 1 : -1;
-		}
-		if (Two.grounded && !Two.currentMove && !activeGrab.active)
-		{
-			Two.facing = Two.x <= One.x ? 1 : -1;
-		}
-
-		const MoveDef* PrevMove0 = One.currentMove;
-		const MoveDef* PrevMove1 = Two.currentMove;
-		const bool WasGrounded0 = One.grounded;
-		const bool WasGrounded1 = Two.grounded;
-
-		One.BeginFrame(P1Input, frame);
-		Two.BeginFrame(P2Input, frame);
-
-		if (One.currentMove && One.currentMove != PrevMove0)
-		{
-			soundEvents.push_back(One.currentMove->isSuper ? SoundEvent::SuperCast :
-				One.currentMove->isSpecial ? SoundEvent::SpecialCast : SoundEvent::Swing);
-		}
-		if (Two.currentMove && Two.currentMove != PrevMove1)
-		{
-			soundEvents.push_back(Two.currentMove->isSuper ? SoundEvent::SuperCast :
-				Two.currentMove->isSpecial ? SoundEvent::SpecialCast : SoundEvent::Swing);
-		}
-		if (WasGrounded0 && !One.grounded && One.state == FighterState::Jump)
-		{
-			soundEvents.push_back(SoundEvent::Jump);
-		}
-		if (WasGrounded1 && !Two.grounded && Two.state == FighterState::Jump)
-		{
-			soundEvents.push_back(SoundEvent::Jump);
-		}
-
-		SpawnProjectiles(0);
-		SpawnProjectiles(1);
-		UpdateProjectiles();
-		ResolveHits(P1Input, P2Input);
-		ResolvePushboxes();
-
-		One.FinishFrame();
-		Two.FinishFrame();
-		UpdateActiveGrab();
-
-		for (int i = 0; i < 2; ++i)
-		{
-			if (comboTimers[static_cast<size_t>(i)] > 0)
-			{
-				comboTimers[static_cast<size_t>(i)] -= 1;
-				if (comboTimers[static_cast<size_t>(i)] == 0)
-				{
-					comboCounts[static_cast<size_t>(i)] = 0;
-				}
-			}
-		}
-
-		if (mode == GameMode::Training)
-		{
-			One.ForceMeter(kMaxMeter);
-			Two.ForceMeter(kMaxMeter);
-			if (One.health <= 150) One.health = One.def->stats.maxHealth;
-			if (Two.health <= 150 && Two.state == FighterState::Idle) Two.health = Two.def->stats.maxHealth;
-			return;
-		}
-
-		timeFrames = std::max(0, timeFrames - 1);
-		if (One.health <= 0 || Two.health <= 0 || timeFrames == 0)
-		{
-			const bool bKnockout = One.health <= 0 || Two.health <= 0;
-			const float R1 = static_cast<float>(One.health) / static_cast<float>(One.def->stats.maxHealth);
-			const float R2 = static_cast<float>(Two.health) / static_cast<float>(Two.def->stats.maxHealth);
-			int Winner = -1;
-			if (std::fabs(R1 - R2) >= 0.0001f)
-			{
-				Winner = R1 > R2 ? 0 : 1;
-			}
-			FinishRound(Winner, bKnockout);
-		}
-	}
-
-	void CombatWorld::SpawnProjectiles(int OwnerIndex)
-	{
-		FighterRuntime& Owner = fighters[static_cast<size_t>(OwnerIndex)];
-		FighterRuntime& Target = fighters[static_cast<size_t>(1 - OwnerIndex)];
-		ProjectileDef Def{};
-		if (!Owner.ConsumePendingProjectile(Def))
-		{
-			return;
-		}
-
-		// Max 1 active projectile of the same id per owner
-		projectiles.erase(
-			std::remove_if(projectiles.begin(), projectiles.end(), [&](const ProjectileRuntime& P) {
-				return P.ownerIndex == OwnerIndex && std::strcmp(P.def.id, Def.id) == 0;
-			}),
-			projectiles.end());
-
-		ProjectileRuntime Proj{};
-		Proj.runtimeId = nextProjectileId++;
-		Proj.ownerIndex = OwnerIndex;
-		Proj.def = Def;
-		Proj.facing = Owner.facing;
-		if (Def.targetSnapshot)
-		{
-			Proj.x = Target.x;
-			Proj.y = static_cast<float>(kGroundY);
-			Proj.velocityX = 0.0f;
-		}
-		else
-		{
-			Proj.x = Owner.x + static_cast<float>(Owner.facing) * Def.offsetX;
-			Proj.y = Owner.y + Def.offsetY;
-			Proj.velocityX = static_cast<float>(Owner.facing) * Def.velocityX;
-		}
-		Proj.life = Def.lifeFrames;
-		Proj.ageFrames = 0;
-		projectiles.push_back(Proj);
-	}
-
-	void CombatWorld::UpdateProjectiles()
-	{
-		for (auto It = projectiles.begin(); It != projectiles.end();)
-		{
-			It->x += It->velocityX;
-			It->ageFrames += 1;
-			It->life -= 1;
-			if (It->life <= 0 || It->x < static_cast<float>(kStageLeft - 80) || It->x > static_cast<float>(kStageRight + 80))
-			{
-				It = projectiles.erase(It);
-			}
-			else
-			{
-				++It;
-			}
-		}
-	}
-
-	void CombatWorld::ResolveHits(const InputFrame& P1Input, const InputFrame& P2Input)
-	{
-		FighterRuntime& One = fighters[0];
-		FighterRuntime& Two = fighters[1];
-
-		auto CheckContact = [](const FighterRuntime& Attacker, const FighterRuntime& Defender, HitboxDef& OutHit) -> bool
-		{
-			Rect HitWorld{};
-			if (!Attacker.HasActiveHitbox(OutHit, HitWorld))
-			{
-				return false;
-			}
-			for (const Rect& Hurt : Defender.CurrentHurtboxesWorld())
-			{
-				if (Intersects(HitWorld, Hurt))
-				{
-					return true;
-				}
-			}
-			return false;
-		};
-
-		HitboxDef Hit01{};
-		HitboxDef Hit10{};
-		const bool bContact01 = CheckContact(One, Two, Hit01);
-		const bool bContact10 = CheckContact(Two, One, Hit10);
-
-		const bool bP1Tech = (P1Input.punchPressed && P1Input.kick) || (P1Input.kickPressed && P1Input.punch) || P1Input.grabPressed;
-		const bool bP2Tech = (P2Input.punchPressed && P2Input.kick) || (P2Input.kickPressed && P2Input.punch) || P2Input.grabPressed;
-
-		auto ApplyStrikeOrThrow = [this](int AttackerIdx, const HitboxDef& Hit, bool bDefenderTech)
-		{
-			FighterRuntime& Attacker = fighters[static_cast<size_t>(AttackerIdx)];
-			FighterRuntime& Defender = fighters[static_cast<size_t>(1 - AttackerIdx)];
-			const MoveDef* Move = Attacker.currentMove;
-			const AppliedHit Result = Defender.ReceiveHit(Hit, Attacker.facing, bDefenderTech);
-
-			if (Result.grabTeched)
-			{
-				Attacker.currentMove = nullptr;
-				Attacker.state = FighterState::HitStun;
-				Attacker.stunFrames = 10;
-				soundEvents.push_back(SoundEvent::Block);
-				return;
-			}
-
-			if (Result.grabConnected && Move && Move->isGrab)
-			{
-				Attacker.NotifyAttackConnected(false, *Move);
-				activeGrab.active = true;
-				activeGrab.attackerIndex = AttackerIdx;
-				activeGrab.defenderIndex = 1 - AttackerIdx;
-				activeGrab.move = *Move;
-				Defender.EnterGrabbedState(
-					FighterState::GrabbedFront,
-					Attacker.x + static_cast<float>(Attacker.facing) * 44.0f,
-					static_cast<float>(kGroundY),
-					0.0f,
-					-Attacker.facing);
-				soundEvents.push_back(SoundEvent::GrabStart);
-				return;
-			}
-
-			if (Result.parryTriggered)
-			{
-				Attacker.ReceiveHit(
-					HitboxDef{Rect{0, -50, 40, 40}, HitLevel::Mid, HitKind::Strike, 1, 1, Defender.parryRiposteDamage, 0, 22, 12, 10, 5, 4.2f, -2.0f, true},
-					Defender.facing,
-					false);
-				soundEvents.push_back(SoundEvent::HitHeavy);
-				return;
-			}
-
-			if (Move)
-			{
-				Attacker.NotifyAttackConnected(Result.blocked, *Move);
-			}
-			if (!Result.blocked && Result.damage > 0)
-			{
-				lastDamage = Result.damage;
-				comboCounts[static_cast<size_t>(AttackerIdx)] += 1;
-				comboTimers[static_cast<size_t>(AttackerIdx)] = 45;
-			}
-			if (Result.blocked)
-			{
-				soundEvents.push_back(SoundEvent::Block);
-			}
-			else if (Result.knockout || Hit.knockdown)
-			{
-				soundEvents.push_back(SoundEvent::Knockdown);
-			}
-			else
-			{
-				soundEvents.push_back(Hit.damage >= 90 ? SoundEvent::HitHeavy : SoundEvent::HitLight);
-			}
-		};
-
-		if (bContact01 && bContact10)
-		{
-			if (Hit01.priority >= Hit10.priority)
-			{
-				ApplyStrikeOrThrow(0, Hit01, bP2Tech);
-			}
-			if (Hit10.priority >= Hit01.priority && !activeGrab.active)
-			{
-				ApplyStrikeOrThrow(1, Hit10, bP1Tech);
-			}
-		}
-		else if (bContact01)
-		{
-			ApplyStrikeOrThrow(0, Hit01, bP2Tech);
-		}
-		else if (bContact10)
-		{
-			ApplyStrikeOrThrow(1, Hit10, bP1Tech);
-		}
-
-		// Resolve projectile contacts
-		for (auto It = projectiles.begin(); It != projectiles.end();)
-		{
-			if (It->ageFrames < It->def.armingFrames)
-			{
-				++It;
-				continue;
-			}
-			FighterRuntime& Defender = fighters[static_cast<size_t>(1 - It->ownerIndex)];
-			if (It->def.hitbox.crouchAvoidable && Defender.state == FighterState::Crouch)
-			{
-				++It;
-				continue;
-			}
-			if (It->def.hitbox.airAvoidable && !Defender.grounded)
-			{
-				++It;
-				continue;
-			}
-			const Rect ProjRect = ToWorldRect(It->def.hitbox.rect, It->x, It->y, It->facing);
-			bool bHit = false;
-			for (const Rect& Hurt : Defender.CurrentHurtboxesWorld())
-			{
-				if (Intersects(ProjRect, Hurt))
-				{
-					bHit = true;
-					break;
-				}
-			}
-			if (bHit)
-			{
-				const AppliedHit Res = Defender.ReceiveHit(It->def.hitbox, It->facing, false);
-				if (!Res.blocked && Res.damage > 0)
-				{
-					lastDamage = Res.damage;
-					comboCounts[static_cast<size_t>(It->ownerIndex)] += 1;
-					comboTimers[static_cast<size_t>(It->ownerIndex)] = 45;
-				}
-				soundEvents.push_back(Res.blocked ? SoundEvent::Block : SoundEvent::HitHeavy);
-				It = projectiles.erase(It);
-			}
-			else
-			{
-				++It;
-			}
-		}
-	}
-
-	void CombatWorld::UpdateActiveGrab()
-	{
-		if (!activeGrab.active)
-		{
-			return;
-		}
-		FighterRuntime& Attacker = fighters[static_cast<size_t>(activeGrab.attackerIndex)];
-		FighterRuntime& Defender = fighters[static_cast<size_t>(activeGrab.defenderIndex)];
-
-		if (!Attacker.currentMove || !Attacker.currentMove->isGrab)
-		{
-			activeGrab.active = false;
-			if (Defender.state == FighterState::GrabbedFront || Defender.state == FighterState::GrabbedLifted)
-			{
-				Defender.ReleaseFromGrab(0.0f, 0.0f, true);
-			}
-			return;
-		}
-
-		const int F = Attacker.stateFrame;
-		if (F < activeGrab.move.holdStartFrame)
-		{
-			Defender.EnterGrabbedState(
-				FighterState::GrabbedFront,
-				Attacker.x + static_cast<float>(Attacker.facing) * 44.0f,
-				static_cast<float>(kGroundY),
-				0.0f,
-				-Attacker.facing);
-		}
-		else if (F < activeGrab.move.releaseFrame)
-		{
-			const float T = static_cast<float>(F - activeGrab.move.holdStartFrame) /
-				static_cast<float>(std::max(1, activeGrab.move.releaseFrame - activeGrab.move.holdStartFrame));
-			const float ArcY = -std::sin(T * 3.14159265f) * 72.0f;
-			const float OffsetX = 44.0f + T * 16.0f;
-			Defender.EnterGrabbedState(
-				FighterState::GrabbedLifted,
-				Attacker.x + static_cast<float>(Attacker.facing) * OffsetX,
-				static_cast<float>(kGroundY) + ArcY,
-				T * 1.57f * static_cast<float>(Attacker.facing),
-				-Attacker.facing);
-		}
-		else
-		{
-			const int GrabDamage = activeGrab.move.hitbox.damage;
-			Defender.health = std::max(0, Defender.health - GrabDamage);
-			lastDamage = GrabDamage;
-			comboCounts[static_cast<size_t>(activeGrab.attackerIndex)] += 1;
-			comboTimers[static_cast<size_t>(activeGrab.attackerIndex)] = 45;
-			Defender.ReleaseFromGrab(static_cast<float>(Attacker.facing) * 2.0f, 0.0f, true);
-			if (Defender.health <= 0)
-			{
-				Defender.state = FighterState::Knockout;
-				Defender.stateFrame = 0;
-			}
-			activeGrab.active = false;
-			soundEvents.push_back(SoundEvent::GrabSlam);
-		}
-	}
-
-	void CombatWorld::ResolvePushboxes()
-	{
-		if (activeGrab.active) return;
-		FighterRuntime& One = fighters[0];
-		FighterRuntime& Two = fighters[1];
-		if (!One.grounded || !Two.grounded)
-		{
-			return;
-		}
-
-		const Rect A = One.PushboxWorld();
-		const Rect B = Two.PushboxWorld();
-		if (!Intersects(A, B))
-		{
-			return;
-		}
-		const float Overlap = HorizontalOverlap(A, B);
-		if (Overlap <= 0.0f)
-		{
-			return;
-		}
-
-		const float Push = Overlap * 0.5f;
-		const float Dir = One.x <= Two.x ? 1.0f : -1.0f;
-		One.x = std::clamp(One.x - Dir * Push, static_cast<float>(kStageLeft), static_cast<float>(kStageRight));
-		Two.x = std::clamp(Two.x + Dir * Push, static_cast<float>(kStageLeft), static_cast<float>(kStageRight));
-	}
-
-	void CombatWorld::FinishRound(int WinnerIndex, bool bKnockout)
-	{
-		activeGrab = ActiveGrabState{};
-		projectiles.clear();
-		roundWinner = WinnerIndex;
-		roundDraw = WinnerIndex < 0;
-		soundEvents.push_back(SoundEvent::RoundEnd);
-
-		if (WinnerIndex >= 0)
-		{
-			fighters[static_cast<size_t>(WinnerIndex)].roundWins += 1;
-			const int LoserIndex = 1 - WinnerIndex;
-			if (!bKnockout)
-			{
-				fighters[static_cast<size_t>(LoserIndex)].ForceState(FighterState::Knockdown);
-			}
-
-			if (fighters[static_cast<size_t>(WinnerIndex)].roundWins >= kRoundsToWin)
-			{
-				matchWinner = WinnerIndex;
-				finisherWinner = WinnerIndex;
-				phase = CombatPhase::FinishReady;
-				phaseFrame = 0;
-				fighters[static_cast<size_t>(WinnerIndex)].ForceState(FighterState::Idle);
-				fighters[static_cast<size_t>(WinnerIndex)].hitStopFrames = 0;
-				fighters[static_cast<size_t>(LoserIndex)].ForceState(FighterState::Knockdown);
-				fighters[static_cast<size_t>(LoserIndex)].hitStopFrames = 0;
-				soundEvents.push_back(SoundEvent::FinishReady);
-				return;
-			}
-
-			fighters[static_cast<size_t>(WinnerIndex)].ForceState(FighterState::Victory);
-		}
-
-		phase = CombatPhase::RoundOver;
-		phaseFrame = 0;
-	}
-
-	void CombatWorld::StepFinishReady(const InputFrame& P1Input, const InputFrame& P2Input)
-	{
-		if (finisherWinner < 0)
-		{
-			phase = CombatPhase::MatchOver;
-			phaseFrame = 0;
-			return;
-		}
-
-		FighterRuntime& Winner = fighters[static_cast<size_t>(finisherWinner)];
-		FighterRuntime& Loser = fighters[static_cast<size_t>(1 - finisherWinner)];
-		const InputFrame& WinInput = finisherWinner == 0 ? P1Input : P2Input;
-		InputFrame Empty{};
-
-		Winner.facing = Winner.x <= Loser.x ? 1 : -1;
-		Loser.facing = -Winner.facing;
-		Winner.BeginFrame(WinInput, frame);
-		Loser.BeginFrame(Empty, frame);
-		Winner.FinishFrame();
-		Loser.FinishFrame();
-
-		const float Distance = std::fabs(Winner.x - Loser.x);
-		const bool bGrabAttempt = Winner.currentMove && Winner.currentMove->isGrab;
-		if (bGrabAttempt && Distance <= 135.0f)
-		{
-			phase = CombatPhase::StageFinish;
-			phaseFrame = 0;
-			soundEvents.push_back(SoundEvent::GrabStart);
-			return;
-		}
-
-		if (phaseFrame >= kFinishWindowFrames)
-		{
-			Winner.ForceState(FighterState::Victory);
-			Loser.ForceState(FighterState::Knockout);
-			phase = CombatPhase::MatchOver;
-			phaseFrame = 0;
-			soundEvents.push_back(SoundEvent::MatchWin);
-		}
-	}
-
-	void CombatWorld::StepStageFinish()
-	{
-		if (finisherWinner < 0)
-		{
-			phase = CombatPhase::MatchOver;
-			return;
-		}
-		FighterRuntime& Winner = fighters[static_cast<size_t>(finisherWinner)];
-		FighterRuntime& Loser = fighters[static_cast<size_t>(1 - finisherWinner)];
-
-		if (phaseFrame < kFinishThrowFrame)
-		{
-			const float Lift = static_cast<float>(phaseFrame) / static_cast<float>(kFinishThrowFrame);
-			Loser.EnterGrabbedState(
-				FighterState::GrabbedLifted,
-				Winner.x + static_cast<float>(Winner.facing) * 32.0f,
-				static_cast<float>(kGroundY) - 42.0f - Lift * 46.0f,
-				1.57f * static_cast<float>(Winner.facing),
-				-Winner.facing);
-		}
-		else
-		{
-			const float T = std::clamp(
-				static_cast<float>(phaseFrame - kFinishThrowFrame) / 52.0f,
-				0.0f,
-				1.0f);
-			float TargetX = std::clamp(Winner.x + static_cast<float>(Winner.facing) * 175.0f, 150.0f, 490.0f);
-			float TargetY = 256.0f;
-			if (stage == StageId::CozinhaMacabra)
-			{
-				TargetX = 442.0f;
-				TargetY = 152.0f;
-			}
-			else if (stage == StageId::Sitio)
-			{
-				TargetX = 328.0f;
-				TargetY = 165.0f;
-			}
-			const float CurX = Winner.x + (TargetX - Winner.x) * T;
-			const float CurY = (static_cast<float>(kGroundY) - 88.0f) * (1.0f - T) + TargetY * T - 80.0f * 4.0f * T * (1.0f - T);
-			Loser.EnterGrabbedState(
-				FighterState::GrabbedLifted,
-				CurX,
-				CurY,
-				T * 6.28f * static_cast<float>(Winner.facing),
-				-Winner.facing);
-			if (phaseFrame >= 178)
-			{
-				Loser.visible = false;
-			}
-		}
-
-		if (phaseFrame == kFinishThrowFrame)
-		{
-			if (stage == StageId::CaisDaCidade) soundEvents.push_back(SoundEvent::FinisherMonsterRoar);
-			else if (stage == StageId::CozinhaMacabra) soundEvents.push_back(SoundEvent::FinisherPotDrop);
-			else soundEvents.push_back(SoundEvent::FinisherTrident);
-		}
-		if (phaseFrame == 112 && stage == StageId::CaisDaCidade)
-		{
-			soundEvents.push_back(SoundEvent::FinisherSplash);
-		}
-
-		if (phaseFrame >= kFinishEndFrame)
-		{
-			finisherCompleted = true;
-			Winner.ForceState(FighterState::Victory);
-			phase = CombatPhase::MatchOver;
-			phaseFrame = 0;
-			soundEvents.push_back(SoundEvent::MatchWin);
-		}
-	}
-
-	void CombatWorld::StepRoundOver()
-	{
-		fighters[0].FinishFrame();
-		fighters[1].FinishFrame();
-		if (phaseFrame >= 150)
-		{
-			StartNextRound();
-		}
-	}
-
-	void CombatWorld::StartNextRound()
-	{
-		round += 1;
-		phase = CombatPhase::Intro;
-		phaseFrame = 0;
-		timeFrames = kRoundTimeFrames;
-		roundDraw = false;
-		roundWinner = -1;
-		projectiles.clear();
-		activeGrab = ActiveGrabState{};
-		fighters[0].ResetForRound(188.0f, 1);
-		fighters[1].ResetForRound(452.0f, -1);
-	}
-
-	WorldSnapshot CombatWorld::Snapshot() const
-	{
-		WorldSnapshot Out{};
-		Out.frame = frame;
-		Out.phase = phase;
-		Out.phaseFrame = phaseFrame;
-		Out.round = round;
-		Out.timeSeconds = std::max(0, (timeFrames + 59) / 60);
-		Out.paused = paused;
-		Out.debugBoxes = debugBoxes;
-		Out.roundDraw = roundDraw;
-		Out.roundWinner = roundWinner;
-		Out.matchWinner = matchWinner;
-		Out.finisherWinner = finisherWinner;
-		Out.finisherCompleted = finisherCompleted;
-		Out.stage = stage;
-		Out.mode = mode;
-		Out.fighters = {fighters[0].Snapshot(), fighters[1].Snapshot()};
-		Out.fighters[0].comboCount = comboCounts[0];
-		Out.fighters[1].comboCount = comboCounts[1];
-		Out.grabActive = activeGrab.active;
-		Out.lastDamage = lastDamage;
-
-		for (const ProjectileRuntime& P : projectiles)
-		{
-			Out.projectiles.push_back(ProjectileSnapshot{
-				P.runtimeId,
-				P.ownerIndex,
-				P.def.id,
-				P.x,
-				P.y,
-				P.facing,
-				ToWorldRect(P.def.hitbox.rect, P.x, P.y, P.facing),
-				P.ageFrames >= P.def.armingFrames
-			});
-		}
-
-		if (paused)
-		{
-			Out.banner = "PAUSADO";
-		}
-		else if (phase == CombatPhase::Intro)
-		{
-			Out.banner = phaseFrame < 60 ? "PREPARE-SE" : "LUTE!";
-		}
-		else if (phase == CombatPhase::FinishReady)
-		{
-			Out.banner = "FINALIZE! (AGARRAO F+G / J+K)";
-		}
-		else if (phase == CombatPhase::StageFinish)
-		{
-			Out.banner = phaseFrame >= 210 ? GetStageDef(stage).finisherBanner : "FINALIZACAO DE PALCO!";
-		}
-		else if (phase == CombatPhase::RoundOver)
-		{
-			Out.banner = roundDraw ? "EMPATE" : "NOCAUTE!";
-		}
-		else if (phase == CombatPhase::MatchOver)
-		{
-			if (finisherCompleted)
-			{
-				Out.banner = GetStageDef(stage).finisherBanner;
-			}
-			else if (matchWinner == 0)
-			{
-				Out.banner = "JOGADOR 1 VENCE!";
-			}
-			else if (matchWinner == 1)
-			{
-				Out.banner = "JOGADOR 2 VENCE!";
-			}
-			else
-			{
-				Out.banner = "FIM DE LUTA";
-			}
-		}
-
-		return Out;
-	}
-
-	uint64_t CombatWorld::ComputeStateHash() const
-	{
-		uint64_t Hash = 0xcbf29ce484222325ULL;
-		auto MixInt = [&Hash](int64_t Val)
-		{
-			for (int i = 0; i < 8; ++i)
-			{
-				const uint8_t Byte = static_cast<uint8_t>(( static_cast<uint64_t>(Val) >> (i * 8)) & 0xFFU);
-				Hash ^= Byte;
-				Hash *= 0x100000001b3ULL;
-			}
-		};
-
-		MixInt(frame);
-		MixInt(static_cast<int>(phase));
-		MixInt(phaseFrame);
-		MixInt(round);
-		MixInt(timeFrames);
-		MixInt(static_cast<int>(stage));
-		MixInt(static_cast<int>(mode));
-		for (const FighterRuntime& F : fighters)
-		{
-			MixInt(static_cast<int>(F.def->id));
-			MixInt(static_cast<int64_t>(std::llround(F.x * 1000.0f)));
-			MixInt(static_cast<int64_t>(std::llround(F.y * 1000.0f)));
-			MixInt(static_cast<int64_t>(std::llround(F.velocityX * 1000.0f)));
-			MixInt(static_cast<int64_t>(std::llround(F.velocityY * 1000.0f)));
-			MixInt(F.facing);
-			MixInt(static_cast<int>(F.state));
-			MixInt(F.stateFrame);
-			MixInt(F.health);
-			MixInt(F.meter);
-			MixInt(F.roundWins);
-			MixInt(F.grounded ? 1 : 0);
-		}
-		MixInt(static_cast<int64_t>(projectiles.size()));
-		for (const ProjectileRuntime& P : projectiles)
-		{
-			MixInt(P.ownerIndex);
-			MixInt(static_cast<int64_t>(std::llround(P.x * 1000.0f)));
-			MixInt(static_cast<int64_t>(std::llround(P.y * 1000.0f)));
-			MixInt(P.life);
-		}
-		return Hash;
-	}
-
-	InputFrame BuildCpuInput(const CombatWorld& World, int CpuIndex, AiDifficulty Difficulty)
-	{
-		InputFrame Out{};
-		const WorldSnapshot Snap = World.Snapshot();
-		if (Snap.paused || (Snap.phase != CombatPhase::Active && Snap.phase != CombatPhase::FinishReady))
-		{
-			return Out;
-		}
-
-		const int OpponentIndex = 1 - CpuIndex;
-		const FighterSnapshot& Self = Snap.fighters[static_cast<size_t>(CpuIndex)];
-		const FighterSnapshot& Foe = Snap.fighters[static_cast<size_t>(OpponentIndex)];
-		const float Dx = Foe.x - Self.x;
-		const float AbsDx = std::fabs(Dx);
-		const int Cadence = Difficulty == AiDifficulty::Hard ? 9 : (Difficulty == AiDifficulty::Normal ? 15 : 24);
-		const int Tick = (Snap.frame + CpuIndex * 13) % Cadence;
-
-		// During FinishReady, walk up to defeated opponent and execute Universal Grab!
-		if (Snap.phase == CombatPhase::FinishReady && Snap.finisherWinner == CpuIndex)
-		{
-			if (AbsDx > 90.0f)
-			{
-				Out.left = Dx < 0.0f;
-				Out.right = Dx > 0.0f;
-			}
-			else if (Tick == 0)
-			{
-				Out.grabPressed = true;
-				Out.punchPressed = true;
-				Out.kick = true;
-			}
-			return Out;
-		}
-
-		// React to enemy projectiles by jumping or blocking
-		for (const ProjectileSnapshot& P : Snap.projectiles)
-		{
-			if (P.ownerIndex != CpuIndex && std::fabs(P.x - Self.x) < 95.0f)
-			{
-				if (Difficulty == AiDifficulty::Hard && Self.grounded)
-				{
-					Out.up = true;
-					Out.upPressed = true;
-				}
-				else
-				{
-					Out.block = true;
-				}
-				return Out;
-			}
-		}
-
-		if (Foe.attacking && AbsDx < 105.0f && Tick < (Cadence / 3))
-		{
-			Out.block = true;
-			Out.down = (Snap.frame % 2) == 0;
-			return Out;
-		}
-
-		if (AbsDx > 110.0f)
-		{
-			Out.left = Dx < 0.0f;
-			Out.right = Dx > 0.0f;
-			if (Tick == 0 && AbsDx > 165.0f)
-			{
-				Out.special = true;
-				Out.specialPressed = true;
-			}
-			return Out;
-		}
-
-		if (Self.meter >= 50 && Tick == 0 && Difficulty != AiDifficulty::Easy)
-		{
-			Out.superPressed = true;
-			Out.down = true;
-			Out.special = true;
-			Out.specialPressed = true;
-			return Out;
-		}
-
-		if (AbsDx < 62.0f && Tick == 2 && (Foe.state == FighterState::BlockStanding || Foe.state == FighterState::BlockCrouching))
-		{
-			Out.grabPressed = true;
-			Out.punchPressed = true;
-			Out.kick = true;
-			return Out;
-		}
-
-		if (Tick == 0)
-		{
-			Out.punch = true;
-			Out.punchPressed = true;
-		}
-		else if (Tick == (Cadence / 2))
-		{
-			Out.kick = true;
-			Out.kickPressed = true;
-			Out.left = Dx < 0.0f;
-			Out.right = Dx > 0.0f;
-		}
-		else if (Tick == (Cadence - 2))
-		{
-			Out.down = true;
-			Out.kick = true;
-			Out.kickPressed = true;
-		}
-		return Out;
-	}
+#include "RDAStageFinisher.inc"
+CombatWorld::CombatWorld(const FighterDef &PlayerOne, const FighterDef &PlayerTwo, GameMode InMode, StageId InStage)
+    : fighters{FighterRuntime(PlayerOne, 188.0f, 1), FighterRuntime(PlayerTwo, 452.0f, -1)}, mode(InMode),
+      stage(InStage)
+{
+    if (mode == GameMode::Training)
+    {
+        fighters[0].ForceMeter(kMaxMeter);
+        fighters[1].ForceMeter(kMaxMeter);
+    }
 }
+
+void CombatWorld::RestartMatch()
+{
+    frame = 0;
+    phase = CombatPhase::Intro;
+    phaseFrame = 0;
+    round = 1;
+    timeFrames = kRoundTimeFrames;
+    paused = false;
+    roundDraw = false;
+    roundWinner = -1;
+    matchWinner = -1;
+    finisherWinner = -1;
+    finisherCompleted = false;
+    lastDamage = 0;
+    comboCounts = {0, 0};
+    comboTimers = {0, 0};
+    projectiles.clear();
+    activeGrab = ActiveGrabState{};
+    fighters[0].ResetForRound(188.0f, 1);
+    fighters[1].ResetForRound(452.0f, -1);
+    fighters[0].roundWins = 0;
+    fighters[1].roundWins = 0;
+    fighters[0].meter = mode == GameMode::Training ? kMaxMeter : 0;
+    fighters[1].meter = mode == GameMode::Training ? kMaxMeter : 0;
+}
+
+void CombatWorld::ResetTrainingPositions()
+{
+    if (mode != GameMode::Training)
+        return;
+    activeGrab = ActiveGrabState{};
+    projectiles.clear();
+    fighters[0].ResetForRound(220.0f, 1);
+    fighters[1].ResetForRound(420.0f, -1);
+    fighters[0].ForceMeter(kMaxMeter);
+    fighters[1].ForceMeter(kMaxMeter);
+    comboCounts = {0, 0};
+    comboTimers = {0, 0};
+    lastDamage = 0;
+}
+
+void CombatWorld::TogglePause()
+{
+    paused = !paused;
+}
+
+void CombatWorld::ToggleDebugBoxes()
+{
+    debugBoxes = !debugBoxes;
+}
+
+std::vector<SoundEvent> CombatWorld::DrainSounds()
+{
+    std::vector<SoundEvent> Out;
+    Out.swap(soundEvents);
+    return Out;
+}
+
+std::vector<SoundCue> CombatWorld::DrainSoundCues()
+{
+    std::vector<SoundCue> result;
+    result.swap(soundCues);
+    return result;
+}
+
+void CombatWorld::Step(const InputFrame &P1Input, const InputFrame &P2Input)
+{
+    if (P1Input.debugPressed || P2Input.debugPressed)
+    {
+        debugBoxes = !debugBoxes;
+    }
+    if (paused)
+    {
+        return;
+    }
+
+    frame += 1;
+    phaseFrame += 1;
+
+    if (phase == CombatPhase::Intro)
+    {
+        StepIntro();
+        return;
+    }
+    if (phase == CombatPhase::FinishReady)
+    {
+        StepFinishReady(P1Input, P2Input);
+        return;
+    }
+    if (phase == CombatPhase::StageFinish)
+    {
+        StepStageFinish();
+        return;
+    }
+    if (phase == CombatPhase::RoundOver)
+    {
+        StepRoundOver();
+        return;
+    }
+    if (phase == CombatPhase::MatchOver)
+    {
+        InputFrame Empty{};
+        fighters[0].BeginFrame(Empty, frame);
+        fighters[1].BeginFrame(Empty, frame);
+        fighters[0].CaptureCollisionPose();
+        fighters[1].CaptureCollisionPose();
+        fighters[0].FinishFrame();
+        fighters[1].FinishFrame();
+        return;
+    }
+
+    StepActive(P1Input, P2Input);
+}
+
+void CombatWorld::StepIntro()
+{
+    InputFrame Empty{};
+    fighters[0].facing = fighters[0].x <= fighters[1].x ? 1 : -1;
+    fighters[1].facing = fighters[1].x <= fighters[0].x ? 1 : -1;
+    fighters[0].BeginFrame(Empty, frame);
+    fighters[1].BeginFrame(Empty, frame);
+    fighters[0].CaptureCollisionPose();
+    fighters[1].CaptureCollisionPose();
+    fighters[0].FinishFrame();
+    fighters[1].FinishFrame();
+
+    if (phaseFrame == 60)
+    {
+        soundEvents.push_back(SoundEvent::Fight);
+    }
+    if (phaseFrame >= 105)
+    {
+        phase = CombatPhase::Active;
+        phaseFrame = 0;
+    }
+}
+
+void CombatWorld::StepActive(const InputFrame &P1Input, const InputFrame &P2Input)
+{
+    FighterRuntime &One = fighters[0];
+    FighterRuntime &Two = fighters[1];
+
+    if (One.grounded && !(One.currentMove && One.currentMove->lockFacing))
+    {
+        One.facing = One.x <= Two.x ? 1 : -1;
+    }
+    if (Two.grounded && !(Two.currentMove && Two.currentMove->lockFacing))
+    {
+        Two.facing = Two.x <= One.x ? 1 : -1;
+    }
+
+    const MoveDef *PrevMove0 = One.currentMove;
+    const MoveDef *PrevMove1 = Two.currentMove;
+    const bool WasGrounded0 = One.grounded;
+    const bool WasGrounded1 = Two.grounded;
+
+    One.BeginFrame(P1Input, frame);
+    Two.BeginFrame(P2Input, frame);
+    One.CaptureCollisionPose();
+    Two.CaptureCollisionPose();
+
+    if (One.currentMove && One.currentMove != PrevMove0)
+    {
+        if (One.currentMove->isSuper)
+        {
+            One.hitStopFrames = std::max(One.hitStopFrames, 30);
+            Two.hitStopFrames = std::max(Two.hitStopFrames, 30);
+        }
+        const SoundEvent event = One.currentMove->isSuper     ? SoundEvent::SuperCast
+                                 : One.currentMove->isSpecial ? SoundEvent::SpecialCast
+                                                              : SoundEvent::Swing;
+        soundEvents.push_back(event);
+        soundCues.push_back(SoundCue{event, 0, One.currentMove->id});
+    }
+    if (Two.currentMove && Two.currentMove != PrevMove1)
+    {
+        if (Two.currentMove->isSuper)
+        {
+            One.hitStopFrames = std::max(One.hitStopFrames, 30);
+            Two.hitStopFrames = std::max(Two.hitStopFrames, 30);
+        }
+        const SoundEvent event = Two.currentMove->isSuper     ? SoundEvent::SuperCast
+                                 : Two.currentMove->isSpecial ? SoundEvent::SpecialCast
+                                                              : SoundEvent::Swing;
+        soundEvents.push_back(event);
+        soundCues.push_back(SoundCue{event, 1, Two.currentMove->id});
+    }
+    if (WasGrounded0 && !One.grounded && One.state == FighterState::Jump)
+    {
+        soundEvents.push_back(SoundEvent::Jump);
+    }
+    if (WasGrounded1 && !Two.grounded && Two.state == FighterState::Jump)
+    {
+        soundEvents.push_back(SoundEvent::Jump);
+    }
+
+    One.ConsumeMoveEvents();
+    Two.ConsumeMoveEvents();
+    SpawnProjectiles(0);
+    SpawnProjectiles(1);
+    UpdateProjectiles();
+    ResolveHits(P1Input, P2Input);
+    ResolvePushboxes();
+
+    One.FinishFrame();
+    Two.FinishFrame();
+    UpdateActiveGrab();
+
+    for (int i = 0; i < 2; ++i)
+    {
+        const auto defenderState = fighters[1 - i].state;
+        if (defenderState != FighterState::HitStun && defenderState != FighterState::Thrown &&
+            defenderState != FighterState::Knockdown)
+        {
+            comboTimers[i] = comboCounts[i] = 0;
+            continue;
+        }
+        if (comboTimers[static_cast<size_t>(i)] > 0)
+        {
+            comboTimers[static_cast<size_t>(i)] -= 1;
+            if (comboTimers[static_cast<size_t>(i)] == 0)
+            {
+                comboCounts[static_cast<size_t>(i)] = 0;
+            }
+        }
+    }
+
+    if (mode == GameMode::Training)
+    {
+        One.ForceMeter(kMaxMeter);
+        Two.ForceMeter(kMaxMeter);
+        return;
+    }
+
+    timeFrames = std::max(0, timeFrames - 1);
+    if (One.health <= 0 || Two.health <= 0 || timeFrames == 0)
+    {
+        const bool bKnockout = One.health <= 0 || Two.health <= 0;
+        const float R1 = static_cast<float>(One.health) / static_cast<float>(One.def->stats.maxHealth);
+        const float R2 = static_cast<float>(Two.health) / static_cast<float>(Two.def->stats.maxHealth);
+        int Winner = -1;
+        if (std::fabs(R1 - R2) >= 0.0001f)
+        {
+            Winner = R1 > R2 ? 0 : 1;
+        }
+        FinishRound(Winner, bKnockout);
+    }
+}
+
+void CombatWorld::SpawnProjectiles(int OwnerIndex)
+{
+    FighterRuntime &Owner = fighters[static_cast<size_t>(OwnerIndex)];
+    FighterRuntime &Target = fighters[static_cast<size_t>(1 - OwnerIndex)];
+    ProjectileDef Def{};
+    if (!Owner.ConsumePendingProjectile(Def))
+    {
+        return;
+    }
+
+    if (Def.maxActivePerOwner >= 0 && std::count_if(projectiles.begin(), projectiles.end(), [&](const auto &p) {
+                                          return p.ownerIndex == OwnerIndex && std::strcmp(p.def.id, Def.id) == 0;
+                                      }) >= Def.maxActivePerOwner)
+        return;
+
+    ProjectileRuntime Proj{};
+    Proj.runtimeId = nextProjectileId++;
+    Proj.ownerIndex = OwnerIndex;
+    Proj.def = Def;
+    Proj.sourceMove = Owner.currentMove;
+    Proj.facing = Owner.facing;
+    if (Def.targetSnapshot)
+    {
+        Proj.x = Target.x + Def.offsetX;
+        Proj.y = Target.y + Def.offsetY;
+        Proj.velocityX = Owner.facing * Def.velocityX;
+    }
+    else
+    {
+        Proj.x = Owner.x + static_cast<float>(Owner.facing) * Def.offsetX;
+        Proj.y = static_cast<float>(kGroundY) + Def.offsetY;
+        Proj.velocityX = static_cast<float>(Owner.facing) * Def.velocityX;
+    }
+    Proj.life = Def.lifeFrames;
+    Proj.ageFrames = 0;
+    projectiles.push_back(Proj);
+}
+
+void CombatWorld::UpdateProjectiles()
+{
+    for (auto It = projectiles.begin(); It != projectiles.end();)
+    {
+        It->x += It->velocityX;
+        It->ageFrames += 1;
+        It->life -= 1;
+        if (It->life <= 0 || It->x <= static_cast<float>(kStageLeft - 30) ||
+            It->x >= static_cast<float>(kStageRight + 30))
+        {
+            It = projectiles.erase(It);
+        }
+        else
+        {
+            ++It;
+        }
+    }
+}
+
+void CombatWorld::ResolveHits(const InputFrame &, const InputFrame &)
+{
+    struct Contact
+    {
+        bool found = false;
+        HitboxDef h{};
+    };
+    auto find = [&](int ai) {
+        Contact c;
+        const auto &a = fighters[ai];
+        const auto &d = fighters[1 - ai];
+        if (a.grabbed || d.grabbed)
+            return c;
+        auto boxes = a.evaluatedHitboxes;
+        std::stable_sort(boxes.begin(), boxes.end(), [](auto &a, auto &b) { return a.priority > b.priority; });
+        for (const auto &h : boxes)
+        {
+            if (std::find(a.registeredHitIds.begin(), a.registeredHitIds.end(), h.id) != a.registeredHitIds.end() ||
+                !d.CanReceive(h))
+                continue;
+            Rect wr = ToWorldRect(h.rect, a.x, a.y, a.facing);
+            for (const auto &hr : d.CurrentHurtboxesWorld())
+                if (Intersects(wr, hr))
+                {
+                    c.found = true;
+                    c.h = h;
+                    return c;
+                }
+        }
+        return c;
+    };
+    auto outcome = [&](int ai, const HitboxDef &h, const MoveDef *m, const AppliedHit &res, int depth) {
+        auto &a = fighters[ai];
+        auto &d = fighters[1 - ai];
+        lastDamage = res.damage;
+        if (res.armored)
+        {
+            comboCounts[ai] = comboTimers[ai] = 0;
+            soundEvents.push_back(SoundEvent::Block);
+            return;
+        }
+        if (m)
+            a.ForceMeter(a.meter + (res.blocked ? m->meterGainOnBlock : m->meterGainOnHit));
+        d.ForceMeter(d.meter + static_cast<int>(std::ceil(res.damage * 0.055f)));
+        if (res.blocked)
+        {
+            comboCounts[ai] = comboTimers[ai] = 0;
+            soundEvents.push_back(SoundEvent::Block);
+        }
+        else
+        {
+            comboCounts[ai] = depth;
+            comboTimers[ai] = 90;
+            soundEvents.push_back(h.damage >= 90 ? SoundEvent::HitHeavy : SoundEvent::HitLight);
+        }
+    };
+    auto parry = [&](int di) {
+        auto &d = fighters[di];
+        auto &a = fighters[1 - di];
+        int damage = d.parryRiposteDamage;
+        d.parryFrames = d.parryRiposteDamage = 0;
+        if (damage <= 0)
+            return;
+        HitboxDef h{};
+        h.damage = damage;
+        h.hitStun = 24;
+        h.hitStop = 10;
+        h.priority = 99;
+        h.knockbackX = 5;
+        h.knockbackY = -2;
+        const auto res = a.ReceiveHit(h, d.facing, false, mode == GameMode::Training, 1,
+                                      d.offensiveDebuffFrames > 0 ? d.offensiveDebuffMultiplier : 1);
+        d.hitStopFrames = std::max(d.hitStopFrames, 10);
+        d.ForceMeter(d.meter + 12);
+        lastDamage = res.damage;
+        soundEvents.push_back(SoundEvent::HitHeavy);
+    };
+    auto apply = [&](int ai, const HitboxDef &h) {
+        auto &a = fighters[ai];
+        auto &d = fighters[1 - ai];
+        if (a.grabbed || d.grabbed)
+            return;
+        const MoveDef *m = a.currentMove;
+        if (std::find(a.registeredHitIds.begin(), a.registeredHitIds.end(), h.id) != a.registeredHitIds.end())
+            return;
+        a.RegisterHit(h);
+        if (d.parryFrames > 0 && h.kind != HitKind::Throw && h.level != HitLevel::Low)
+        {
+            a.moveConnected = 2;
+            parry(1 - ai);
+            return;
+        }
+        int depth = d.state == FighterState::HitStun ? comboCounts[ai] + 1 : 1;
+        if (h.kind == HitKind::Throw && m && m->isGrab)
+        {
+            a.moveConnected = 1;
+            a.hitStopFrames = std::max(a.hitStopFrames, h.hitStop);
+            d.hitStopFrames = std::max(d.hitStopFrames, h.hitStop);
+            activeGrab.active = true;
+            activeGrab.attackerIndex = ai;
+            activeGrab.defenderIndex = 1 - ai;
+            activeGrab.move = *m;
+            activeGrab.hitbox = h;
+            activeGrab.comboDepth = depth;
+            d.grabbed = true;
+            UpdateActiveGrab();
+            soundEvents.push_back(SoundEvent::GrabStart);
+            return;
+        }
+        const auto res = d.ReceiveHit(h, a.facing, false, mode == GameMode::Training, depth,
+                                      a.offensiveDebuffFrames > 0 ? a.offensiveDebuffMultiplier : 1);
+        a.moveConnected = res.blocked ? 2 : 1;
+        a.hitStopFrames = std::max(a.hitStopFrames, h.hitStop);
+        outcome(ai, h, m, res, depth);
+    };
+    Contact one = find(0), two = find(1);
+    if (one.found && two.found)
+    {
+        if (one.h.priority >= two.h.priority)
+            apply(0, one.h);
+        if (two.h.priority >= one.h.priority)
+            apply(1, two.h);
+    }
+    else if (one.found)
+        apply(0, one.h);
+    else if (two.found)
+        apply(1, two.h);
+    for (auto it = projectiles.begin(); it != projectiles.end();)
+    {
+        auto &d = fighters[1 - it->ownerIndex];
+        if (it->ageFrames < it->def.armingFrames || !d.CanReceive(it->def.hitbox))
+        {
+            ++it;
+            continue;
+        }
+        Rect wr = ToWorldRect(it->def.hitbox.rect, it->x, it->y, it->facing);
+        bool hit = false;
+        for (const auto &hr : d.CurrentHurtboxesWorld())
+            if (Intersects(wr, hr))
+            {
+                hit = true;
+                break;
+            }
+        if (!hit)
+        {
+            ++it;
+            continue;
+        }
+        if (d.parryFrames > 0 && it->def.hitbox.kind != HitKind::Throw && it->def.hitbox.level != HitLevel::Low)
+            parry(1 - it->ownerIndex);
+        else
+        {
+            auto &a = fighters[it->ownerIndex];
+            int depth = d.state == FighterState::HitStun ? comboCounts[it->ownerIndex] + 1 : 1;
+            auto res = d.ReceiveHit(it->def.hitbox, it->facing, false, mode == GameMode::Training, depth,
+                                    a.offensiveDebuffFrames > 0 ? a.offensiveDebuffMultiplier : 1);
+            a.hitStopFrames = std::max(a.hitStopFrames, it->def.hitbox.hitStop);
+            outcome(it->ownerIndex, it->def.hitbox, it->sourceMove, res, depth);
+        }
+        it = projectiles.erase(it);
+    }
+}
+
+void CombatWorld::UpdateActiveGrab()
+{
+    if (!activeGrab.active)
+        return;
+    auto &a = fighters[activeGrab.attackerIndex];
+    auto &d = fighters[activeGrab.defenderIndex];
+    const auto &m = activeGrab.move;
+    if (!a.currentMove || std::strcmp(a.currentMove->id, m.id) != 0 || a.state == FighterState::Knockout)
+    {
+        activeGrab.active = false;
+        d.grabbed = false;
+        d.ForceState(d.y < kGroundY ? FighterState::Fall : FighterState::Idle);
+        return;
+    }
+    int f = a.stateFrame;
+    if (f >= m.releaseFrame)
+    {
+        activeGrab.active = false;
+        const auto res =
+            d.ReceiveHit(activeGrab.hitbox, a.facing, false, mode == GameMode::Training, activeGrab.comboDepth);
+        a.hitStopFrames = std::max(a.hitStopFrames, activeGrab.hitbox.hitStop);
+        a.ForceMeter(a.meter + m.meterGainOnHit);
+        d.ForceMeter(d.meter + static_cast<int>(std::ceil(res.damage * 0.055f)));
+        lastDamage = res.damage;
+        comboCounts[activeGrab.attackerIndex] = activeGrab.comboDepth;
+        comboTimers[activeGrab.attackerIndex] = 90;
+        if (!res.knockout)
+            d.ReleaseFromGrab(a.facing * m.throwVelocityX, m.throwVelocityY, m.slam);
+        else
+            d.grabbed = false;
+        soundEvents.push_back(SoundEvent::GrabSlam);
+        return;
+    }
+    const auto &poses = m.grabPoses[static_cast<int>(d.def->id)];
+    if (!poses.empty())
+    {
+        const auto &p = poses[std::clamp(f, 0, static_cast<int>(poses.size()) - 1)];
+        d.EnterGrabbedState(p.state, a.x + a.facing * p.x, a.y + p.y, a.facing * p.rotation, -a.facing);
+        d.victimPoseFrame = p.poseFrame;
+        d.victimInFront = m.id == std::string("universalGrab") && f >= 35;
+    }
+    else
+        d.EnterGrabbedState(f < m.holdStartFrame ? FighterState::GrabbedFront : FighterState::GrabbedLifted,
+                            a.x + a.facing * 44, a.y, 0, -a.facing);
+}
+
+void CombatWorld::ResolvePushboxes()
+{
+    if (activeGrab.active)
+        return;
+    FighterRuntime &One = fighters[0];
+    FighterRuntime &Two = fighters[1];
+    if (One.grabbed || Two.grabbed || One.state == FighterState::Thrown || Two.state == FighterState::Thrown ||
+        std::fabs(One.y - Two.y) > 96)
+    {
+        return;
+    }
+
+    const Rect A = One.PushboxWorld();
+    const Rect B = Two.PushboxWorld();
+    if (!Intersects(A, B))
+    {
+        return;
+    }
+    const float Overlap = HorizontalOverlap(A, B);
+    if (Overlap <= 0.0f)
+    {
+        return;
+    }
+
+    const float TotalWeight = One.def->stats.weight + Two.def->stats.weight;
+    const float Dir = One.x <= Two.x ? 1.0f : -1.0f;
+    One.x = std::clamp(One.x - Dir * Overlap * Two.def->stats.weight / TotalWeight, static_cast<float>(kStageLeft),
+                       static_cast<float>(kStageRight));
+    Two.x = std::clamp(Two.x + Dir * Overlap * One.def->stats.weight / TotalWeight, static_cast<float>(kStageLeft),
+                       static_cast<float>(kStageRight));
+}
+
+void CombatWorld::FinishRound(int winner, bool)
+{
+    if (phase != CombatPhase::Active)
+        return;
+    activeGrab = {};
+    projectiles.clear();
+    roundWinner = winner;
+    roundDraw = winner < 0;
+    phase = CombatPhase::RoundOver;
+    phaseFrame = 0;
+    soundEvents.push_back(SoundEvent::RoundEnd);
+    if (winner < 0)
+    {
+        fighters[0].ForceState(fighters[0].health <= 0 || fighters[1].health <= 0 ? FighterState::Knockout
+                                                                                  : FighterState::Idle);
+        fighters[1].ForceState(fighters[0].health <= 0 || fighters[1].health <= 0 ? FighterState::Knockout
+                                                                                  : FighterState::Idle);
+        return;
+    }
+    auto &a = fighters[winner];
+    auto &d = fighters[1 - winner];
+    ++a.roundWins;
+    if (mode != GameMode::Training && a.roundWins >= kRoundsToWin)
+    {
+        matchWinner = finisherWinner = winner;
+        phase = CombatPhase::FinishReady;
+        a.ForceState(FighterState::Idle);
+        d.ForceState(FighterState::Dizzy);
+        soundEvents.push_back(SoundEvent::FinishReady);
+        return;
+    }
+    a.ForceState(FighterState::Victory);
+    d.ForceState(FighterState::Knockout);
+}
+void CombatWorld::CompleteFinish()
+{
+    projectiles.clear();
+    finisherCompleted = phase == CombatPhase::StageFinish;
+    fighters[finisherWinner].ForceState(FighterState::Victory);
+    fighters[1 - finisherWinner].ForceState(FighterState::Knockout);
+    phase = CombatPhase::MatchOver;
+    phaseFrame = phaseFrame >= kFinishEndFrame ? kFinishEndFrame : 0;
+    soundEvents.push_back(SoundEvent::MatchWin);
+}
+
+void CombatWorld::StepFinishReady(const InputFrame &p1, const InputFrame &p2)
+{
+    if (finisherWinner < 0)
+    {
+        phase = CombatPhase::MatchOver;
+        return;
+    }
+    auto &a = fighters[finisherWinner];
+    auto &d = fighters[1 - finisherWinner];
+    InputFrame empty{};
+    if (phaseFrame >= kFinishWindowFrames)
+    {
+        phaseFrame = 0;
+        CompleteFinish();
+        return;
+    }
+    if (!(a.currentMove && a.currentMove->lockFacing) && a.grounded)
+        a.facing = a.x <= d.x ? 1 : -1;
+    a.BeginFrame(finisherWinner == 0 ? p1 : p2, frame);
+    d.BeginFrame(empty, frame);
+    a.CaptureCollisionPose();
+    d.CaptureCollisionPose();
+    auto boxes = a.evaluatedHitboxes;
+    std::stable_sort(boxes.begin(), boxes.end(), [](auto &a, auto &b) { return a.priority > b.priority; });
+    for (const auto &h : boxes)
+    {
+        if (!d.CanReceive(h))
+            continue;
+        Rect wr = ToWorldRect(h.rect, a.x, a.y, a.facing);
+        bool contact = false;
+        for (const auto &hr : d.CurrentHurtboxesWorld())
+            if (Intersects(wr, hr))
+            {
+                contact = true;
+                break;
+            }
+        if (!contact)
+            continue;
+        if (h.kind == HitKind::Throw)
+        {
+            a.ForceState(FighterState::Idle);
+            d.ForceState(FighterState::Dizzy);
+            projectiles.clear();
+            phase = CombatPhase::StageFinish;
+            phaseFrame = 0;
+            StepStageFinish();
+            soundEvents.push_back(SoundEvent::GrabStart);
+        }
+        else
+        {
+            phaseFrame = 0;
+            CompleteFinish();
+        }
+        return;
+    }
+    a.ConsumeMoveEvents();
+    SpawnProjectiles(finisherWinner);
+    UpdateProjectiles();
+    int oldHealth = d.health;
+    ResolveHits(empty, empty);
+    if (d.state != FighterState::Dizzy || d.health < oldHealth)
+    {
+        projectiles.clear();
+        phaseFrame = 0;
+        CompleteFinish();
+        return;
+    }
+    ResolvePushboxes();
+    a.FinishFrame();
+    d.FinishFrame();
+}
+
+void CombatWorld::StepStageFinish()
+{
+    if (finisherWinner < 0)
+    {
+        phase = CombatPhase::MatchOver;
+        return;
+    }
+    auto &a = fighters[finisherWinner];
+    auto &d = fighters[1 - finisherWinner];
+    int f = phaseFrame;
+    if (stage == StageId::Sitio && f >= 84 && f < 132 && std::fabs(a.x - 327.5f) < 150)
+        a.x = std::clamp(a.x - a.facing * (f % 2 == 0 ? 2.0f : 1.0f), float(kStageLeft), float(kStageRight));
+    auto p = StageVictim(stage, f, a, d);
+    d.EnterGrabbedState(p.state, p.x, p.y, p.rotation, -a.facing);
+    d.victimPoseFrame = p.pose;
+    d.victimScale = p.scale;
+    d.cutBelowY = p.cut;
+    d.visible = p.visible;
+    d.victimInFront = p.front;
+    a.CaptureCollisionPose();
+    d.CaptureCollisionPose();
+    if (stage == StageId::CaisDaCidade && f == 60)
+        soundEvents.push_back(SoundEvent::FinisherMonsterRoar);
+    if (stage == StageId::CaisDaCidade && f == 112)
+        soundEvents.push_back(SoundEvent::FinisherSplash);
+    if (stage == StageId::CozinhaMacabra && f == 108)
+        soundEvents.push_back(SoundEvent::FinisherPotDrop);
+    if (stage == StageId::Sitio && f == 112)
+        soundEvents.push_back(SoundEvent::FinisherTrident);
+    if (f >= kFinishEndFrame)
+        CompleteFinish();
+}
+
+void CombatWorld::StepRoundOver()
+{
+    InputFrame Empty{};
+    fighters[0].BeginFrame(Empty, frame);
+    fighters[1].BeginFrame(Empty, frame);
+    fighters[0].CaptureCollisionPose();
+    fighters[1].CaptureCollisionPose();
+    fighters[0].FinishFrame();
+    fighters[1].FinishFrame();
+    if (phaseFrame >= 150)
+    {
+        StartNextRound();
+    }
+}
+
+void CombatWorld::StartNextRound()
+{
+    if (roundWinner >= 0)
+        round += 1;
+    phase = CombatPhase::Intro;
+    phaseFrame = 0;
+    timeFrames = kRoundTimeFrames;
+    roundDraw = false;
+    roundWinner = -1;
+    projectiles.clear();
+    activeGrab = ActiveGrabState{};
+    fighters[0].ResetForRound(188.0f, 1);
+    fighters[1].ResetForRound(452.0f, -1);
+    comboCounts = {0, 0};
+    comboTimers = {0, 0};
+}
+
+WorldSnapshot CombatWorld::Snapshot() const
+{
+    WorldSnapshot Out{};
+    Out.frame = frame;
+    Out.phase = phase;
+    Out.phaseFrame = phaseFrame;
+    Out.round = round;
+    Out.timeSeconds = std::max(0, (timeFrames + 59) / 60);
+    Out.paused = paused;
+    Out.debugBoxes = debugBoxes;
+    Out.roundDraw = roundDraw;
+    Out.roundWinner = roundWinner;
+    Out.matchWinner = matchWinner;
+    Out.finisherWinner = finisherWinner;
+    Out.finisherCompleted = finisherCompleted;
+    Out.stage = stage;
+    Out.mode = mode;
+    Out.fighters = {fighters[0].Snapshot(), fighters[1].Snapshot()};
+    Out.fighters[0].comboCount = comboCounts[0];
+    Out.fighters[1].comboCount = comboCounts[1];
+    Out.grabActive = activeGrab.active;
+    Out.lastDamage = lastDamage;
+    if (finisherWinner >= 0 && (phase == CombatPhase::StageFinish || finisherCompleted))
+    {
+        const int f = std::min(kFinishEndFrame, phaseFrame);
+        Out.visualFinisher = StageVisual(stage, f, fighters[finisherWinner]);
+        auto &a = Out.fighters[finisherWinner];
+        if (f < 84)
+        {
+            a.poseState = FighterState::HeavyAttack;
+            a.poseAnim = AnimId::UniversalGrab;
+            a.poseStateFrame = FinisherAttackerFrame(f);
+            a.poseMoveId = "universalGrab";
+            a.poseMoveAnimationKey = "universalGrab";
+            a.poseMoveConnected = true;
+            a.poseMoveTotalFrames = fighters[finisherWinner].def->universalGrab.totalFrames;
+            a.poseHitActiveFrom = fighters[finisherWinner].def->universalGrab.visualImpactFrom;
+            a.poseHitActiveTo = fighters[finisherWinner].def->universalGrab.visualImpactTo;
+        }
+        else if (stage == StageId::Sitio && f >= 84 && f < 132 && std::fabs(a.x - 327.5f) < 150)
+        {
+            a.poseState = FighterState::WalkBackward;
+            a.poseAnim = AnimId::WalkBackward;
+            a.poseStateFrame = f - 84;
+            a.poseMoveId = "";
+            a.poseMoveAnimationKey = "";
+            a.poseMoveTotalFrames = 0;
+        }
+    }
+
+    for (const ProjectileRuntime &P : projectiles)
+    {
+        Out.projectiles.push_back(ProjectileSnapshot{
+            P.runtimeId, P.ownerIndex, P.def.id, P.x, P.y, P.facing, ToWorldRect(P.def.hitbox.rect, P.x, P.y, P.facing),
+            P.ageFrames >= P.def.armingFrames, P.sourceMove ? P.sourceMove->id : "", P.ageFrames, P.def.armingFrames});
+    }
+
+    if (paused)
+    {
+        Out.banner = "PAUSADO";
+    }
+    else if (phase == CombatPhase::Intro)
+    {
+        Out.banner = phaseFrame < 60 ? "PREPARE-SE" : "LUTE!";
+    }
+    else if (phase == CombatPhase::FinishReady)
+    {
+        Out.banner = "FINALIZE! (AGARRAO F+G / J+K)";
+    }
+    else if (phase == CombatPhase::StageFinish)
+    {
+        Out.banner = phaseFrame >= 210 ? GetStageDef(stage).finisherBanner : "FINALIZACAO DE PALCO!";
+    }
+    else if (phase == CombatPhase::RoundOver)
+    {
+        Out.banner = roundDraw ? "EMPATE" : "NOCAUTE!";
+    }
+    else if (phase == CombatPhase::MatchOver)
+    {
+        if (finisherCompleted)
+        {
+            Out.banner = GetStageDef(stage).finisherBanner;
+        }
+        else if (matchWinner == 0)
+        {
+            Out.banner = "JOGADOR 1 VENCE!";
+        }
+        else if (matchWinner == 1)
+        {
+            Out.banner = "JOGADOR 2 VENCE!";
+        }
+        else
+        {
+            Out.banner = "FIM DE LUTA";
+        }
+    }
+
+    return Out;
+}
+
+uint64_t CombatWorld::ComputeStateHash() const
+{
+    uint64_t Hash = 0xcbf29ce484222325ULL;
+    auto MixInt = [&Hash](int64_t Val) {
+        for (int i = 0; i < 8; ++i)
+        {
+            const uint8_t Byte = static_cast<uint8_t>((static_cast<uint64_t>(Val) >> (i * 8)) & 0xFFU);
+            Hash ^= Byte;
+            Hash *= 0x100000001b3ULL;
+        }
+    };
+
+    MixInt(frame);
+    MixInt(static_cast<int>(phase));
+    MixInt(phaseFrame);
+    MixInt(round);
+    MixInt(timeFrames);
+    MixInt(static_cast<int>(stage));
+    MixInt(static_cast<int>(mode));
+    for (const FighterRuntime &F : fighters)
+    {
+        MixInt(static_cast<int>(F.def->id));
+        MixInt(static_cast<int64_t>(std::llround(F.x * 1000.0f)));
+        MixInt(static_cast<int64_t>(std::llround(F.y * 1000.0f)));
+        MixInt(static_cast<int64_t>(std::llround(F.velocityX * 1000.0f)));
+        MixInt(static_cast<int64_t>(std::llround(F.velocityY * 1000.0f)));
+        MixInt(F.facing);
+        MixInt(static_cast<int>(F.state));
+        MixInt(F.stateFrame);
+        MixInt(F.health);
+        MixInt(F.meter);
+        MixInt(F.roundWins);
+        MixInt(F.grounded ? 1 : 0);
+    }
+    MixInt(static_cast<int64_t>(projectiles.size()));
+    for (const ProjectileRuntime &P : projectiles)
+    {
+        MixInt(P.ownerIndex);
+        MixInt(static_cast<int64_t>(std::llround(P.x * 1000.0f)));
+        MixInt(static_cast<int64_t>(std::llround(P.y * 1000.0f)));
+        MixInt(P.life);
+    }
+    return Hash;
+}
+
+// Planejador da referência src/ai/CpuController.ts; RNG local injetável/determinístico.
+InputFrame BuildCpuInput(const CombatWorld &world, int index, AiDifficulty difficulty)
+{
+    if (index < 0 || index > 1)
+        return {};
+    auto &state = world.cpuControllers[index];
+    const WorldSnapshot snapshot = world.Snapshot();
+    const auto &definition = *world.fighters[index].def;
+    if (state.definition != &definition || state.difficulty != difficulty || snapshot.frame < state.lastFrame)
+    {
+        state = {};
+        state.definition = &definition;
+        state.difficulty = difficulty;
+        state.randomState = 0x9e3779b9U ^ (uint32_t(definition.id) + 1) * 0x85ebca6bU ^ uint32_t(index) * 0xc2b2ae35U;
+    }
+    if (state.lastFrame == snapshot.frame)
+        return state.cachedInput;
+    state.lastFrame = snapshot.frame;
+    auto emit = [&](InputFrame current) {
+        const auto &previous = state.previousActions;
+        current.leftPressed = current.left && !previous.left;
+        current.rightPressed = current.right && !previous.right;
+        current.upPressed = current.up && !previous.up;
+        current.downPressed = current.down && !previous.down;
+        current.punchPressed = current.punch && !previous.punch;
+        current.kickPressed = current.kick && !previous.kick;
+        current.specialPressed = current.special && !previous.special;
+        current.blockPressed = current.block && !previous.block;
+        state.previousActions = current;
+        state.cachedInput = current;
+        return current;
+    };
+    auto resetPlanning = [&]() {
+        state.observations.clear();
+        state.plan.clear();
+        state.decisionCooldown = 0;
+    };
+    auto random = [&]() {
+        uint32_t &value = state.randomState;
+        value ^= value << 13;
+        value ^= value >> 17;
+        value ^= value << 5;
+        return (value & 0xffffff) / 16777216.0f;
+    };
+    auto direction = [](int token, bool towardRight) {
+        InputFrame input{};
+        if (token == 1 || token == 2 || token == 3)
+            input.down = true;
+        if (token == 2 || token == 4)
+        {
+            input.right = towardRight;
+            input.left = !towardRight;
+        }
+        if (token == 3 || token == 5)
+        {
+            input.left = towardRight;
+            input.right = !towardRight;
+        }
+        if (token == 6)
+            input.up = true;
+        return input;
+    };
+    auto queueMove = [&](const MoveDef &move, bool towardRight) {
+        for (int token : move.command.directions)
+            state.plan.push_back({3, direction(token, towardRight)});
+        InputFrame final =
+            move.command.directions.empty() ? InputFrame{} : direction(move.command.directions.back(), towardRight);
+        final.punch = move.command.buttons & 16;
+        final.kick = move.command.buttons & 32;
+        final.special = move.command.buttons & 64;
+        final.block = move.command.buttons & 128;
+        state.plan.push_back({1, final});
+        state.plan.push_back({8, {}});
+    };
+    const auto &own = snapshot.fighters[index];
+    const auto &rival = snapshot.fighters[1 - index];
+    if (snapshot.phase == CombatPhase::FinishReady && snapshot.finisherWinner == index)
+    {
+        resetPlanning();
+        InputFrame input{};
+        if (snapshot.phaseFrame >= 60)
+        {
+            if (std::fabs(own.x - rival.x) > 74)
+            {
+                input.right = rival.x > own.x;
+                input.left = !input.right;
+            }
+            else if (snapshot.phaseFrame % 30 < 5)
+                input.punch = input.kick = true;
+        }
+        return emit(input);
+    }
+    if (snapshot.paused || snapshot.phase != CombatPhase::Active)
+    {
+        resetPlanning();
+        return emit({});
+    }
+    struct Config
+    {
+        int reaction, decision;
+        float guard, special, jump, mistake;
+    };
+    const Config config = difficulty == AiDifficulty::Easy   ? Config{18, 12, 0.2f, 0.08f, 0.08f, 0.15f}
+                          : difficulty == AiDifficulty::Hard ? Config{6, 4, 0.65f, 0.25f, 0.14f, 0.02f}
+                                                             : Config{10, 7, 0.45f, 0.16f, 0.11f, 0.06f};
+    state.observations.push_back(snapshot);
+    while (state.observations.size() > size_t(config.reaction + 2))
+        state.observations.erase(state.observations.begin());
+    if (state.observations.size() <= size_t(config.reaction))
+        return emit({});
+    if (own.state == FighterState::LightAttack || own.state == FighterState::HeavyAttack ||
+        own.state == FighterState::KickAttack || own.state == FighterState::SpecialAttack ||
+        own.state == FighterState::HitStun || own.state == FighterState::Knockdown ||
+        own.state == FighterState::WakeUp || own.state == FighterState::Victory || own.state == FighterState::Knockout)
+        return emit({});
+    state.decisionCooldown = std::max(0, state.decisionCooldown - 1);
+    if (state.plan.empty() && state.decisionCooldown == 0)
+    {
+        const auto &observed = state.observations.front();
+        const auto &self = observed.fighters[index];
+        const auto &opponent = observed.fighters[1 - index];
+        float distance = std::fabs(self.x - opponent.x);
+        bool towardRight = opponent.x > self.x;
+        auto approach = [&](float jumpChance) {
+            InputFrame input{};
+            input.right = towardRight;
+            input.left = !towardRight;
+            if (random() < jumpChance)
+            {
+                input.up = true;
+                state.plan.push_back({1, input});
+                input.up = false;
+                state.plan.push_back({16, input});
+            }
+            else
+                state.plan.push_back({10, input});
+        };
+        auto choose = [&]() {
+            if (random() < config.mistake)
+            {
+                state.plan.push_back({8, {}});
+                return;
+            }
+            if (opponent.attacking && distance < 105 && random() < config.guard)
+            {
+                InputFrame guard{};
+                guard.block = true;
+                guard.down = random() < 0.35f;
+                state.plan.push_back({12, guard});
+                return;
+            }
+            if (distance > 145)
+            {
+                approach(config.jump);
+                return;
+            }
+            const bool canSuper = self.meter >= 100;
+            if (canSuper || random() < config.special)
+            {
+                const MoveDef *candidate = nullptr;
+                for (const auto &move : definition.canonicalMoves)
+                    if (move.isSpecial && move.isSuper == canSuper && (distance < 60 || !move.isGrab) &&
+                        (!candidate || move.command.priority > candidate->command.priority))
+                        candidate = &move;
+                if (candidate)
+                {
+                    queueMove(*candidate, towardRight);
+                    return;
+                }
+            }
+            const float preferredRange = definition.cpuPreferredRange;
+            if (distance > preferredRange)
+            {
+                approach(config.jump * 0.5f);
+                return;
+            }
+            const MoveDef *throwMove = nullptr;
+            for (const auto &move : definition.canonicalMoves)
+                if (move.isGrab && !move.isSuper)
+                {
+                    throwMove = &move;
+                    break;
+                }
+            if (distance < 48 && throwMove && random() < 0.28f)
+            {
+                queueMove(*throwMove, towardRight);
+                return;
+            }
+            if (distance < 36 && random() < 0.22f)
+            {
+                InputFrame away{};
+                away.left = towardRight;
+                away.right = !towardRight;
+                state.plan.push_back({10, away});
+                return;
+            }
+            const bool heavy = random() < 0.42f, low = random() < 0.25f;
+            InputFrame attack{};
+            if (low)
+                attack.down = true;
+            else if (heavy && random() < 0.35f)
+            {
+                attack.right = towardRight;
+                attack.left = !towardRight;
+            }
+            attack.kick = heavy;
+            attack.punch = !heavy;
+            state.plan.push_back({1, attack});
+            state.plan.push_back({5, {}});
+        };
+        choose();
+        state.decisionCooldown = config.decision;
+    }
+    InputFrame actions{};
+    if (!state.plan.empty())
+    {
+        actions = state.plan.front().actions;
+        if (--state.plan.front().frames <= 0)
+            state.plan.erase(state.plan.begin());
+    }
+    return emit(actions);
+}
+} // namespace RDA

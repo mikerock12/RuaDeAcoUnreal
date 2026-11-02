@@ -1,5 +1,7 @@
 #define MyAppName "Rua de Aco"
-#define MyAppVersion "0.2.0"
+#ifndef MyAppVersion
+#define MyAppVersion "0.3.0"
+#endif
 #define MyAppPublisher "Smells Like Tech"
 #define MyAppURL "https://softwares.smellsliketech.com.br/games/rua-de-aco/"
 #define MyAppExeName "RuaDeAcoUnreal.exe"
@@ -17,8 +19,8 @@ DefaultGroupName={#MyAppName}
 DisableProgramGroupPage=yes
 PrivilegesRequired=lowest
 PrivilegesRequiredOverridesAllowed=dialog
-OutputDir=..\..\Saved\Packages\Release-0.2.0
-OutputBaseFilename=RuaDeAco-0.2.0-Windows-x64-Setup
+OutputDir=..\..\Saved\Packages\Release-{#MyAppVersion}
+OutputBaseFilename=RuaDeAco-{#MyAppVersion}-Windows-x64-Setup
 Compression=lzma2/fast
 SolidCompression=yes
 WizardStyle=modern

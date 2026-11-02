@@ -1,0 +1,1695 @@
+{
+  "sourceRepository": "mikerock12/RuaDeAco",
+  "files": [
+    {
+      "source": "public/assets/fighters/guto-barba/abraco-glacial-effect.png",
+      "target": "Content/RuaDeAco/Art/Characters/GutoBarba/abraco-glacial-effect.png",
+      "sha256": "c959d503d1908fdc635e2560d0b918f13411ab6821eab5678b9cdf990a95ebd9"
+    },
+    {
+      "source": "public/assets/fighters/guto-barba/abraco-glacial-finish.png",
+      "target": "Content/RuaDeAco/Art/Characters/GutoBarba/abraco-glacial-finish.png",
+      "sha256": "06e029b99997b9279fa55021705e4c2eb1ea7c518e76f70c500e74ddafc6a83b"
+    },
+    {
+      "source": "public/assets/fighters/guto-barba/abraco-glacial-freeze.png",
+      "target": "Content/RuaDeAco/Art/Characters/GutoBarba/abraco-glacial-freeze.png",
+      "sha256": "f68ccc679c46155bd3f5ff1669b29fcf25279ee558c7b4f004aab1bea3285519"
+    },
+    {
+      "source": "public/assets/fighters/guto-barba/abraco-glacial-grab.png",
+      "target": "Content/RuaDeAco/Art/Characters/GutoBarba/abraco-glacial-grab.png",
+      "sha256": "5a3c0ab1e499bdee37497112ac16ef655cc5cb1cf77afded30526011054ffece"
+    },
+    {
+      "source": "public/assets/fighters/guto-barba/abraco-glacial-hold.png",
+      "target": "Content/RuaDeAco/Art/Characters/GutoBarba/abraco-glacial-hold.png",
+      "sha256": "d4752da6e7d228e9e11dbcbba0fc3971dbc33f61aec84ad21587342be664fb1a"
+    },
+    {
+      "source": "public/assets/fighters/guto-barba/abraco-glacial-startup.png",
+      "target": "Content/RuaDeAco/Art/Characters/GutoBarba/abraco-glacial-startup.png",
+      "sha256": "6b2edc9b30bdef7f4c51d5bcf28dccdfd0969087cac4590a3bbdaf5e337d9a00"
+    },
+    {
+      "source": "public/assets/fighters/guto-barba/air-heavy-backward.png",
+      "target": "Content/RuaDeAco/Art/Characters/GutoBarba/air-heavy-backward.png",
+      "sha256": "67f4c1a37dace8e7b67959cbe72999657f7db4a407b17711964c98e927e4ac50"
+    },
+    {
+      "source": "public/assets/fighters/guto-barba/air-heavy-forward.png",
+      "target": "Content/RuaDeAco/Art/Characters/GutoBarba/air-heavy-forward.png",
+      "sha256": "31e8a2ffb651cd35a2c2a63ce15a021a06083759cc85c85391590517b081472f"
+    },
+    {
+      "source": "public/assets/fighters/guto-barba/air-heavy-neutral.png",
+      "target": "Content/RuaDeAco/Art/Characters/GutoBarba/air-heavy-neutral.png",
+      "sha256": "950ceafa225baff8ed3c2caa8294ac8a3d2571718567f3c9a3549eeaac275eaf"
+    },
+    {
+      "source": "public/assets/fighters/guto-barba/air-light-backward.png",
+      "target": "Content/RuaDeAco/Art/Characters/GutoBarba/air-light-backward.png",
+      "sha256": "2d9ce3510d4ee3cc94bceeb02d39281140d1fa0a725ae5380b9785193fa27766"
+    },
+    {
+      "source": "public/assets/fighters/guto-barba/air-light-forward.png",
+      "target": "Content/RuaDeAco/Art/Characters/GutoBarba/air-light-forward.png",
+      "sha256": "1fb5e5f898c41eb56d5bc21798496fc4fc21259bd576f5086ff9000aa6982fc4"
+    },
+    {
+      "source": "public/assets/fighters/guto-barba/air-light-neutral.png",
+      "target": "Content/RuaDeAco/Art/Characters/GutoBarba/air-light-neutral.png",
+      "sha256": "b7ffb2d442e397b40c0065b8780f7df56fa8d1ed65f499b561f36e2c331b51b1"
+    },
+    {
+      "source": "public/assets/fighters/guto-barba/block-crouching.png",
+      "target": "Content/RuaDeAco/Art/Characters/GutoBarba/block-crouching.png",
+      "sha256": "6cc7219827488bab04e23b23edecb107c881bc06584ce5322e94f742c36ff816"
+    },
+    {
+      "source": "public/assets/fighters/guto-barba/block-standing.png",
+      "target": "Content/RuaDeAco/Art/Characters/GutoBarba/block-standing.png",
+      "sha256": "de50d9e8c257b488ceaef350a9bd87c2e5da550a71e7631921b1dd4678ccdfc2"
+    },
+    {
+      "source": "public/assets/fighters/guto-barba/corrida.png",
+      "target": "Content/RuaDeAco/Art/Characters/GutoBarba/corrida.png",
+      "sha256": "e008725c9340ffb5c3275da3b4f8e7d6e02fc4ddebe50785e81fa785939f1d9e"
+    },
+    {
+      "source": "public/assets/fighters/guto-barba/crouch-heavy.png",
+      "target": "Content/RuaDeAco/Art/Characters/GutoBarba/crouch-heavy.png",
+      "sha256": "ecb1fb2e56f45e7b5c834e8e2d23e128147f0343be9b9cbe181eab3a4f454db5"
+    },
+    {
+      "source": "public/assets/fighters/guto-barba/crouch-light.png",
+      "target": "Content/RuaDeAco/Art/Characters/GutoBarba/crouch-light.png",
+      "sha256": "021e983e4793c2cf7f0953eff1ff32ddabec424589ff4c5a95ca2821605e6699"
+    },
+    {
+      "source": "public/assets/fighters/guto-barba/crouch.png",
+      "target": "Content/RuaDeAco/Art/Characters/GutoBarba/crouch.png",
+      "sha256": "8b5886dc9ea28736d2835e179252b77de2bde15ede353ee1174720261ac823d0"
+    },
+    {
+      "source": "public/assets/fighters/guto-barba/fall.png",
+      "target": "Content/RuaDeAco/Art/Characters/GutoBarba/fall.png",
+      "sha256": "7a57421902e70cdc48e710b5d3fb28c23b21a41f289c2715df3bece7d2942d05"
+    },
+    {
+      "source": "public/assets/fighters/guto-barba/forward-heavy.png",
+      "target": "Content/RuaDeAco/Art/Characters/GutoBarba/forward-heavy.png",
+      "sha256": "7649fda2a54e31de1125a1b0c7e960cdd91297c9281465c45faf5e0bec00ef7e"
+    },
+    {
+      "source": "public/assets/fighters/guto-barba/forward-light.png",
+      "target": "Content/RuaDeAco/Art/Characters/GutoBarba/forward-light.png",
+      "sha256": "895d9e52a0e53aedb3e8bc2addc09e2705cc759c28390ac535ebcc351681ea25"
+    },
+    {
+      "source": "public/assets/fighters/guto-barba/frozen.png",
+      "target": "Content/RuaDeAco/Art/Characters/GutoBarba/frozen.png",
+      "sha256": "dfa7407236acd1c807d4a85a52385aefd3b80bc780db785973e48acf3029e8e8"
+    },
+    {
+      "source": "public/assets/fighters/guto-barba/gancho-do-urso-grab.png",
+      "target": "Content/RuaDeAco/Art/Characters/GutoBarba/gancho-do-urso-grab.png",
+      "sha256": "b92daa483144a34d25ffc4d8945ca3a37fabcf74e70f8653b5f7db0115e2712a"
+    },
+    {
+      "source": "public/assets/fighters/guto-barba/gancho-do-urso-hold.png",
+      "target": "Content/RuaDeAco/Art/Characters/GutoBarba/gancho-do-urso-hold.png",
+      "sha256": "f0bcd8b16f038f5ffb347760852905f9e025cbc3f39b5a3a1a93275ce9b095a7"
+    },
+    {
+      "source": "public/assets/fighters/guto-barba/gancho-do-urso-recovery.png",
+      "target": "Content/RuaDeAco/Art/Characters/GutoBarba/gancho-do-urso-recovery.png",
+      "sha256": "1b2a81a13e35a5f99264c0c5ee2ceb8eb568a646d1252180932e102bbbf5689c"
+    },
+    {
+      "source": "public/assets/fighters/guto-barba/gancho-do-urso-startup.png",
+      "target": "Content/RuaDeAco/Art/Characters/GutoBarba/gancho-do-urso-startup.png",
+      "sha256": "55268dd9d2a7a080b1b48fe6388357ed7e038e426ecc9d0ea07eb54aa9220c64"
+    },
+    {
+      "source": "public/assets/fighters/guto-barba/gancho-do-urso-throw.png",
+      "target": "Content/RuaDeAco/Art/Characters/GutoBarba/gancho-do-urso-throw.png",
+      "sha256": "8cb22c3ec6081e5290dcd65150d4c26cd6a0d32e8664eb7770af8fc3f6f2d1c7"
+    },
+    {
+      "source": "public/assets/fighters/guto-barba/grabbed-front.png",
+      "target": "Content/RuaDeAco/Art/Characters/GutoBarba/grabbed-front.png",
+      "sha256": "2fc71d22486883afacedd2c84350f416fa21b54400f919cff7cb74becf10ff94"
+    },
+    {
+      "source": "public/assets/fighters/guto-barba/grabbed-lifted.png",
+      "target": "Content/RuaDeAco/Art/Characters/GutoBarba/grabbed-lifted.png",
+      "sha256": "3eb63470a9f85bd20c81a15e09098f07be92fadcfcc44408c5f825bca5745236"
+    },
+    {
+      "source": "public/assets/fighters/guto-barba/hit.png",
+      "target": "Content/RuaDeAco/Art/Characters/GutoBarba/hit.png",
+      "sha256": "175160f280ed7ff1a84ecab196bb60e76754b49692ccc5255a0fa707e00ebea8"
+    },
+    {
+      "source": "public/assets/fighters/guto-barba/idle.png",
+      "target": "Content/RuaDeAco/Art/Characters/GutoBarba/idle.png",
+      "sha256": "1918d9ef027a9f1949fee50d2bf392f0529524f8175c273fa0f5e7c6cc3da6a1"
+    },
+    {
+      "source": "public/assets/fighters/guto-barba/jump-backward.png",
+      "target": "Content/RuaDeAco/Art/Characters/GutoBarba/jump-backward.png",
+      "sha256": "68e3995b6627eee8dfe372ef7aa6d02fc3def455dc428a70a9d66b6bfbef7079"
+    },
+    {
+      "source": "public/assets/fighters/guto-barba/jump-forward.png",
+      "target": "Content/RuaDeAco/Art/Characters/GutoBarba/jump-forward.png",
+      "sha256": "97f5e2fdbbecd8e45b3501b431f704bb0fbbd5e46012ae668271073e88d30bdf"
+    },
+    {
+      "source": "public/assets/fighters/guto-barba/jump-neutral.png",
+      "target": "Content/RuaDeAco/Art/Characters/GutoBarba/jump-neutral.png",
+      "sha256": "ae939155d8c502275195856daaf7208a92ed68d9c4d1027e00d57ac88c92af52"
+    },
+    {
+      "source": "public/assets/fighters/guto-barba/knockdown.png",
+      "target": "Content/RuaDeAco/Art/Characters/GutoBarba/knockdown.png",
+      "sha256": "f147748b25f86abc07fb50ca044d57af30001ceac25ad11318f5f34610f4475b"
+    },
+    {
+      "source": "public/assets/fighters/guto-barba/knockout.png",
+      "target": "Content/RuaDeAco/Art/Characters/GutoBarba/knockout.png",
+      "sha256": "d8f6a96f5f51188b94157769a53fe86aaa7e5a1753ac3d62ef2b6bc99b305cf3"
+    },
+    {
+      "source": "public/assets/fighters/guto-barba/landing.png",
+      "target": "Content/RuaDeAco/Art/Characters/GutoBarba/landing.png",
+      "sha256": "229ee6ffded775e9e154db2b3f7eaa9852dfb17530363a7fddd245931b378daa"
+    },
+    {
+      "source": "public/assets/fighters/guto-barba/muralha-norte-effect.png",
+      "target": "Content/RuaDeAco/Art/Characters/GutoBarba/muralha-norte-effect.png",
+      "sha256": "eecdba741d4320ebe197db0ca3548ad30256364424ed6520129a975db86ac0d8"
+    },
+    {
+      "source": "public/assets/fighters/guto-barba/muralha-norte.png",
+      "target": "Content/RuaDeAco/Art/Characters/GutoBarba/muralha-norte.png",
+      "sha256": "c52ed3fcaaf4085ac53bf1131b71628cf39bd63a7c47d3dcb2b18b81d8ec2f1e"
+    },
+    {
+      "source": "public/assets/fighters/guto-barba/standing-heavy.png",
+      "target": "Content/RuaDeAco/Art/Characters/GutoBarba/standing-heavy.png",
+      "sha256": "5b154ffb84af346bed37adeb1676ceeaad7fb7765a917051484ac169ee16d286"
+    },
+    {
+      "source": "public/assets/fighters/guto-barba/standing-light.png",
+      "target": "Content/RuaDeAco/Art/Characters/GutoBarba/standing-light.png",
+      "sha256": "a8f744a7f0e0d4c875186cebf3e2df89ede01b9c846660699f5def3979542659"
+    },
+    {
+      "source": "public/assets/fighters/guto-barba/thrown.png",
+      "target": "Content/RuaDeAco/Art/Characters/GutoBarba/thrown.png",
+      "sha256": "7f1df48cec426973a434e38c536fe9bd76a14f01787e85f722ad195245f86257"
+    },
+    {
+      "source": "public/assets/fighters/guto-barba/universal-grab-v2.png",
+      "target": "Content/RuaDeAco/Art/Characters/GutoBarba/universal-grab-v2.png",
+      "sha256": "cbe3fc8148375bd130a075d940144a4a785d56edcfaa5ee3d1082f2d09bd6630"
+    },
+    {
+      "source": "public/assets/fighters/guto-barba/victory.png",
+      "target": "Content/RuaDeAco/Art/Characters/GutoBarba/victory.png",
+      "sha256": "3496aaf24eda281a1f24409598a2dbcd396d4c157877ac430b599c3dc8f8e569"
+    },
+    {
+      "source": "public/assets/fighters/guto-barba/wake-up.png",
+      "target": "Content/RuaDeAco/Art/Characters/GutoBarba/wake-up.png",
+      "sha256": "e73d1aa8bf7339542c8edc2337ccc9e113f8efb1051eef0121f1c99ef5b32e26"
+    },
+    {
+      "source": "public/assets/fighters/guto-barba/walk-backward.png",
+      "target": "Content/RuaDeAco/Art/Characters/GutoBarba/walk-backward.png",
+      "sha256": "848147b19504b87f3beea1dfe24d8373b8c8d5b552c82ea71e2a5086c6af169f"
+    },
+    {
+      "source": "public/assets/fighters/rafa-mare/air-heavy-backward.png",
+      "target": "Content/RuaDeAco/Art/Characters/RafaMare/air-heavy-backward.png",
+      "sha256": "ea4247785ac7af8847dfc397b34ba09350db913b3c8e96f248535be9a25698aa"
+    },
+    {
+      "source": "public/assets/fighters/rafa-mare/air-heavy-forward.png",
+      "target": "Content/RuaDeAco/Art/Characters/RafaMare/air-heavy-forward.png",
+      "sha256": "d6f146b9dcd5ecc9f382157d1022af2d1ca9acb83e585f09da80d25008303eae"
+    },
+    {
+      "source": "public/assets/fighters/rafa-mare/air-heavy-neutral.png",
+      "target": "Content/RuaDeAco/Art/Characters/RafaMare/air-heavy-neutral.png",
+      "sha256": "46063cc50dd65e54037fccebac86c2a81f1e4a14cd008ccf19d439f7a5a3d048"
+    },
+    {
+      "source": "public/assets/fighters/rafa-mare/air-light-backward.png",
+      "target": "Content/RuaDeAco/Art/Characters/RafaMare/air-light-backward.png",
+      "sha256": "8ef264146d99c1d1c929d34d732dd4f7927e0d46e11658e8b85c8c5a7786e545"
+    },
+    {
+      "source": "public/assets/fighters/rafa-mare/air-light-forward.png",
+      "target": "Content/RuaDeAco/Art/Characters/RafaMare/air-light-forward.png",
+      "sha256": "753080296551ce43eff4dc5647f51844685ec73dea4605f111947dedf5e33243"
+    },
+    {
+      "source": "public/assets/fighters/rafa-mare/air-light-neutral.png",
+      "target": "Content/RuaDeAco/Art/Characters/RafaMare/air-light-neutral.png",
+      "sha256": "6f04786a2d88182ebc0972481a2d5a7b7bfc3f47eb36f8a770cee42360229172"
+    },
+    {
+      "source": "public/assets/fighters/rafa-mare/block-crouching.png",
+      "target": "Content/RuaDeAco/Art/Characters/RafaMare/block-crouching.png",
+      "sha256": "390a54b57bd0cb6ccff3209a3e877f57ff5626afa2658745b80c6eceab057ac6"
+    },
+    {
+      "source": "public/assets/fighters/rafa-mare/block-standing.png",
+      "target": "Content/RuaDeAco/Art/Characters/RafaMare/block-standing.png",
+      "sha256": "b4f5bdb438ae184d591206fcb5c7801b675dce1fb66a621330071208ead34c10"
+    },
+    {
+      "source": "public/assets/fighters/rafa-mare/chute-da-ressaca-effect.png",
+      "target": "Content/RuaDeAco/Art/Characters/RafaMare/chute-da-ressaca-effect.png",
+      "sha256": "ca4fc05c8ac7e6295b8189b4f47187081c980c6150075f26b4f4bea4ccb30e58"
+    },
+    {
+      "source": "public/assets/fighters/rafa-mare/chute-da-ressaca.png",
+      "target": "Content/RuaDeAco/Art/Characters/RafaMare/chute-da-ressaca.png",
+      "sha256": "c09ff3649bf5077d1f8765a876f42f5dc3db1b85c2d74153fafbcb230372a9da"
+    },
+    {
+      "source": "public/assets/fighters/rafa-mare/corrida.png",
+      "target": "Content/RuaDeAco/Art/Characters/RafaMare/corrida.png",
+      "sha256": "4d49949b2b53e10daca2367eaba2baccfeb5769666a1563ead6d9f793fdcf62e"
+    },
+    {
+      "source": "public/assets/fighters/rafa-mare/crouch-heavy.png",
+      "target": "Content/RuaDeAco/Art/Characters/RafaMare/crouch-heavy.png",
+      "sha256": "9d269b5ab69848c70fcd73fe133618c772117aa04ca231bd8fb8ff5bd4905070"
+    },
+    {
+      "source": "public/assets/fighters/rafa-mare/crouch-light.png",
+      "target": "Content/RuaDeAco/Art/Characters/RafaMare/crouch-light.png",
+      "sha256": "dee2adb856ff18080179df00bfdad002dc491ccc238771ea7775e912f8a09750"
+    },
+    {
+      "source": "public/assets/fighters/rafa-mare/crouch.png",
+      "target": "Content/RuaDeAco/Art/Characters/RafaMare/crouch.png",
+      "sha256": "eecbbdd31094c71bf676114751de174fe6ceaeb068c7e1560bc04f146bfef915"
+    },
+    {
+      "source": "public/assets/fighters/rafa-mare/eco-tatuado-effect.png",
+      "target": "Content/RuaDeAco/Art/Characters/RafaMare/eco-tatuado-effect.png",
+      "sha256": "15c840476b99284473915eed6105e81d22797fb0079e826674b945b4c3a67c5c"
+    },
+    {
+      "source": "public/assets/fighters/rafa-mare/eco-tatuado.png",
+      "target": "Content/RuaDeAco/Art/Characters/RafaMare/eco-tatuado.png",
+      "sha256": "433f3b947b4ac4c2f3ef545226ec32982911203cb219cc00d396b13682d827d5"
+    },
+    {
+      "source": "public/assets/fighters/rafa-mare/fall.png",
+      "target": "Content/RuaDeAco/Art/Characters/RafaMare/fall.png",
+      "sha256": "6544bb2625b3f6d9ff020885ce57a525283193623e989af17feb35239d408188"
+    },
+    {
+      "source": "public/assets/fighters/rafa-mare/forward-heavy.png",
+      "target": "Content/RuaDeAco/Art/Characters/RafaMare/forward-heavy.png",
+      "sha256": "2ef14e2711d36b350bb2c4f6b2b8430c1cdacde497686b717ae62db96e590433"
+    },
+    {
+      "source": "public/assets/fighters/rafa-mare/forward-light.png",
+      "target": "Content/RuaDeAco/Art/Characters/RafaMare/forward-light.png",
+      "sha256": "33afcb0fa3674eebf7ab3b33c4c5a0d3c316bab149dc47e5560c1e11b1ba4f32"
+    },
+    {
+      "source": "public/assets/fighters/rafa-mare/frozen.png",
+      "target": "Content/RuaDeAco/Art/Characters/RafaMare/frozen.png",
+      "sha256": "a9713cb7ca379246530e11887e93ca5ea837ff9beec8716c1c2fa256d30265d1"
+    },
+    {
+      "source": "public/assets/fighters/rafa-mare/grabbed-front.png",
+      "target": "Content/RuaDeAco/Art/Characters/RafaMare/grabbed-front.png",
+      "sha256": "0de743757166bff26fcdbb1867b993b3ebc1734afccd113048e654a74ba796de"
+    },
+    {
+      "source": "public/assets/fighters/rafa-mare/grabbed-lifted.png",
+      "target": "Content/RuaDeAco/Art/Characters/RafaMare/grabbed-lifted.png",
+      "sha256": "2d2c06c4ad82292de6fd7261c726f8c26f561ee7217aebf76f5d2148558e526b"
+    },
+    {
+      "source": "public/assets/fighters/rafa-mare/hit.png",
+      "target": "Content/RuaDeAco/Art/Characters/RafaMare/hit.png",
+      "sha256": "c81f2348a4e1e03b9546d39b1391ec326ccb07fc564597bd49a3ebce1f9bb130"
+    },
+    {
+      "source": "public/assets/fighters/rafa-mare/idle.png",
+      "target": "Content/RuaDeAco/Art/Characters/RafaMare/idle.png",
+      "sha256": "2b31fab25ad7dc26573cb68e82b9d16cfb372538db57d2a3dad63f54555a942d"
+    },
+    {
+      "source": "public/assets/fighters/rafa-mare/jump-backward.png",
+      "target": "Content/RuaDeAco/Art/Characters/RafaMare/jump-backward.png",
+      "sha256": "5148030dffb1e7ac8e96b7c733054e05ffbc5932aab4da9a1bf7b6db0a379a32"
+    },
+    {
+      "source": "public/assets/fighters/rafa-mare/jump-forward.png",
+      "target": "Content/RuaDeAco/Art/Characters/RafaMare/jump-forward.png",
+      "sha256": "9264412b05eec2881e890e58c46cf6b57fea25f9bf7a05d3a42af328d5387586"
+    },
+    {
+      "source": "public/assets/fighters/rafa-mare/jump-neutral.png",
+      "target": "Content/RuaDeAco/Art/Characters/RafaMare/jump-neutral.png",
+      "sha256": "70dac43a30c901593099d0b934b299676ba5cec6045bf18fb29e2edbf6c3af02"
+    },
+    {
+      "source": "public/assets/fighters/rafa-mare/knockdown.png",
+      "target": "Content/RuaDeAco/Art/Characters/RafaMare/knockdown.png",
+      "sha256": "1343d9a97e758fb820eb0c39d0da9bfd7ff533192fb37a67936f256f2bed23e9"
+    },
+    {
+      "source": "public/assets/fighters/rafa-mare/knockout.png",
+      "target": "Content/RuaDeAco/Art/Characters/RafaMare/knockout.png",
+      "sha256": "1159fab644258bd5b850a641431151961cb99d0e80e1db74686de156e4408f66"
+    },
+    {
+      "source": "public/assets/fighters/rafa-mare/landing.png",
+      "target": "Content/RuaDeAco/Art/Characters/RafaMare/landing.png",
+      "sha256": "8012d12c1f4271c9f166a8de132c327ed6905f6fac0580ce700942bb5a73e8a0"
+    },
+    {
+      "source": "public/assets/fighters/rafa-mare/mao-da-mare-effect.png",
+      "target": "Content/RuaDeAco/Art/Characters/RafaMare/mao-da-mare-effect.png",
+      "sha256": "126fd462c628a8644ec61374afdb7760e7d81f5d9064d22d779ce9d35b4e0e26"
+    },
+    {
+      "source": "public/assets/fighters/rafa-mare/mao-da-mare.png",
+      "target": "Content/RuaDeAco/Art/Characters/RafaMare/mao-da-mare.png",
+      "sha256": "c286fad8bfe8c9d3b9066696debc840a3493869f5102f4d2e964e8272bfe422f"
+    },
+    {
+      "source": "public/assets/fighters/rafa-mare/standing-heavy.png",
+      "target": "Content/RuaDeAco/Art/Characters/RafaMare/standing-heavy.png",
+      "sha256": "27abbaae7f4d76cb8cf33429eede5706620b369049ca83ac40a98f7c3831d6e1"
+    },
+    {
+      "source": "public/assets/fighters/rafa-mare/standing-light.png",
+      "target": "Content/RuaDeAco/Art/Characters/RafaMare/standing-light.png",
+      "sha256": "f165c83bc6bb760c5ccd3736e89e45d103184ffb5213023883770ea28f3d87df"
+    },
+    {
+      "source": "public/assets/fighters/rafa-mare/thrown.png",
+      "target": "Content/RuaDeAco/Art/Characters/RafaMare/thrown.png",
+      "sha256": "c35f6f5d6319f4f27a6342115ac137767de3f8db6ff1f50ee0b8e4a50cbf9cca"
+    },
+    {
+      "source": "public/assets/fighters/rafa-mare/universal-grab-v2.png",
+      "target": "Content/RuaDeAco/Art/Characters/RafaMare/universal-grab-v2.png",
+      "sha256": "50faeb1dddbc6db4d9c8f8c10f9425cc0a86c4c4e3202a7b0053c8f84fe7b4c8"
+    },
+    {
+      "source": "public/assets/fighters/rafa-mare/victory.png",
+      "target": "Content/RuaDeAco/Art/Characters/RafaMare/victory.png",
+      "sha256": "0350c9b1a660fcbfd56602290e93e4e1d07c69858d91703446e9bf2d23521597"
+    },
+    {
+      "source": "public/assets/fighters/rafa-mare/wake-up.png",
+      "target": "Content/RuaDeAco/Art/Characters/RafaMare/wake-up.png",
+      "sha256": "de762d5625ae586cf8e1d8321fdacf8013eb04459d46afb55f2d5878d2f001f8"
+    },
+    {
+      "source": "public/assets/fighters/rafa-mare/walk-backward.png",
+      "target": "Content/RuaDeAco/Art/Characters/RafaMare/walk-backward.png",
+      "sha256": "89ec405a2dcc53045d76eade6984ecad4f0441407891799a2f076c210970d17f"
+    },
+    {
+      "source": "public/assets/fighters/noir-reflexo/air-heavy-backward.png",
+      "target": "Content/RuaDeAco/Art/Characters/NoirReflexo/air-heavy-backward.png",
+      "sha256": "6fb91953d3311c64babcf9fc35c02891b5bd4495e809fdc532522d5cbf27dbcb"
+    },
+    {
+      "source": "public/assets/fighters/noir-reflexo/air-heavy-forward.png",
+      "target": "Content/RuaDeAco/Art/Characters/NoirReflexo/air-heavy-forward.png",
+      "sha256": "d2f226ea5ff54f19e7a2e25e4c215926a05293a7bdb244affc6891b403b55aa0"
+    },
+    {
+      "source": "public/assets/fighters/noir-reflexo/air-heavy-neutral.png",
+      "target": "Content/RuaDeAco/Art/Characters/NoirReflexo/air-heavy-neutral.png",
+      "sha256": "aa2219de0f52a77b3042a4e356a9acf8d0edea4183fae8a103d1ea472f53e3ff"
+    },
+    {
+      "source": "public/assets/fighters/noir-reflexo/air-light-backward.png",
+      "target": "Content/RuaDeAco/Art/Characters/NoirReflexo/air-light-backward.png",
+      "sha256": "11d4d09c949f6e8ca30762c00ccce50f5e0b554d7ec7a4509d6ddc5102fce204"
+    },
+    {
+      "source": "public/assets/fighters/noir-reflexo/air-light-forward.png",
+      "target": "Content/RuaDeAco/Art/Characters/NoirReflexo/air-light-forward.png",
+      "sha256": "9649103727171b841b75c45558435282ba687cc9b416ab8cda15c8a944420f79"
+    },
+    {
+      "source": "public/assets/fighters/noir-reflexo/air-light-neutral.png",
+      "target": "Content/RuaDeAco/Art/Characters/NoirReflexo/air-light-neutral.png",
+      "sha256": "79f23221cfa31f73998e6b20cab5177091eb7befb059871fcd9ffe79013ba7e6"
+    },
+    {
+      "source": "public/assets/fighters/noir-reflexo/block-crouching.png",
+      "target": "Content/RuaDeAco/Art/Characters/NoirReflexo/block-crouching.png",
+      "sha256": "ab2b208adf8dd9323d4fc14c232b5a8c07f245be6458a123d6d4281a3eb5f5d8"
+    },
+    {
+      "source": "public/assets/fighters/noir-reflexo/block-standing.png",
+      "target": "Content/RuaDeAco/Art/Characters/NoirReflexo/block-standing.png",
+      "sha256": "859f0b4c24a7506a9c58209f5a20c946d26615901cd47f12c956d5da660c51bb"
+    },
+    {
+      "source": "public/assets/fighters/noir-reflexo/corrida.png",
+      "target": "Content/RuaDeAco/Art/Characters/NoirReflexo/corrida.png",
+      "sha256": "0199a147d208839bfae9126d0c77bfc4ad934ed703f80eb458fc7c7bceab20a5"
+    },
+    {
+      "source": "public/assets/fighters/noir-reflexo/crouch-heavy.png",
+      "target": "Content/RuaDeAco/Art/Characters/NoirReflexo/crouch-heavy.png",
+      "sha256": "679b7e6ac898c2c018f06071547c5db9c129b3bb9c49a04c9bd32ca8ac669c12"
+    },
+    {
+      "source": "public/assets/fighters/noir-reflexo/crouch-light.png",
+      "target": "Content/RuaDeAco/Art/Characters/NoirReflexo/crouch-light.png",
+      "sha256": "9ff47ac84b1f06b050728125fb35cbc5b5eeb08cb7c679efe9aca7bb71de435c"
+    },
+    {
+      "source": "public/assets/fighters/noir-reflexo/crouch.png",
+      "target": "Content/RuaDeAco/Art/Characters/NoirReflexo/crouch.png",
+      "sha256": "dd3055effbd019473ceaa054bc45bf07a4827dacd4971b59cae97aad98b9b82b"
+    },
+    {
+      "source": "public/assets/fighters/noir-reflexo/fall.png",
+      "target": "Content/RuaDeAco/Art/Characters/NoirReflexo/fall.png",
+      "sha256": "687aa8f22d2a016b77019d7df19f414a39b2688c55dc0816088a7751ece64f19"
+    },
+    {
+      "source": "public/assets/fighters/noir-reflexo/forward-heavy.png",
+      "target": "Content/RuaDeAco/Art/Characters/NoirReflexo/forward-heavy.png",
+      "sha256": "4755bf96e8e7c0085331d8577486355f738e47819be65a5994d1a67f86c6c390"
+    },
+    {
+      "source": "public/assets/fighters/noir-reflexo/forward-light.png",
+      "target": "Content/RuaDeAco/Art/Characters/NoirReflexo/forward-light.png",
+      "sha256": "356a2cd68f56b6ba93e7f4817cabf83c9d8b83beaa84492c8dbe89370ca4ea0e"
+    },
+    {
+      "source": "public/assets/fighters/noir-reflexo/frozen.png",
+      "target": "Content/RuaDeAco/Art/Characters/NoirReflexo/frozen.png",
+      "sha256": "19589da37fc3e994b6ff9f1bd09373ebb598d06f84ef9daed873913cfe86ab7d"
+    },
+    {
+      "source": "public/assets/fighters/noir-reflexo/grabbed-front.png",
+      "target": "Content/RuaDeAco/Art/Characters/NoirReflexo/grabbed-front.png",
+      "sha256": "3a0ac9cde94c4c301d04cc2e889c67e99e9c3c3fc564ed0fc204b1734f68e44e"
+    },
+    {
+      "source": "public/assets/fighters/noir-reflexo/grabbed-lifted.png",
+      "target": "Content/RuaDeAco/Art/Characters/NoirReflexo/grabbed-lifted.png",
+      "sha256": "4b65d76c94a51d2c11ee26fc532461f3361aa933217d9e3efda6409bfc9b4c93"
+    },
+    {
+      "source": "public/assets/fighters/noir-reflexo/hit.png",
+      "target": "Content/RuaDeAco/Art/Characters/NoirReflexo/hit.png",
+      "sha256": "e655dce7982ad5a8473d1703f2f4a1deb7137fffb15077821be9a07b4424fb11"
+    },
+    {
+      "source": "public/assets/fighters/noir-reflexo/idle.png",
+      "target": "Content/RuaDeAco/Art/Characters/NoirReflexo/idle.png",
+      "sha256": "23279c5e18c733e4363c066626d2b99c04db591fee9713ff22cd0ce64d4d1f94"
+    },
+    {
+      "source": "public/assets/fighters/noir-reflexo/impacto-solar-effect.png",
+      "target": "Content/RuaDeAco/Art/Characters/NoirReflexo/impacto-solar-effect.png",
+      "sha256": "1cc3581ae41193ed159ee528608e728d9568bc8b22a14019a9d42119cc2310f1"
+    },
+    {
+      "source": "public/assets/fighters/noir-reflexo/impacto-solar.png",
+      "target": "Content/RuaDeAco/Art/Characters/NoirReflexo/impacto-solar.png",
+      "sha256": "07275982483ee323a50fd99adb4cdf7a6df302d90679bfa162981f71c27de1ee"
+    },
+    {
+      "source": "public/assets/fighters/noir-reflexo/jump-backward.png",
+      "target": "Content/RuaDeAco/Art/Characters/NoirReflexo/jump-backward.png",
+      "sha256": "d9e19adede09ef4e5715eb45d3e0bebd474c01aad84671b65e742bb73aaf5772"
+    },
+    {
+      "source": "public/assets/fighters/noir-reflexo/jump-forward.png",
+      "target": "Content/RuaDeAco/Art/Characters/NoirReflexo/jump-forward.png",
+      "sha256": "c9eb78bf31dadc2a72d392dee498fe2269e0baf8d75701e165bbce048686100e"
+    },
+    {
+      "source": "public/assets/fighters/noir-reflexo/jump-neutral.png",
+      "target": "Content/RuaDeAco/Art/Characters/NoirReflexo/jump-neutral.png",
+      "sha256": "a85d0a2700c5be1d2ba5f7a9e60d37e3464122951e4d1e960a8fa605d0dd4025"
+    },
+    {
+      "source": "public/assets/fighters/noir-reflexo/knockdown.png",
+      "target": "Content/RuaDeAco/Art/Characters/NoirReflexo/knockdown.png",
+      "sha256": "b5865d18e42c4d6acf42cd0a281e8b0d9997c580292d41cfa4eab1d80f3a55fc"
+    },
+    {
+      "source": "public/assets/fighters/noir-reflexo/knockout.png",
+      "target": "Content/RuaDeAco/Art/Characters/NoirReflexo/knockout.png",
+      "sha256": "a45c8bbe6f98e25f39845e2091a0d56757ea08e4b906d66b426ac66fdf4597c4"
+    },
+    {
+      "source": "public/assets/fighters/noir-reflexo/landing.png",
+      "target": "Content/RuaDeAco/Art/Characters/NoirReflexo/landing.png",
+      "sha256": "95bd09dcd9dc254b46e3299338f0dd79510c17d0230708b4a6ae0978660113b9"
+    },
+    {
+      "source": "public/assets/fighters/noir-reflexo/quebra-luz-effect.png",
+      "target": "Content/RuaDeAco/Art/Characters/NoirReflexo/quebra-luz-effect.png",
+      "sha256": "f7849d85bb3097e7f214bc18c6fdc8eff6f09dab3e71e4afc6d2088537e28786"
+    },
+    {
+      "source": "public/assets/fighters/noir-reflexo/quebra-luz-status-effect.png",
+      "target": "Content/RuaDeAco/Art/Characters/NoirReflexo/quebra-luz-status-effect.png",
+      "sha256": "edb6bd0b3e75584847aad873e3dee4fbfca67e4fe86e588e3e1d0a50db97c603"
+    },
+    {
+      "source": "public/assets/fighters/noir-reflexo/quebra-luz.png",
+      "target": "Content/RuaDeAco/Art/Characters/NoirReflexo/quebra-luz.png",
+      "sha256": "38e248535600bd72f3b0a28506b9d02f1386b5b1cdc91e7f831864e847741790"
+    },
+    {
+      "source": "public/assets/fighters/noir-reflexo/reflexo-negro-effect.png",
+      "target": "Content/RuaDeAco/Art/Characters/NoirReflexo/reflexo-negro-effect.png",
+      "sha256": "c4dc742dee7873e3760486f6403ef3ddec2066cd82dac403ea71865720262198"
+    },
+    {
+      "source": "public/assets/fighters/noir-reflexo/reflexo-negro.png",
+      "target": "Content/RuaDeAco/Art/Characters/NoirReflexo/reflexo-negro.png",
+      "sha256": "b87ddd4ed6266a8a1a43337933786c7d284e30047c0e58c3d5e4828bf8174c18"
+    },
+    {
+      "source": "public/assets/fighters/noir-reflexo/standing-heavy.png",
+      "target": "Content/RuaDeAco/Art/Characters/NoirReflexo/standing-heavy.png",
+      "sha256": "69fcaeb9196776f7629877667ec8b665007cd51acee62f08dc75c21bb90050ef"
+    },
+    {
+      "source": "public/assets/fighters/noir-reflexo/standing-light.png",
+      "target": "Content/RuaDeAco/Art/Characters/NoirReflexo/standing-light.png",
+      "sha256": "fc35b5057c6567794d8b4264b66b2aaf2669f4838a6e7faa87ea69354a7bd1b3"
+    },
+    {
+      "source": "public/assets/fighters/noir-reflexo/thrown.png",
+      "target": "Content/RuaDeAco/Art/Characters/NoirReflexo/thrown.png",
+      "sha256": "b809ef1ff5c0b03b924c1a458a0aed75108cc02e8f22b9efa46e1ef973881865"
+    },
+    {
+      "source": "public/assets/fighters/noir-reflexo/universal-grab-v2.png",
+      "target": "Content/RuaDeAco/Art/Characters/NoirReflexo/universal-grab-v2.png",
+      "sha256": "7004fcf7dd35c51f650c023fe9645f30665eb4489aef029591c83c7b623913d9"
+    },
+    {
+      "source": "public/assets/fighters/noir-reflexo/victory.png",
+      "target": "Content/RuaDeAco/Art/Characters/NoirReflexo/victory.png",
+      "sha256": "9e58e8d5ee59a777537cd3bae9730970885251636bb2bac977e4401c525aeef2"
+    },
+    {
+      "source": "public/assets/fighters/noir-reflexo/wake-up.png",
+      "target": "Content/RuaDeAco/Art/Characters/NoirReflexo/wake-up.png",
+      "sha256": "3ed3006542711d1a79a096b89a0b081977dcb7e41de0b7194902e27905231b84"
+    },
+    {
+      "source": "public/assets/fighters/noir-reflexo/walk-backward.png",
+      "target": "Content/RuaDeAco/Art/Characters/NoirReflexo/walk-backward.png",
+      "sha256": "1acde2784859769104860d4a3b71f610f3a511aa6f8e1bd026777303b5272eda"
+    },
+    {
+      "source": "public/assets/fighters/astro-riso/air-heavy-backward.png",
+      "target": "Content/RuaDeAco/Art/Characters/AstroRiso/air-heavy-backward.png",
+      "sha256": "7f6b28f0a588934ef27f105442f6c2b24a7fc244e94f6188866f404398f8a93e"
+    },
+    {
+      "source": "public/assets/fighters/astro-riso/air-heavy-forward.png",
+      "target": "Content/RuaDeAco/Art/Characters/AstroRiso/air-heavy-forward.png",
+      "sha256": "f24562b2bde59e45b820e7c8582a2a543302bf0a69f0428341cb5fc5b968ebd3"
+    },
+    {
+      "source": "public/assets/fighters/astro-riso/air-heavy-neutral.png",
+      "target": "Content/RuaDeAco/Art/Characters/AstroRiso/air-heavy-neutral.png",
+      "sha256": "39c2ebe355dab78e091e0b3ee2c89cd7cf472c3a3b8fc7113689e97afa9973ba"
+    },
+    {
+      "source": "public/assets/fighters/astro-riso/air-light-backward.png",
+      "target": "Content/RuaDeAco/Art/Characters/AstroRiso/air-light-backward.png",
+      "sha256": "be643660e03f986a7205391d125846f03f4233c6a60c9b816d7e0416382e3d1a"
+    },
+    {
+      "source": "public/assets/fighters/astro-riso/air-light-forward.png",
+      "target": "Content/RuaDeAco/Art/Characters/AstroRiso/air-light-forward.png",
+      "sha256": "b1267722456ba22463de20e0cd85f64acc172a39cf0d8d871152357491c64f80"
+    },
+    {
+      "source": "public/assets/fighters/astro-riso/air-light-neutral.png",
+      "target": "Content/RuaDeAco/Art/Characters/AstroRiso/air-light-neutral.png",
+      "sha256": "905e0de06c7d79aa25c12224794310ce3b0b379abc8c72bc58116d4149e1fc07"
+    },
+    {
+      "source": "public/assets/fighters/astro-riso/astro-giro-effect.png",
+      "target": "Content/RuaDeAco/Art/Characters/AstroRiso/astro-giro-effect.png",
+      "sha256": "53aaba7b198aa8cc8254b9a2a66695b829e0edc61722fd4c2133b57d56674966"
+    },
+    {
+      "source": "public/assets/fighters/astro-riso/astro-giro.png",
+      "target": "Content/RuaDeAco/Art/Characters/AstroRiso/astro-giro.png",
+      "sha256": "cabe95b51d899298ecc388bd431eefcea555a3b2277ee6b6ffba5727ea6218d8"
+    },
+    {
+      "source": "public/assets/fighters/astro-riso/block-crouching.png",
+      "target": "Content/RuaDeAco/Art/Characters/AstroRiso/block-crouching.png",
+      "sha256": "753836727e59f30a0dca50a2677580b5e1e3441c6f1d36626c6f444196740717"
+    },
+    {
+      "source": "public/assets/fighters/astro-riso/block-standing.png",
+      "target": "Content/RuaDeAco/Art/Characters/AstroRiso/block-standing.png",
+      "sha256": "3d34c1a4ff734003519991f0f7635e2a170767c0a45fda402499211de1420626"
+    },
+    {
+      "source": "public/assets/fighters/astro-riso/corrida.png",
+      "target": "Content/RuaDeAco/Art/Characters/AstroRiso/corrida.png",
+      "sha256": "6c92c4d9df102d98f5c084ef72466ec1f63e2f83cffc9858c8553e48139981f6"
+    },
+    {
+      "source": "public/assets/fighters/astro-riso/crouch-heavy.png",
+      "target": "Content/RuaDeAco/Art/Characters/AstroRiso/crouch-heavy.png",
+      "sha256": "975a332c5f2f1416eccb9b7f4e5183f5c82e17310154dc5541328ecf1af53b81"
+    },
+    {
+      "source": "public/assets/fighters/astro-riso/crouch-light.png",
+      "target": "Content/RuaDeAco/Art/Characters/AstroRiso/crouch-light.png",
+      "sha256": "c4912ec6841659c10239f156b308923572eaad94d8dc2746b7116265521628f5"
+    },
+    {
+      "source": "public/assets/fighters/astro-riso/crouch.png",
+      "target": "Content/RuaDeAco/Art/Characters/AstroRiso/crouch.png",
+      "sha256": "2d9751567b3cb221969fdd5fe798d48d134390c125d5b3e25c9e69865e6da357"
+    },
+    {
+      "source": "public/assets/fighters/astro-riso/fall.png",
+      "target": "Content/RuaDeAco/Art/Characters/AstroRiso/fall.png",
+      "sha256": "6735d67f2e423ba48cacde8aa4628890b76dae9f48d7163c3d0eda999bdba717"
+    },
+    {
+      "source": "public/assets/fighters/astro-riso/forward-heavy.png",
+      "target": "Content/RuaDeAco/Art/Characters/AstroRiso/forward-heavy.png",
+      "sha256": "2514719e9e330fb180a69dd4fdb141335c1fa659a5f32969b61de9c5d8fbbfb8"
+    },
+    {
+      "source": "public/assets/fighters/astro-riso/forward-light.png",
+      "target": "Content/RuaDeAco/Art/Characters/AstroRiso/forward-light.png",
+      "sha256": "f9eebbcfa7d9c5d0d18218805508d47e72d4245abef5ae9448108c331a12de60"
+    },
+    {
+      "source": "public/assets/fighters/astro-riso/frozen.png",
+      "target": "Content/RuaDeAco/Art/Characters/AstroRiso/frozen.png",
+      "sha256": "53f8da845f62649e1024b56f6766caa5fdae0d9cac2b994361a578c7aafdbc5c"
+    },
+    {
+      "source": "public/assets/fighters/astro-riso/grabbed-front.png",
+      "target": "Content/RuaDeAco/Art/Characters/AstroRiso/grabbed-front.png",
+      "sha256": "3e6951158da9730b20f3cab60daf98553e5ce31914ec26ad3edd435d39effec9"
+    },
+    {
+      "source": "public/assets/fighters/astro-riso/grabbed-lifted.png",
+      "target": "Content/RuaDeAco/Art/Characters/AstroRiso/grabbed-lifted.png",
+      "sha256": "a26e5a95e2185a832754ea8a76480c977d692fe9eca0fa2afa595fbac348b9be"
+    },
+    {
+      "source": "public/assets/fighters/astro-riso/hit.png",
+      "target": "Content/RuaDeAco/Art/Characters/AstroRiso/hit.png",
+      "sha256": "00b6ea66a64e1ae7d261108e7a453a852cd184eeb1d59e731bdbd1b836ff0184"
+    },
+    {
+      "source": "public/assets/fighters/astro-riso/idle.png",
+      "target": "Content/RuaDeAco/Art/Characters/AstroRiso/idle.png",
+      "sha256": "942ea109ae715d3611cdb1399ee45ece2389706d78bcbeed395f061fe1592f3d"
+    },
+    {
+      "source": "public/assets/fighters/astro-riso/jump-backward.png",
+      "target": "Content/RuaDeAco/Art/Characters/AstroRiso/jump-backward.png",
+      "sha256": "bf0b162f0a731b6e2a7cc45698ce0b453f31bdee775e9f9e522346eb8867277f"
+    },
+    {
+      "source": "public/assets/fighters/astro-riso/jump-forward.png",
+      "target": "Content/RuaDeAco/Art/Characters/AstroRiso/jump-forward.png",
+      "sha256": "d1a803101a998c5f73b0f0b08abd00c1b43dfd8d2216ab4a40fd43733f7be430"
+    },
+    {
+      "source": "public/assets/fighters/astro-riso/jump-neutral.png",
+      "target": "Content/RuaDeAco/Art/Characters/AstroRiso/jump-neutral.png",
+      "sha256": "6fd3b62028253b2b79b3039a01ad02e452175bfb2515d57d259ecafd07ba2a80"
+    },
+    {
+      "source": "public/assets/fighters/astro-riso/knockdown.png",
+      "target": "Content/RuaDeAco/Art/Characters/AstroRiso/knockdown.png",
+      "sha256": "13939115953905f9c1fe5ae7d9e7585e22f256b5464909428ef4d5666a749b6e"
+    },
+    {
+      "source": "public/assets/fighters/astro-riso/knockout.png",
+      "target": "Content/RuaDeAco/Art/Characters/AstroRiso/knockout.png",
+      "sha256": "07a4d722e6e0d7cb1debd08c83297e8014f413675971d5cd7a0cd556d9a2dfbf"
+    },
+    {
+      "source": "public/assets/fighters/astro-riso/landing.png",
+      "target": "Content/RuaDeAco/Art/Characters/AstroRiso/landing.png",
+      "sha256": "8a81d1c5464c3d55f1ff35cb78fb9e76f6360f332dcb3591e95ded2137834ba1"
+    },
+    {
+      "source": "public/assets/fighters/astro-riso/rajada-neon-effect.png",
+      "target": "Content/RuaDeAco/Art/Characters/AstroRiso/rajada-neon-effect.png",
+      "sha256": "3a832fbdd25bb17174cddd58183ea173f13558481f6572ac185b9db3a339852e"
+    },
+    {
+      "source": "public/assets/fighters/astro-riso/rajada-neon.png",
+      "target": "Content/RuaDeAco/Art/Characters/AstroRiso/rajada-neon.png",
+      "sha256": "1146a5c3a28c16d11f11c25f2324f9bbd873442d756de77c6872c534c56c46b9"
+    },
+    {
+      "source": "public/assets/fighters/astro-riso/sorriso-relampago-effect.png",
+      "target": "Content/RuaDeAco/Art/Characters/AstroRiso/sorriso-relampago-effect.png",
+      "sha256": "c7fd4688cba5196c3d9dfd6c79531b93f8bf4ef2982995b33511685fb72ea892"
+    },
+    {
+      "source": "public/assets/fighters/astro-riso/sorriso-relampago.png",
+      "target": "Content/RuaDeAco/Art/Characters/AstroRiso/sorriso-relampago.png",
+      "sha256": "ea94513dd637b8bb69070fc5ba135888bc7c231d4292cc55100fd2216aec5768"
+    },
+    {
+      "source": "public/assets/fighters/astro-riso/standing-heavy.png",
+      "target": "Content/RuaDeAco/Art/Characters/AstroRiso/standing-heavy.png",
+      "sha256": "78d1726eea4138847dc5c0430fd9459b0ad780583fcdec49c14bd18835a40926"
+    },
+    {
+      "source": "public/assets/fighters/astro-riso/standing-light.png",
+      "target": "Content/RuaDeAco/Art/Characters/AstroRiso/standing-light.png",
+      "sha256": "df2810b50325a580e81a06c408caef3fc12592e3e95783208647567a2eed2936"
+    },
+    {
+      "source": "public/assets/fighters/astro-riso/thrown.png",
+      "target": "Content/RuaDeAco/Art/Characters/AstroRiso/thrown.png",
+      "sha256": "4c70ab7bc46f39fade8fd4e0621dff650740f99763747a16da1a8f966a029885"
+    },
+    {
+      "source": "public/assets/fighters/astro-riso/universal-grab-v2.png",
+      "target": "Content/RuaDeAco/Art/Characters/AstroRiso/universal-grab-v2.png",
+      "sha256": "08b8e4858d204c57107d5d4c145c9a043786a4b4497ab408518a251fddbe8e47"
+    },
+    {
+      "source": "public/assets/fighters/astro-riso/victory.png",
+      "target": "Content/RuaDeAco/Art/Characters/AstroRiso/victory.png",
+      "sha256": "80536178959134fc766d15db5dab1eef023985e0a4e85349a2336b5058283a29"
+    },
+    {
+      "source": "public/assets/fighters/astro-riso/wake-up.png",
+      "target": "Content/RuaDeAco/Art/Characters/AstroRiso/wake-up.png",
+      "sha256": "aef438946ed12fe183cc879cd0d965910b1f9f6750cd79a0ea3cbf9db0d9fb37"
+    },
+    {
+      "source": "public/assets/fighters/astro-riso/walk-backward.png",
+      "target": "Content/RuaDeAco/Art/Characters/AstroRiso/walk-backward.png",
+      "sha256": "f37e722f85d8cb1c98fe58417f26c98cffdd63fb6d7b703fe89f45eba59a0d08"
+    },
+    {
+      "source": "public/assets/fighters/dante-sinal/air-heavy-backward.png",
+      "target": "Content/RuaDeAco/Art/Characters/DanteSinal/air-heavy-backward.png",
+      "sha256": "12d9d871999a0f678c213dca5eed9d6d28f587d91f7300e9eac68e245fe455c0"
+    },
+    {
+      "source": "public/assets/fighters/dante-sinal/air-heavy-forward.png",
+      "target": "Content/RuaDeAco/Art/Characters/DanteSinal/air-heavy-forward.png",
+      "sha256": "49da4d653549931445c1e113b3f6a746983519cebfbba8f4ae5c8582bf491c3b"
+    },
+    {
+      "source": "public/assets/fighters/dante-sinal/air-heavy-neutral.png",
+      "target": "Content/RuaDeAco/Art/Characters/DanteSinal/air-heavy-neutral.png",
+      "sha256": "3ccc2cc6d8f25cfa0cbf9b1034406a9431ce07228cbd54f0ae69da5071827acf"
+    },
+    {
+      "source": "public/assets/fighters/dante-sinal/air-light-backward.png",
+      "target": "Content/RuaDeAco/Art/Characters/DanteSinal/air-light-backward.png",
+      "sha256": "49e613f01aa5727fe9da6100114c080e771bd87d3ac78de42e9b117a9da4a36d"
+    },
+    {
+      "source": "public/assets/fighters/dante-sinal/air-light-forward.png",
+      "target": "Content/RuaDeAco/Art/Characters/DanteSinal/air-light-forward.png",
+      "sha256": "7eb900b2ecf3132173eb7ddff0a27d85ab7bddc02f20fcf9d5e36a7e5ac5dd47"
+    },
+    {
+      "source": "public/assets/fighters/dante-sinal/air-light-neutral.png",
+      "target": "Content/RuaDeAco/Art/Characters/DanteSinal/air-light-neutral.png",
+      "sha256": "c0905854ccfc0bfecdfcf2b301f2a7fd651e8b8a9885998559c3b24555cc5992"
+    },
+    {
+      "source": "public/assets/fighters/dante-sinal/block-crouching.png",
+      "target": "Content/RuaDeAco/Art/Characters/DanteSinal/block-crouching.png",
+      "sha256": "9fe93a84dc7b93e3ae5ed5618c9ad2adf93d3ee28bb416f68f597921424b6aba"
+    },
+    {
+      "source": "public/assets/fighters/dante-sinal/block-standing.png",
+      "target": "Content/RuaDeAco/Art/Characters/DanteSinal/block-standing.png",
+      "sha256": "cc01ad479dd411635330d9b4d0a9c9bcf3105e9f8ca973ada5780059fb40b392"
+    },
+    {
+      "source": "public/assets/fighters/dante-sinal/bomba-fumaca-effect.png",
+      "target": "Content/RuaDeAco/Art/Characters/DanteSinal/bomba-fumaca-effect.png",
+      "sha256": "1fe29ba9064dd755a9aed8c16ea4eccb7af7a359187f283495e3eadbbde3661d"
+    },
+    {
+      "source": "public/assets/fighters/dante-sinal/bomba-fumaca.png",
+      "target": "Content/RuaDeAco/Art/Characters/DanteSinal/bomba-fumaca.png",
+      "sha256": "0823bbefbe88e974c4ac2fd3160d869527ff13380b763c7b7d68cbb59a401608"
+    },
+    {
+      "source": "public/assets/fighters/dante-sinal/chave-binaria-effect.png",
+      "target": "Content/RuaDeAco/Art/Characters/DanteSinal/chave-binaria-effect.png",
+      "sha256": "5a663e73741dc22b8929b96f105d00cfb8495490ceae02a9b37cc27ca0d1ddfe"
+    },
+    {
+      "source": "public/assets/fighters/dante-sinal/chave-binaria.png",
+      "target": "Content/RuaDeAco/Art/Characters/DanteSinal/chave-binaria.png",
+      "sha256": "9c7b33fe421ba1fd1ea9764442976598bab4c6d5d54991600d71c68051dde3f1"
+    },
+    {
+      "source": "public/assets/fighters/dante-sinal/corrida.png",
+      "target": "Content/RuaDeAco/Art/Characters/DanteSinal/corrida.png",
+      "sha256": "0d5c19912417600e915c9a5511f075eda53eb1b37c71707d463345cfd6158bb7"
+    },
+    {
+      "source": "public/assets/fighters/dante-sinal/crouch-heavy.png",
+      "target": "Content/RuaDeAco/Art/Characters/DanteSinal/crouch-heavy.png",
+      "sha256": "f7297ed7df0ac9d6133a05c2b303680d7b0516500409e32dc929f869e21efbce"
+    },
+    {
+      "source": "public/assets/fighters/dante-sinal/crouch-light.png",
+      "target": "Content/RuaDeAco/Art/Characters/DanteSinal/crouch-light.png",
+      "sha256": "28788299ad0f6586eca59bac9ef78ba204faab681932c0988fb5a9714a476845"
+    },
+    {
+      "source": "public/assets/fighters/dante-sinal/crouch.png",
+      "target": "Content/RuaDeAco/Art/Characters/DanteSinal/crouch.png",
+      "sha256": "19bfe2a4f6902155bfaaed0cae5f9508abf9d44641d92e4511555d3bdcbf1621"
+    },
+    {
+      "source": "public/assets/fighters/dante-sinal/fall.png",
+      "target": "Content/RuaDeAco/Art/Characters/DanteSinal/fall.png",
+      "sha256": "81264e5eb24eb47f455d2765b7a6d7abbe729b66e4312d0df2614a084f683764"
+    },
+    {
+      "source": "public/assets/fighters/dante-sinal/forward-heavy.png",
+      "target": "Content/RuaDeAco/Art/Characters/DanteSinal/forward-heavy.png",
+      "sha256": "0b53ff33e5aeb45bdaa3744672b146bce3dc37a608415f6e5a1506d42246db49"
+    },
+    {
+      "source": "public/assets/fighters/dante-sinal/forward-light.png",
+      "target": "Content/RuaDeAco/Art/Characters/DanteSinal/forward-light.png",
+      "sha256": "ad5c3184d377e554b2b4d4a78f26054e7323e13110a26b0ce3c8be32d14393b2"
+    },
+    {
+      "source": "public/assets/fighters/dante-sinal/frozen.png",
+      "target": "Content/RuaDeAco/Art/Characters/DanteSinal/frozen.png",
+      "sha256": "df86edfdc3675ba7ad201844281e799d1cbceea84e6426b130de183783083e03"
+    },
+    {
+      "source": "public/assets/fighters/dante-sinal/grabbed-front.png",
+      "target": "Content/RuaDeAco/Art/Characters/DanteSinal/grabbed-front.png",
+      "sha256": "57cac0b93914c161cfbbc6c9d420f9c98b7794ffd6c14db0d8216abab799cf9e"
+    },
+    {
+      "source": "public/assets/fighters/dante-sinal/grabbed-lifted.png",
+      "target": "Content/RuaDeAco/Art/Characters/DanteSinal/grabbed-lifted.png",
+      "sha256": "bc8964607cf0db20333bc018198d5f8aeeda67fda5a97e2ad997cdde472e218a"
+    },
+    {
+      "source": "public/assets/fighters/dante-sinal/hit.png",
+      "target": "Content/RuaDeAco/Art/Characters/DanteSinal/hit.png",
+      "sha256": "049e1593d1c70da6b9aacd21d69108fc69a7b0dfe24c22d01135109be9af41c8"
+    },
+    {
+      "source": "public/assets/fighters/dante-sinal/idle.png",
+      "target": "Content/RuaDeAco/Art/Characters/DanteSinal/idle.png",
+      "sha256": "71082c6798141308cd8e792d68985e9c0aa87b6959a51d2a222d770ccd21ba92"
+    },
+    {
+      "source": "public/assets/fighters/dante-sinal/jump-backward.png",
+      "target": "Content/RuaDeAco/Art/Characters/DanteSinal/jump-backward.png",
+      "sha256": "efb558c6c3678b1b386b312192ae8a5c497bbbba427eaddb07606b24fc951a46"
+    },
+    {
+      "source": "public/assets/fighters/dante-sinal/jump-forward.png",
+      "target": "Content/RuaDeAco/Art/Characters/DanteSinal/jump-forward.png",
+      "sha256": "9dfebd1a74ad4492dbb01f21ebdbbba3c6ea4861b08f6a535a89ae0ea09730cd"
+    },
+    {
+      "source": "public/assets/fighters/dante-sinal/jump-neutral.png",
+      "target": "Content/RuaDeAco/Art/Characters/DanteSinal/jump-neutral.png",
+      "sha256": "04a9f9e0a3ec79da3a0aba1631d867b1ab019cc66bc41ba1edc60518a6cd5bdb"
+    },
+    {
+      "source": "public/assets/fighters/dante-sinal/knockdown.png",
+      "target": "Content/RuaDeAco/Art/Characters/DanteSinal/knockdown.png",
+      "sha256": "2a1e5889f1b9b2f717841afce89f796ab9728f6187d3865446820387f33a3b5a"
+    },
+    {
+      "source": "public/assets/fighters/dante-sinal/knockout.png",
+      "target": "Content/RuaDeAco/Art/Characters/DanteSinal/knockout.png",
+      "sha256": "054550e1b62aa2020c41a28fb4d0c94285f35f9e79dfac1e9c123691693a2c62"
+    },
+    {
+      "source": "public/assets/fighters/dante-sinal/landing.png",
+      "target": "Content/RuaDeAco/Art/Characters/DanteSinal/landing.png",
+      "sha256": "431110230bd83e11ecdbc5479ca6562168abdcacff323492a2163646a2679f85"
+    },
+    {
+      "source": "public/assets/fighters/dante-sinal/ponto-final-effect.png",
+      "target": "Content/RuaDeAco/Art/Characters/DanteSinal/ponto-final-effect.png",
+      "sha256": "22b588a56c55792f1661f1e8755f5b20b3f923960818e74be9fdf72ec0f96e63"
+    },
+    {
+      "source": "public/assets/fighters/dante-sinal/ponto-final.png",
+      "target": "Content/RuaDeAco/Art/Characters/DanteSinal/ponto-final.png",
+      "sha256": "252ccb03d01267f23fb1804cc957dc675345027f0d85d3dfa1c35bea8e024ff7"
+    },
+    {
+      "source": "public/assets/fighters/dante-sinal/standing-heavy.png",
+      "target": "Content/RuaDeAco/Art/Characters/DanteSinal/standing-heavy.png",
+      "sha256": "0a0d3996c9cd339bc1e44005891cbc592a230e624396960e040b37b98873db19"
+    },
+    {
+      "source": "public/assets/fighters/dante-sinal/standing-light.png",
+      "target": "Content/RuaDeAco/Art/Characters/DanteSinal/standing-light.png",
+      "sha256": "7c0fceaa922512cd5976d938ee8b27b73eb9b6092ceddf4b8c2a9cce795ba388"
+    },
+    {
+      "source": "public/assets/fighters/dante-sinal/thrown.png",
+      "target": "Content/RuaDeAco/Art/Characters/DanteSinal/thrown.png",
+      "sha256": "657f7dff7839118cb87d6f772bb40da0f283cd617ff046be4d473bf3593c8555"
+    },
+    {
+      "source": "public/assets/fighters/dante-sinal/universal-grab-v2.png",
+      "target": "Content/RuaDeAco/Art/Characters/DanteSinal/universal-grab-v2.png",
+      "sha256": "a5cc98f0a1a013accdb28c6e26b0fabc3b15913a4c0a11eb0c4f0c146379a5e0"
+    },
+    {
+      "source": "public/assets/fighters/dante-sinal/victory.png",
+      "target": "Content/RuaDeAco/Art/Characters/DanteSinal/victory.png",
+      "sha256": "5ec00cbc0b4957190a45b989b98bfc540b0ab8e6161f0416b441d34244c756d1"
+    },
+    {
+      "source": "public/assets/fighters/dante-sinal/wake-up.png",
+      "target": "Content/RuaDeAco/Art/Characters/DanteSinal/wake-up.png",
+      "sha256": "62fd6bcd8239498617a915e30ea1b5253f3bd3e1a1789dbea497390cac440bdf"
+    },
+    {
+      "source": "public/assets/fighters/dante-sinal/walk-backward.png",
+      "target": "Content/RuaDeAco/Art/Characters/DanteSinal/walk-backward.png",
+      "sha256": "32581ad0fe1c1bdccb5357037bf5bd66bd37330167a3ed9f1640314a3ee2a954"
+    },
+    {
+      "source": "public/assets/fighters/leo-violeta/air-heavy-backward.png",
+      "target": "Content/RuaDeAco/Art/Characters/LeoVioleta/air-heavy-backward.png",
+      "sha256": "9be8c29b1cf1338cfbc68d330cb60ead0594777fc96c05aebcd9d389b936c70d"
+    },
+    {
+      "source": "public/assets/fighters/leo-violeta/air-heavy-forward.png",
+      "target": "Content/RuaDeAco/Art/Characters/LeoVioleta/air-heavy-forward.png",
+      "sha256": "7aed82b039c19825ecf971e7014639fce72a4c13d508eafb48f142e52b84c4bb"
+    },
+    {
+      "source": "public/assets/fighters/leo-violeta/air-heavy-neutral.png",
+      "target": "Content/RuaDeAco/Art/Characters/LeoVioleta/air-heavy-neutral.png",
+      "sha256": "8a2eaab1a5e0c7875fec5c8711cfed726fb973fa5c7666c46b0bac0c460d3cce"
+    },
+    {
+      "source": "public/assets/fighters/leo-violeta/air-light-backward.png",
+      "target": "Content/RuaDeAco/Art/Characters/LeoVioleta/air-light-backward.png",
+      "sha256": "c5c89996bfdb6771af5501b1954f16aac60e2f3219b637ac78d5c9cdfb216d7a"
+    },
+    {
+      "source": "public/assets/fighters/leo-violeta/air-light-forward.png",
+      "target": "Content/RuaDeAco/Art/Characters/LeoVioleta/air-light-forward.png",
+      "sha256": "2b806ccab4e3a0601c2314e55696894a899a9c83474cb146bf2ec76d68932f50"
+    },
+    {
+      "source": "public/assets/fighters/leo-violeta/air-light-neutral.png",
+      "target": "Content/RuaDeAco/Art/Characters/LeoVioleta/air-light-neutral.png",
+      "sha256": "b03c0328d5df95caa05125905455f67fc804b727b37171b7cfed21378339585e"
+    },
+    {
+      "source": "public/assets/fighters/leo-violeta/block-crouching.png",
+      "target": "Content/RuaDeAco/Art/Characters/LeoVioleta/block-crouching.png",
+      "sha256": "418061a7054f72d266a653c1b0a0d62a9ab833d2ea684e72f5a5aff8600d4963"
+    },
+    {
+      "source": "public/assets/fighters/leo-violeta/block-standing.png",
+      "target": "Content/RuaDeAco/Art/Characters/LeoVioleta/block-standing.png",
+      "sha256": "fe265956d9983f73964e6c9f891311baf246b89a06ff037b9aae193768761531"
+    },
+    {
+      "source": "public/assets/fighters/leo-violeta/corrida.png",
+      "target": "Content/RuaDeAco/Art/Characters/LeoVioleta/corrida.png",
+      "sha256": "3bab6ccc6f2b22354552d410deab1d020dedd5c9ae6056fceda2bec110a0cf43"
+    },
+    {
+      "source": "public/assets/fighters/leo-violeta/crouch-heavy.png",
+      "target": "Content/RuaDeAco/Art/Characters/LeoVioleta/crouch-heavy.png",
+      "sha256": "5453ea2783ed515e6a697d6415fe17e29e571e40162a5369f9b4406d4a841104"
+    },
+    {
+      "source": "public/assets/fighters/leo-violeta/crouch-light.png",
+      "target": "Content/RuaDeAco/Art/Characters/LeoVioleta/crouch-light.png",
+      "sha256": "ff6c5f9f19d9930e4385ba9dcfab626a8c1c324f0950ef55216d2dffb73f44b1"
+    },
+    {
+      "source": "public/assets/fighters/leo-violeta/crouch.png",
+      "target": "Content/RuaDeAco/Art/Characters/LeoVioleta/crouch.png",
+      "sha256": "bd0b1fc4de930aa6b4c707cd5e544cc28d371560db0b5159de91c0394391c781"
+    },
+    {
+      "source": "public/assets/fighters/leo-violeta/fall.png",
+      "target": "Content/RuaDeAco/Art/Characters/LeoVioleta/fall.png",
+      "sha256": "dcf961f4da76d831c46b8685c8ba658e067d8c19d6793cabf0d547fe6f9ae133"
+    },
+    {
+      "source": "public/assets/fighters/leo-violeta/forward-heavy.png",
+      "target": "Content/RuaDeAco/Art/Characters/LeoVioleta/forward-heavy.png",
+      "sha256": "0c3e89c395149ac9f660ced4235738bcb1e6c72f24a2a6e89f01a8cb70312ef6"
+    },
+    {
+      "source": "public/assets/fighters/leo-violeta/forward-light.png",
+      "target": "Content/RuaDeAco/Art/Characters/LeoVioleta/forward-light.png",
+      "sha256": "e969a2a6ad5953497eece88f7a58b4c1bcc0ea40105a9d39167189af8381cb7b"
+    },
+    {
+      "source": "public/assets/fighters/leo-violeta/frozen.png",
+      "target": "Content/RuaDeAco/Art/Characters/LeoVioleta/frozen.png",
+      "sha256": "0968c19860dd3bfc7abd6ca78fe91cdbb3b32373916162d8a2e91242e9f062cc"
+    },
+    {
+      "source": "public/assets/fighters/leo-violeta/grabbed-front.png",
+      "target": "Content/RuaDeAco/Art/Characters/LeoVioleta/grabbed-front.png",
+      "sha256": "f37ac2e4d34ae741f46ccaf8950b4f81f16513bbde19334dc96e9bf569673939"
+    },
+    {
+      "source": "public/assets/fighters/leo-violeta/grabbed-lifted.png",
+      "target": "Content/RuaDeAco/Art/Characters/LeoVioleta/grabbed-lifted.png",
+      "sha256": "5e77da1d0a91aed3c845189501c16098705d28a672f6028fb5b17e4e7379c04a"
+    },
+    {
+      "source": "public/assets/fighters/leo-violeta/hit.png",
+      "target": "Content/RuaDeAco/Art/Characters/LeoVioleta/hit.png",
+      "sha256": "3df7ee9051f020856e9005d312b247c23553b3fccad7a9bf0251f2b13105d8fb"
+    },
+    {
+      "source": "public/assets/fighters/leo-violeta/idle.png",
+      "target": "Content/RuaDeAco/Art/Characters/LeoVioleta/idle.png",
+      "sha256": "1fdc5df0bd1049db8a4c48cbf498898134417966f2264efd498c66f84a89735c"
+    },
+    {
+      "source": "public/assets/fighters/leo-violeta/impacto-sombrio-effect.png",
+      "target": "Content/RuaDeAco/Art/Characters/LeoVioleta/impacto-sombrio-effect.png",
+      "sha256": "2f37c3a5b67203eab3571a8af78be49d03845203dd83de734fa96eab0f1ca0be"
+    },
+    {
+      "source": "public/assets/fighters/leo-violeta/impacto-sombrio.png",
+      "target": "Content/RuaDeAco/Art/Characters/LeoVioleta/impacto-sombrio.png",
+      "sha256": "853b323734cc0d6fdc042114df23abea1ebb64195b4c706b3ecdd92f8b098577"
+    },
+    {
+      "source": "public/assets/fighters/leo-violeta/jump-backward.png",
+      "target": "Content/RuaDeAco/Art/Characters/LeoVioleta/jump-backward.png",
+      "sha256": "be6a88bf57750efb64aa96591f876847780c5563ecc393a2a69331f04575d731"
+    },
+    {
+      "source": "public/assets/fighters/leo-violeta/jump-forward.png",
+      "target": "Content/RuaDeAco/Art/Characters/LeoVioleta/jump-forward.png",
+      "sha256": "00ecd823faa8b48be93607d456d4196686c6c650806b4f4681419c891d474142"
+    },
+    {
+      "source": "public/assets/fighters/leo-violeta/jump-neutral.png",
+      "target": "Content/RuaDeAco/Art/Characters/LeoVioleta/jump-neutral.png",
+      "sha256": "a9532ca290ea32807327886115a8b977c9fdbdca11354739da58a9a3aac3f18b"
+    },
+    {
+      "source": "public/assets/fighters/leo-violeta/knockdown.png",
+      "target": "Content/RuaDeAco/Art/Characters/LeoVioleta/knockdown.png",
+      "sha256": "87b90a8af92aceecba052645fc8389a2282f9a9538da36483f614bc295dfc97c"
+    },
+    {
+      "source": "public/assets/fighters/leo-violeta/knockout.png",
+      "target": "Content/RuaDeAco/Art/Characters/LeoVioleta/knockout.png",
+      "sha256": "7fbc45199bda09fe7b26b00498a9309f334ffa1517122bcfccc55ed0b78c764e"
+    },
+    {
+      "source": "public/assets/fighters/leo-violeta/landing.png",
+      "target": "Content/RuaDeAco/Art/Characters/LeoVioleta/landing.png",
+      "sha256": "255ed6205a7cec03c54251c29ee5945aaeb026fe26303f3c391ecf7cfa778c45"
+    },
+    {
+      "source": "public/assets/fighters/leo-violeta/olhar-frio-effect.png",
+      "target": "Content/RuaDeAco/Art/Characters/LeoVioleta/olhar-frio-effect.png",
+      "sha256": "c28d2fde1e543bf0072a680385e75cc40bdb0d5b001986006a1ef97e8944524c"
+    },
+    {
+      "source": "public/assets/fighters/leo-violeta/olhar-frio.png",
+      "target": "Content/RuaDeAco/Art/Characters/LeoVioleta/olhar-frio.png",
+      "sha256": "649e1ac25c726e47ab8c141eb8b2e09cb67ad6c83d111f523483f3b616e56cc9"
+    },
+    {
+      "source": "public/assets/fighters/leo-violeta/pressao-violeta-effect.png",
+      "target": "Content/RuaDeAco/Art/Characters/LeoVioleta/pressao-violeta-effect.png",
+      "sha256": "c896e40d337f2729a1e1a5211f9fcbebbd9fabacebf9f92822a61573c54c726f"
+    },
+    {
+      "source": "public/assets/fighters/leo-violeta/pressao-violeta.png",
+      "target": "Content/RuaDeAco/Art/Characters/LeoVioleta/pressao-violeta.png",
+      "sha256": "47c619274e186886f1fc56f3c722cb027bbb181763acac8938a56cba13afe15c"
+    },
+    {
+      "source": "public/assets/fighters/leo-violeta/standing-heavy.png",
+      "target": "Content/RuaDeAco/Art/Characters/LeoVioleta/standing-heavy.png",
+      "sha256": "c760a353b7ae4c3eff0f1075078efa7ee79c0599816cdba744fa004921f4b13f"
+    },
+    {
+      "source": "public/assets/fighters/leo-violeta/standing-light.png",
+      "target": "Content/RuaDeAco/Art/Characters/LeoVioleta/standing-light.png",
+      "sha256": "f3fed2d90b0bebdd338a5c0d624b965180f0836d6486ff48c7d8b5c9bac10dda"
+    },
+    {
+      "source": "public/assets/fighters/leo-violeta/thrown.png",
+      "target": "Content/RuaDeAco/Art/Characters/LeoVioleta/thrown.png",
+      "sha256": "7e7e4a54248bf68beccb86243e2407a3d75c17bdf43c618db97a7eb04aa9151f"
+    },
+    {
+      "source": "public/assets/fighters/leo-violeta/universal-grab-v2.png",
+      "target": "Content/RuaDeAco/Art/Characters/LeoVioleta/universal-grab-v2.png",
+      "sha256": "4623e9d4667aefbd8e66b6c3c06892f25d997b3adbf4d5b485ff589db5698eed"
+    },
+    {
+      "source": "public/assets/fighters/leo-violeta/victory.png",
+      "target": "Content/RuaDeAco/Art/Characters/LeoVioleta/victory.png",
+      "sha256": "712ce42a16e82fea39bc7dc0df4d0d575e6225dda7e40781b5813f1ca5aaffcf"
+    },
+    {
+      "source": "public/assets/fighters/leo-violeta/wake-up.png",
+      "target": "Content/RuaDeAco/Art/Characters/LeoVioleta/wake-up.png",
+      "sha256": "911d5db049639701d1d268a3e401fd882fbf51e9976b85f0b6f69010eec6ec4f"
+    },
+    {
+      "source": "public/assets/fighters/leo-violeta/walk-backward.png",
+      "target": "Content/RuaDeAco/Art/Characters/LeoVioleta/walk-backward.png",
+      "sha256": "eaf60c26f4cb23aa8b2a8cf8877d2c65d19628869d8726d516c557475aa96510"
+    },
+    {
+      "source": "public/assets/portraits/astro-riso.png",
+      "target": "Content/RuaDeAco/Art/Portraits/astro-riso.png",
+      "sha256": "d164f451557f3d4a9460b191e166db7aa10801ff68bd3fa7636b641557f906f1"
+    },
+    {
+      "source": "public/assets/portraits/dante-sinal.png",
+      "target": "Content/RuaDeAco/Art/Portraits/dante-sinal.png",
+      "sha256": "4983c0da9c24b17cea0770f890650d7bf5cab889c4c3157e7c24580cef4a527a"
+    },
+    {
+      "source": "public/assets/portraits/guto-barba.png",
+      "target": "Content/RuaDeAco/Art/Portraits/guto-barba.png",
+      "sha256": "69bb38b01d8bc85f22a345ad5bb6b929c4aa61dff8dbfb14bab656cc14965517"
+    },
+    {
+      "source": "public/assets/portraits/leo-violeta.png",
+      "target": "Content/RuaDeAco/Art/Portraits/leo-violeta.png",
+      "sha256": "b08c0471e579803c8f4dc6b3f42e19ab0cf936ac03916571157063445714a894"
+    },
+    {
+      "source": "public/assets/portraits/noir-reflexo.png",
+      "target": "Content/RuaDeAco/Art/Portraits/noir-reflexo.png",
+      "sha256": "554a4aae24e539e33951e0181d32f2b900dac4ded0d37314c811e620aa18ca0f"
+    },
+    {
+      "source": "public/assets/portraits/rafa-mare.png",
+      "target": "Content/RuaDeAco/Art/Portraits/rafa-mare.png",
+      "sha256": "ace37dbe89c21d90cd6e1d5693a559ac2a2eed1428297a1c79867045a59ddea1"
+    },
+    {
+      "source": "public/assets/stages/cais-da-cidade/far.png",
+      "target": "Content/RuaDeAco/Art/Environments/CaisDaCidade/far.png",
+      "sha256": "e5d1d0988aa994b41d4102cacfc15119270e3b2a49aad60d7bff91f5e07cf5e6"
+    },
+    {
+      "source": "public/assets/stages/cais-da-cidade/foreground.png",
+      "target": "Content/RuaDeAco/Art/Environments/CaisDaCidade/foreground.png",
+      "sha256": "94e6346968f6ee25d0dda0e3287825ecbd096ab3843ee2d8e3980ba58feaa314"
+    },
+    {
+      "source": "public/assets/stages/cais-da-cidade/mid.png",
+      "target": "Content/RuaDeAco/Art/Environments/CaisDaCidade/mid.png",
+      "sha256": "6e3e64fc7c4de2825c03fd851bbae8319b5aa5ab2c6bebe4bf4a6c332e157616"
+    },
+    {
+      "source": "public/assets/stages/cais-da-cidade/water.png",
+      "target": "Content/RuaDeAco/Art/Environments/CaisDaCidade/water.png",
+      "sha256": "9ef8e36ee251f74fa8db2ccd06cb437d19d063b422d2796a9e49e329bfe9fcd8"
+    },
+    {
+      "source": "public/assets/stages/cais-da-cidade/remaster/background.png",
+      "target": "Content/RuaDeAco/Art/Environments/CaisDaCidade/background.png",
+      "sha256": "701e617fe9132c531267d62802abab9d90127e14043c952ae0d9af32cd8c7ae5"
+    },
+    {
+      "source": "public/assets/stages/cais-da-cidade/remaster/fire.png",
+      "target": "Content/RuaDeAco/Art/Environments/CaisDaCidade/fire.png",
+      "sha256": "dcb2d79cae3c6282648e9c468d89a874a4e383293d9046ce24001b0823f99a1f"
+    },
+    {
+      "source": "public/assets/stages/cais-da-cidade/remaster/monster-finisher-v2.png",
+      "target": "Content/RuaDeAco/Art/Environments/CaisDaCidade/monster-finisher-v2.png",
+      "sha256": "310ecaf00e7fef3a8297476364d303cfc446b00ea1f545194aaf49f67f4fb972"
+    },
+    {
+      "source": "public/assets/stages/cais-da-cidade/remaster/monster.png",
+      "target": "Content/RuaDeAco/Art/Environments/CaisDaCidade/monster.png",
+      "sha256": "8373416d87e9cdfd53e90fd25fd229f8e9dd3ad021266ba0c31ad202d303a9c9"
+    },
+    {
+      "source": "public/assets/stages/cais-da-cidade/remaster/moon.png",
+      "target": "Content/RuaDeAco/Art/Environments/CaisDaCidade/moon.png",
+      "sha256": "1c4a18b01eff08a154e45956bb94de287537ae3caad2353dc1042adb048e64bf"
+    },
+    {
+      "source": "public/assets/stages/cais-da-cidade/remaster/ship.png",
+      "target": "Content/RuaDeAco/Art/Environments/CaisDaCidade/ship.png",
+      "sha256": "db83158e28ef0887abbdf28f7d8474119ec3db90b9416ff6a914db8630f20ad3"
+    },
+    {
+      "source": "public/assets/stages/cais-da-cidade/remaster/splash.png",
+      "target": "Content/RuaDeAco/Art/Environments/CaisDaCidade/splash.png",
+      "sha256": "1a4d6a4addd4607ba5b96f1b8ad398fe76e05009af14a4db3f62b874c1bc5680"
+    },
+    {
+      "source": "public/assets/stages/cais-da-cidade/remaster/ufo.png",
+      "target": "Content/RuaDeAco/Art/Environments/CaisDaCidade/ufo.png",
+      "sha256": "9cd50d65423658ba4ef441aea8c54236f07c458bdf37879a411126c69dc61408"
+    },
+    {
+      "source": "public/assets/stages/cais-da-cidade/remaster/water-0.png",
+      "target": "Content/RuaDeAco/Art/Environments/CaisDaCidade/water-0.png",
+      "sha256": "57ef73abf8318e3e4dbc544c0c3e155e61b1883226e251f5147010b8c03891cd"
+    },
+    {
+      "source": "public/assets/stages/cais-da-cidade/remaster/water-1.png",
+      "target": "Content/RuaDeAco/Art/Environments/CaisDaCidade/water-1.png",
+      "sha256": "a0293b1af16ccff7f9b857ac55939b28a757d4556ea3fc01fd9600590fb41da6"
+    },
+    {
+      "source": "public/assets/stages/cais-da-cidade/remaster/water-2.png",
+      "target": "Content/RuaDeAco/Art/Environments/CaisDaCidade/water-2.png",
+      "sha256": "404fd0f4f9d819e49a3ab04c4b4ba3003710596f612b75e950894a5a6a13eb57"
+    },
+    {
+      "source": "public/assets/stages/cais-da-cidade/remaster/witch.png",
+      "target": "Content/RuaDeAco/Art/Environments/CaisDaCidade/witch.png",
+      "sha256": "176920f05fd2ff07b5930f097d7386a1b5d8c2f78fb255a4bbb65ff283527a2a"
+    },
+    {
+      "source": "public/assets/stages/cozinha-macabra/background.png",
+      "target": "Content/RuaDeAco/Art/Environments/CozinhaMacabra/background.png",
+      "sha256": "68ca94b5c1d0ea0eb17e9ce91858f3edd13e8cfa7d798103dd250572c5c07901"
+    },
+    {
+      "source": "public/assets/stages/cozinha-macabra/bat.png",
+      "target": "Content/RuaDeAco/Art/Environments/CozinhaMacabra/bat.png",
+      "sha256": "056af684c3fa8d93e98c55ddcf0d0c4a7d327ff2e1ffb90814f2e1d53a9ce731"
+    },
+    {
+      "source": "public/assets/stages/cozinha-macabra/rat.png",
+      "target": "Content/RuaDeAco/Art/Environments/CozinhaMacabra/rat.png",
+      "sha256": "108a20fb18a6fbdaecc506700309bd0a69171a601a80752762870aaf278572f4"
+    },
+    {
+      "source": "public/assets/stages/cozinha-macabra/skull-bones.png",
+      "target": "Content/RuaDeAco/Art/Environments/CozinhaMacabra/skull-bones.png",
+      "sha256": "ceb57ce62026b2113238749cc3c5f31a6db27ea9dfe44b33fe1a7a993a897d9b"
+    },
+    {
+      "source": "public/assets/stages/cozinha-macabra/witch.png",
+      "target": "Content/RuaDeAco/Art/Environments/CozinhaMacabra/witch.png",
+      "sha256": "49ef63463417b66f16feefdb0657813f4988cb83fc1c82cc3314726495711ba5"
+    },
+    {
+      "source": "public/assets/stages/sitio/background.png",
+      "target": "Content/RuaDeAco/Art/Environments/Sitio/background.png",
+      "sha256": "46da1e9a61c238a0c59193e9bf010eb053ce4187bdef26849e7dabfa12b4642f"
+    },
+    {
+      "source": "public/assets/stages/sitio/duck.png",
+      "target": "Content/RuaDeAco/Art/Environments/Sitio/duck.png",
+      "sha256": "53906fd75438fc98b805aa11214b13766193942d47ee42e7228d70b0d1833c91"
+    },
+    {
+      "source": "public/assets/stages/sitio/hen.png",
+      "target": "Content/RuaDeAco/Art/Environments/Sitio/hen.png",
+      "sha256": "faffd77fa4a749a85867086386e22f82727eac45d6f4aa8dde755a11dd014905"
+    },
+    {
+      "source": "public/assets/stages/sitio/lizard.png",
+      "target": "Content/RuaDeAco/Art/Environments/Sitio/lizard.png",
+      "sha256": "961b09d3a20220ac572b00bd17e1fda3a48971396550891345482723da050404"
+    },
+    {
+      "source": "public/assets/stages/sitio/masked-farmer.png",
+      "target": "Content/RuaDeAco/Art/Environments/Sitio/masked-farmer.png",
+      "sha256": "f5582e0843c85588aeb26a3d4c4d7a012b198608d3c6637511d0d1dc69989f45"
+    },
+    {
+      "source": "public/assets/stages/sitio/snake.png",
+      "target": "Content/RuaDeAco/Art/Environments/Sitio/snake.png",
+      "sha256": "708620b3735a0ad6f36f90b0619f45dac2df911059f3aceda9f488dfe7357bb9"
+    },
+    {
+      "source": "public/assets/stages/sitio/trident.png",
+      "target": "Content/RuaDeAco/Art/Environments/Sitio/trident.png",
+      "sha256": "6f2c87d971f1bb53ea664fb3a2449d631bc05031f701b1b442d3e2babf5d44f6"
+    },
+    {
+      "source": "public/assets/ui/button.png",
+      "target": "Content/RuaDeAco/Art/UI/button.png",
+      "sha256": "ac7d7fb0a987b2448398939249615ecdd3887ab0d076196a41207792c5a4b565"
+    },
+    {
+      "source": "public/assets/ui/hud-frame.png",
+      "target": "Content/RuaDeAco/Art/UI/hud-frame.png",
+      "sha256": "82eaab41885ac1845b2750686b866e3373e6e8045ec4d724f3bbc4198ad011bf"
+    },
+    {
+      "source": "public/assets/ui/missing-asset.png",
+      "target": "Content/RuaDeAco/Art/UI/missing-asset.png",
+      "sha256": "ee3a1072498168ce0129a3036c76111b44efa1c6ebb4cc2ab860cad2078dbfed"
+    },
+    {
+      "source": "public/assets/ui/panel.png",
+      "target": "Content/RuaDeAco/Art/UI/panel.png",
+      "sha256": "8d15e99926a556abc8acd307f3e05d0a83e15a5e336fce9a0b66a803b2667a30"
+    },
+    {
+      "source": "public/assets/ui/selection-frame.png",
+      "target": "Content/RuaDeAco/Art/UI/selection-frame.png",
+      "sha256": "1d691a68257791a520ae900a4011d166a5436905e03593b83667dd682f79e9a9"
+    },
+    {
+      "source": "public/assets/audio/music/cais-da-cidade.ogg",
+      "target": "Content/RuaDeAco/Audio/Music/cais-da-cidade.ogg",
+      "sha256": "20059d29a1c2fa6051aaf56a022b542442de6e0c13565886580398115b530300"
+    },
+    {
+      "source": "public/assets/audio/music/cozinha-macabra.ogg",
+      "target": "Content/RuaDeAco/Audio/Music/cozinha-macabra.ogg",
+      "sha256": "f577fe6d005876a925310ca958c10ca9754b28f3c99ca714b51339397bdf5e10"
+    },
+    {
+      "source": "public/assets/audio/music/menu-principal.ogg",
+      "target": "Content/RuaDeAco/Audio/Music/menu-principal.ogg",
+      "sha256": "13741f25d20f69c75cfe124310360d015ebd5972a42b52e7a5ec1e4fcf2419b3"
+    },
+    {
+      "source": "public/assets/audio/music/selecao-personagens.ogg",
+      "target": "Content/RuaDeAco/Audio/Music/selecao-personagens.ogg",
+      "sha256": "c743e0dec1d513203c41a5c11ed83cccb6910732876e083f776319b713c6f385"
+    },
+    {
+      "source": "public/assets/audio/music/sitio.ogg",
+      "target": "Content/RuaDeAco/Audio/Music/sitio.ogg",
+      "sha256": "c5065abdb8c75c76410cd1181c45440f3a1ad707bbce2eb54f9efe89c1aade97"
+    },
+    {
+      "source": "public/assets/audio/sfx/combate/bloqueio.ogg",
+      "target": "Content/RuaDeAco/Audio/Sfx/combate/bloqueio.ogg",
+      "sha256": "0b03fa5252c1be711559b2dfa0365b2e26175658e7a1c2be84bf6988c681e859"
+    },
+    {
+      "source": "public/assets/audio/sfx/combate/golpe-ar.ogg",
+      "target": "Content/RuaDeAco/Audio/Sfx/combate/golpe-ar.ogg",
+      "sha256": "7219c1ec9d8c40462677f7a25a71c509ae8533ebc5b1741a86fc11e024c2b436"
+    },
+    {
+      "source": "public/assets/audio/sfx/combate/ko-impacto.ogg",
+      "target": "Content/RuaDeAco/Audio/Sfx/combate/ko-impacto.ogg",
+      "sha256": "d7fd50efc6151fc12012d3eafd80a44e3e05db1f49e15c0f609c6094876a7c53"
+    },
+    {
+      "source": "public/assets/audio/sfx/combate/soco-forte.ogg",
+      "target": "Content/RuaDeAco/Audio/Sfx/combate/soco-forte.ogg",
+      "sha256": "68340b455c7927556edbb5eda853a29032bf1c96f4b4b1e866e7a4b237d3eb53"
+    },
+    {
+      "source": "public/assets/audio/sfx/combate/soco-leve.ogg",
+      "target": "Content/RuaDeAco/Audio/Sfx/combate/soco-leve.ogg",
+      "sha256": "a2600e43f4a22600a1e0240c76fbe88466cb57b0ac506336ee1085634e06a65f"
+    },
+    {
+      "source": "public/assets/audio/sfx/especiais/agua.ogg",
+      "target": "Content/RuaDeAco/Audio/Sfx/especiais/agua.ogg",
+      "sha256": "0d7a09ce081700122df511b13212ee4de1ceffda8a7437fc866c7f4072607535"
+    },
+    {
+      "source": "public/assets/audio/sfx/especiais/espelho.ogg",
+      "target": "Content/RuaDeAco/Audio/Sfx/especiais/espelho.ogg",
+      "sha256": "843c783c0ab4c44c7a6cb649ac458328a21e07778ec9d1115e9d95d056d9d8f6"
+    },
+    {
+      "source": "public/assets/audio/sfx/especiais/fumaca.ogg",
+      "target": "Content/RuaDeAco/Audio/Sfx/especiais/fumaca.ogg",
+      "sha256": "6da54e96d771123b2031b2ac2f81cec6abe76c64c29c3ddf3d99068a5ce1a882"
+    },
+    {
+      "source": "public/assets/audio/sfx/especiais/gelo.ogg",
+      "target": "Content/RuaDeAco/Audio/Sfx/especiais/gelo.ogg",
+      "sha256": "7b212024933313a489cce4734f6e7448afbf94db45725970c6fd5a5851a06268"
+    },
+    {
+      "source": "public/assets/audio/sfx/especiais/neon.ogg",
+      "target": "Content/RuaDeAco/Audio/Sfx/especiais/neon.ogg",
+      "sha256": "6109cdaa02d0a53a90c892487e95207f3b652869f2da239d5c485df926dd9819"
+    },
+    {
+      "source": "public/assets/audio/sfx/especiais/sombra.ogg",
+      "target": "Content/RuaDeAco/Audio/Sfx/especiais/sombra.ogg",
+      "sha256": "60b75002292ba2112d7ff7448ae6088a25310103bcfd00c738b1d0a7514c55bc"
+    },
+    {
+      "source": "public/assets/audio/sfx/especiais/super-abraco-glacial.ogg",
+      "target": "Content/RuaDeAco/Audio/Sfx/especiais/super-abraco-glacial.ogg",
+      "sha256": "10fc304cdb69325626abaa6bfea56e15fb4e965816d36303878863629b6a2126"
+    },
+    {
+      "source": "public/assets/audio/sfx/especiais/super-astro-giro.ogg",
+      "target": "Content/RuaDeAco/Audio/Sfx/especiais/super-astro-giro.ogg",
+      "sha256": "f573ec9a38fc2e912d1e5ff98ccea79b2dbbefed396b1436db8e873ce5e0e2b1"
+    },
+    {
+      "source": "public/assets/audio/sfx/especiais/super-chute-da-ressaca.ogg",
+      "target": "Content/RuaDeAco/Audio/Sfx/especiais/super-chute-da-ressaca.ogg",
+      "sha256": "a3ff0daa850bc1b2b1a5dd55552dec021ff69e64b31e612428346ac1ffa9e3b2"
+    },
+    {
+      "source": "public/assets/audio/sfx/especiais/super-impacto-solar.ogg",
+      "target": "Content/RuaDeAco/Audio/Sfx/especiais/super-impacto-solar.ogg",
+      "sha256": "242ce648e9de4ef133c00d70fd4f01e7e4ce55df458796d62ce527347601de05"
+    },
+    {
+      "source": "public/assets/audio/sfx/especiais/super-ponto-final.ogg",
+      "target": "Content/RuaDeAco/Audio/Sfx/especiais/super-ponto-final.ogg",
+      "sha256": "7b2c6531f37bd6fb6f35a8029468b301a7a28755d11b015da48d275c69370101"
+    },
+    {
+      "source": "public/assets/audio/sfx/especiais/super-pressao-violeta.ogg",
+      "target": "Content/RuaDeAco/Audio/Sfx/especiais/super-pressao-violeta.ogg",
+      "sha256": "01c9e9bfd53820a07a4c64a3fb4287423d806b71a8b0ff36cb246c81a7e7c031"
+    },
+    {
+      "source": "public/assets/audio/sfx/finalizacao/monstro-rugido.ogg",
+      "target": "Content/RuaDeAco/Audio/Sfx/finalizacao/monstro-rugido.ogg",
+      "sha256": "5639ba01f17b94bf2438de1b44bb2856c5d5205999032a3be1ff927ded2cfe91"
+    },
+    {
+      "source": "public/assets/audio/sfx/locutor/empate.ogg",
+      "target": "Content/RuaDeAco/Audio/Sfx/locutor/empate.ogg",
+      "sha256": "52cb96c79bd7a99aa542b9a86bbc069a0f4d7df20b483f6f120affe3b9aaf716"
+    },
+    {
+      "source": "public/assets/audio/sfx/locutor/fight.ogg",
+      "target": "Content/RuaDeAco/Audio/Sfx/locutor/fight.ogg",
+      "sha256": "2622d3d43c1d79c9cae4d9aec8ece1e46d3acdab6621d3793dfbdc70d9ac1d73"
+    },
+    {
+      "source": "public/assets/audio/sfx/locutor/finalize.ogg",
+      "target": "Content/RuaDeAco/Audio/Sfx/locutor/finalize.ogg",
+      "sha256": "0fd15e1948985dad7813cea10a0e47dd6be543a33bc95fbae6242d6c61bbd972"
+    },
+    {
+      "source": "public/assets/audio/sfx/locutor/ko.ogg",
+      "target": "Content/RuaDeAco/Audio/Sfx/locutor/ko.ogg",
+      "sha256": "017b88cb3c2353c5ef76fb62bf137dad4bdec03d3888527233ca3ae79622bc8b"
+    },
+    {
+      "source": "public/assets/audio/sfx/locutor/round-1.ogg",
+      "target": "Content/RuaDeAco/Audio/Sfx/locutor/round-1.ogg",
+      "sha256": "c40be3642c0a0061409e277a63529b0bf4edc5e049eac9d4012ca6ca4e45319e"
+    },
+    {
+      "source": "public/assets/audio/sfx/locutor/round-2.ogg",
+      "target": "Content/RuaDeAco/Audio/Sfx/locutor/round-2.ogg",
+      "sha256": "200aa0ed4f93ef6ee5566116ca247f65174b80990d87dec3323a246a63824b27"
+    },
+    {
+      "source": "public/assets/audio/sfx/locutor/round-3.ogg",
+      "target": "Content/RuaDeAco/Audio/Sfx/locutor/round-3.ogg",
+      "sha256": "f7f0f1e1d5ba7454e8de023e8656951e820d8ddc638f030612c6fce1f0a0d055"
+    },
+    {
+      "source": "public/assets/audio/sfx/locutor/round-4.ogg",
+      "target": "Content/RuaDeAco/Audio/Sfx/locutor/round-4.ogg",
+      "sha256": "5db56263b7480bca3cf1d7a423a80dc11df628f0d52da75da6a703f09f89938c"
+    },
+    {
+      "source": "public/assets/audio/sfx/locutor/round-5.ogg",
+      "target": "Content/RuaDeAco/Audio/Sfx/locutor/round-5.ogg",
+      "sha256": "85c60813856b183a7068623f91aa4bcc28f255ba348367b0d152d0f3cb40b281"
+    },
+    {
+      "source": "public/assets/audio/sfx/locutor/tempo.ogg",
+      "target": "Content/RuaDeAco/Audio/Sfx/locutor/tempo.ogg",
+      "sha256": "192b4e135c8fb414632b8993a5765a815d7d5583775e10b795f41c2f6b2fe6b8"
+    },
+    {
+      "source": "public/assets/audio/sfx/locutor/vitoria.ogg",
+      "target": "Content/RuaDeAco/Audio/Sfx/locutor/vitoria.ogg",
+      "sha256": "1748a203202256d95ac003c9b3eba7e335157d14d369e30efae2472badbb7eef"
+    },
+    {
+      "source": "public/assets/audio/sfx/vozes/astro/astro-giro.ogg",
+      "target": "Content/RuaDeAco/Audio/Sfx/vozes/astro/astro-giro.ogg",
+      "sha256": "1d13870a13ae89bf2a407973bd0bd3ead18acb142e0d07a8283cbaa3029fbf15"
+    },
+    {
+      "source": "public/assets/audio/sfx/vozes/astro/rajada-neon.ogg",
+      "target": "Content/RuaDeAco/Audio/Sfx/vozes/astro/rajada-neon.ogg",
+      "sha256": "94e10e17539383365d06617a2895fd103afe4c6d3bd948b4105e09f25cb315fd"
+    },
+    {
+      "source": "public/assets/audio/sfx/vozes/astro/sorriso-relampago.ogg",
+      "target": "Content/RuaDeAco/Audio/Sfx/vozes/astro/sorriso-relampago.ogg",
+      "sha256": "2698991bbdacc89391eb86cbdac8d986f50d1b1e89170b1da297301f132b6ff9"
+    },
+    {
+      "source": "public/assets/audio/sfx/vozes/dante/bomba-de-fumaca.ogg",
+      "target": "Content/RuaDeAco/Audio/Sfx/vozes/dante/bomba-de-fumaca.ogg",
+      "sha256": "07d6a48d2079e765bfb3c91a5baa4f66a09e5bb98336044bd9db3f4cc644159a"
+    },
+    {
+      "source": "public/assets/audio/sfx/vozes/dante/chave-binaria.ogg",
+      "target": "Content/RuaDeAco/Audio/Sfx/vozes/dante/chave-binaria.ogg",
+      "sha256": "e770422ce2b6f144a2d02460f032f35e2c1e7f775dff9f8a3b461a1b03804617"
+    },
+    {
+      "source": "public/assets/audio/sfx/vozes/dante/ponto-final.ogg",
+      "target": "Content/RuaDeAco/Audio/Sfx/vozes/dante/ponto-final.ogg",
+      "sha256": "2a2025621570dd4344b7f59b2cf2081b83bc4acb3368c22cfbe09d2ccf11db81"
+    },
+    {
+      "source": "public/assets/audio/sfx/vozes/guto/abraco-glacial.ogg",
+      "target": "Content/RuaDeAco/Audio/Sfx/vozes/guto/abraco-glacial.ogg",
+      "sha256": "26f96e544ea2644e0892b2a03dbf2e0d29d0b9c11609c9e62f7071123b12dfab"
+    },
+    {
+      "source": "public/assets/audio/sfx/vozes/guto/gancho-do-urso.ogg",
+      "target": "Content/RuaDeAco/Audio/Sfx/vozes/guto/gancho-do-urso.ogg",
+      "sha256": "1bc5e6fce447e26548e1d15200a75295a4487c9ed881fe10928602c84e076c0f"
+    },
+    {
+      "source": "public/assets/audio/sfx/vozes/guto/muralha-norte.ogg",
+      "target": "Content/RuaDeAco/Audio/Sfx/vozes/guto/muralha-norte.ogg",
+      "sha256": "4970fc12ae93fc81b977d698014add2352b1acc5e28ac47927b3c0e2a95e6b9d"
+    },
+    {
+      "source": "public/assets/audio/sfx/vozes/leo/impacto-sombrio.ogg",
+      "target": "Content/RuaDeAco/Audio/Sfx/vozes/leo/impacto-sombrio.ogg",
+      "sha256": "0dd354c58c3503294e19661d42def49bd8cd5cd29a33f424fc2aa6b8e44dd9fe"
+    },
+    {
+      "source": "public/assets/audio/sfx/vozes/leo/olhar-frio.ogg",
+      "target": "Content/RuaDeAco/Audio/Sfx/vozes/leo/olhar-frio.ogg",
+      "sha256": "f753269a08666e7856100e3921ad7daa5594f82e0e5baf696b3bb1e80c98ceb1"
+    },
+    {
+      "source": "public/assets/audio/sfx/vozes/leo/pressao-violeta.ogg",
+      "target": "Content/RuaDeAco/Audio/Sfx/vozes/leo/pressao-violeta.ogg",
+      "sha256": "78784ad701f474e44567a1cbf541815f439484c24345de1bb858ebca5e4a5958"
+    },
+    {
+      "source": "public/assets/audio/sfx/vozes/noir/impacto-solar.ogg",
+      "target": "Content/RuaDeAco/Audio/Sfx/vozes/noir/impacto-solar.ogg",
+      "sha256": "e31420c70a4ca6522819e63deee0bc0a66249d2a532d748675b1270fa71dcd7d"
+    },
+    {
+      "source": "public/assets/audio/sfx/vozes/noir/quebra-luz.ogg",
+      "target": "Content/RuaDeAco/Audio/Sfx/vozes/noir/quebra-luz.ogg",
+      "sha256": "dd2e121b307d2f3bcc37959f92ec0132e20da7eabf9c69ebb6c7512c7406219b"
+    },
+    {
+      "source": "public/assets/audio/sfx/vozes/noir/reflexo-negro.ogg",
+      "target": "Content/RuaDeAco/Audio/Sfx/vozes/noir/reflexo-negro.ogg",
+      "sha256": "8a9a12acbc2b4e296ece2d10287fcd6a726bac8328638db8cfcf8693bdd67ba3"
+    },
+    {
+      "source": "public/assets/audio/sfx/vozes/rafa/chute-da-ressaca.ogg",
+      "target": "Content/RuaDeAco/Audio/Sfx/vozes/rafa/chute-da-ressaca.ogg",
+      "sha256": "b1925db40c037cd4e46eb3a0ce2eecc4b55c44bd16ad859b97de1b8fdcff8c6f"
+    },
+    {
+      "source": "public/assets/audio/sfx/vozes/rafa/eco-tatuado.ogg",
+      "target": "Content/RuaDeAco/Audio/Sfx/vozes/rafa/eco-tatuado.ogg",
+      "sha256": "f7341279702885909ba68c57ce767fc6c998ec8c67d17444eb96f8bb85ec78d3"
+    },
+    {
+      "source": "public/assets/audio/sfx/vozes/rafa/mao-da-mare.ogg",
+      "target": "Content/RuaDeAco/Audio/Sfx/vozes/rafa/mao-da-mare.ogg",
+      "sha256": "60fb120b9dee29467fae08515418b8374c937ec281aed0f621dbd8ef7a78bab7"
+    },
+    {
+      "source": "public/assets/fonts/.gitkeep",
+      "target": "Content/RuaDeAco/Fonts/.gitkeep",
+      "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6"
+    },
+    {
+      "source": "public/assets/fonts/PressStart2P-OFL.txt",
+      "target": "Content/RuaDeAco/Fonts/PressStart2P-OFL.txt",
+      "sha256": "705960c3281a5765ecc0b59bd4ed7ca59eed165748076bc2fc3e8fdbfeb944b0"
+    },
+    {
+      "source": "public/assets/fonts/PressStart2P-Regular.ttf",
+      "target": "Content/RuaDeAco/Fonts/PressStart2P-Regular.ttf",
+      "sha256": "034c77f1f05ec89421e4a63f0e3a4ca1ecf852cc6d2bf611f126f275728e017d"
+    },
+    {
+      "source": "public/assets/fonts/rua-de-aco-pixel.png",
+      "target": "Content/RuaDeAco/Fonts/rua-de-aco-pixel.png",
+      "sha256": "bdf2c49e29b661f1a66d49007a3d81be05f104b3174ab75248254798d0fe806d"
+    },
+    {
+      "source": "public/assets/fonts/rua-de-aco-pixel.xml",
+      "target": "Content/RuaDeAco/Fonts/rua-de-aco-pixel.xml",
+      "sha256": "82b094ce29f3ca0f2757d5bede9b2781d06a6dd234300f9d122351269e5137c7"
+    }
+  ]
+}

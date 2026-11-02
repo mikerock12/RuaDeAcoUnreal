@@ -1,5 +1,30 @@
 # Contexto do Projeto — Rua de Aço Nativo (`contexto.md`)
 
+## Correção 0.3.0 em validação — 02/11/2026
+
+A implementação 0.2.0 publicada era insuficiente: sua tela Android simplificava o jogo, descartava áudio e os antigos testes chamados golden não executavam os replays TypeScript. Esse histórico não comprova paridade.
+
+O port agora consome definições, colisões calibradas, múltiplas janelas, comandos, eventos, passivas e poses atuais exportados do original. A comparação real cobre 33 replays / 16.170 passos, com igualdade dos campos discretos exportados e tolerância float de 0,002 px; os hashes completos internos não são comparados e não há lockstep nativo com a Web. Os testes de componentes são separados (45 verificações antes da revisão final da CPU). Fonte e método em Docs/PARITY_REPLAYS.md.
+
+Frontend C++/raylib compartilhado com Android NativeActivity, 224 animações canônicas, efeitos/vozes por golpe e lutador, controles multitouch com bordas, menus touch, teclado e dois gamepads. O HUD touch controla P1; versus local 2P requer controles externos ou teclado. Assets são sincronizados do original por Scripts/Sync-CanonicalPresentation.py com manifesto de hashes. As camadas das três arenas e suas finalizações reutilizam a apresentação original. Render smoke Windows e CTest passaram em uma árvore nova; geração dos candidatos finais e execução real Android no CI seguem em validação. Runtime MSVC estático evita depender de uma instalação de Visual Studio/redistribuível no destino.
+
+Pendências antes de concluir: congelar fonte após revisão final da CPU/palcos, repetir build/testes/capturas finais, empacotar e validar instalador, executar emulador Android, conferir assinatura e certificado de atualização, PR/CI/merge, releases, portal e backups privados com restauração. O usuário autorizou reutilizar a chave e a senha Android existentes sem exibi-las/publicá-las. Sem aparelhos físicos disponíveis; não declarar homologação física nem conclusão de áudio/desempenho em ARM64 a partir de compilação ou imagens. Responsável: Codex.
+
+## Localização real dos projetos — 02/11/2026
+
+Raiz de trabalho confirmada: `D:\PROJETOS\SoftwaresSmellsLikeTech`. Não procurar nem criar cópias em `D:\PROJETOS\RuaDeAco`, `D:\PROJETOS\RuaDeAcoUnreal` ou `D:\MikeAndDenyse`: referências a esses locais em registros antigos são históricas.
+
+| Pasta real | Papel |
+|---|---|
+| `D:\PROJETOS\SoftwaresSmellsLikeTech` | Portal existente e coordenação da publicação; preserva seus cinco submódulos de softwares. |
+| `D:\PROJETOS\SoftwaresSmellsLikeTech\RuaDeAco` | Jogo original TypeScript/Phaser atualizado; fonte canônica de regras, lutadores, golpes, apresentação, arte e áudio para o port C++. |
+| `D:\PROJETOS\SoftwaresSmellsLikeTech\RuaDeAcoUnreal` | Base C++ reaproveitada e atualizada conforme o original; sua implementação antiga não define o gameplay nem as capturas atuais. |
+| `D:\PROJETOS\SoftwaresSmellsLikeTech\MikeAndDenyse` | Repositório Nightfall; referência Unity preservada em `NightfallUnity/` e port C++ em `NightfallNative/`. |
+| `D:\PROJETOS\SoftwaresSmellsLikeTech\RuaDeAco_AndroidBuild` | Árvore auxiliar existente de build Android/Capacitor do Rua de Aço; não substitui a fonte canônica `RuaDeAco` nem o build nativo em `RuaDeAcoUnreal`. |
+| `D:\PROJETOS\SoftwaresSmellsLikeTech\RuaDeAco_AudioMasters` | Matrizes de áudio existentes (`music/`); preservar os originais. Não é uma fonte alternativa de gameplay. |
+
+Confirmar o Git de cada pasta antes de editar; estas pastas de jogos são projetos independentes dentro da raiz do portal, não novos submódulos nem assets estáticos a publicar. Capturas do site devem vir da versão indicada em execução e mostrar os lutadores atuais. Responsável: Codex.
+
 **Última atualização:** 01/11/2026  
 **Repositório:** `https://github.com/mikerock12/RuaDeAcoUnreal`  
 **Branch principal:** `main`

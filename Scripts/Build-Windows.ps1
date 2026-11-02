@@ -58,9 +58,10 @@ $linkRsp = Join-Path $ObjDir "link.rsp"
     "/EHsc",
     "/utf-8",
     "/W3",
-    "/MD",
+    "/MT",
     "/DNOMINMAX",
     "/DPLATFORM_DESKTOP",
+    "/DUSE_LIBTYPE_SHARED",
     "/DGRAPHICS_API_OPENGL_33",
     "/I$IncludeRuntime",
     "/I$IncludeRaylib",
@@ -75,7 +76,7 @@ $objs = $Sources | ForEach-Object { Join-Path $ObjDir ((Split-Path $_ -Leaf) -re
     "/OUT:$ExePath",
     "/LIBPATH:$LibRaylib"
 ) + $objs + @(
-    "raylib.lib",
+    "raylibdll.lib",
     "winmm.lib",
     "gdi32.lib",
     "user32.lib",
@@ -94,7 +95,10 @@ Copy-Item (Join-Path $Root "ThirdParty\raylib\lib\raylib.dll") $OutDir -Force
 $ContentSrc = Join-Path $Root "Content"
 $ContentDst = Join-Path $OutDir "Content"
 if (Test-Path $ContentDst) {
-    Remove-Item $ContentDst -Recurse -Force
+    $ResolvedTarget = (Resolve-Path -LiteralPath $ContentDst).Path
+    $ExpectedTarget = [IO.Path]::GetFullPath((Join-Path $Root 'Saved/Packages/Windows/Content'))
+    if ($ResolvedTarget -ne $ExpectedTarget) { throw 'Refusing to clean an unexpected content staging path.' }
+    Remove-Item -LiteralPath $ResolvedTarget -Recurse -Force
 }
 Copy-Item $ContentSrc $ContentDst -Recurse -Force
 

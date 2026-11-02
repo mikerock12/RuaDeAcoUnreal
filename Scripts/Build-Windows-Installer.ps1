@@ -5,7 +5,7 @@
 #>
 [CmdletBinding()]
 param(
-    [string]$Version = "0.2.0"
+    [string]$Version = "0.3.0"
 )
 
 $ErrorActionPreference = "Stop"
@@ -43,7 +43,7 @@ if (-not (Test-Path $Iscc)) {
     throw "Inno Setup 6 (ISCC.exe) nao encontrado em $Iscc"
 }
 $IssPath = Join-Path $Root "Platform\Windows\RuaDeAco.iss"
-& $Iscc /Q $IssPath
+& $Iscc /Q "/DMyAppVersion=$Version" $IssPath
 if ($LASTEXITCODE -ne 0) {
     throw "Falha ao compilar instalador Inno Setup."
 }
