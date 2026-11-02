@@ -4,45 +4,146 @@
 
 namespace RDA
 {
-    class RDA_API CombatWorld
-    {
-    public:
-        CombatWorld(const FighterDef& playerOne, const FighterDef& playerTwo);
+	enum class SoundEvent : uint8_t
+	{
+		None = 0,
+		Fight,
+		Swing,
+		HitLight,
+		HitHeavy,
+		Block,
+		Jump,
+		Knockdown,
+		RoundEnd,
+		MatchWin,
+		GrabStart,
+		GrabSlam,
+		SpecialCast,
+		SuperCast,
+		FinishReady,
+		FinisherMonsterRoar,
+		FinisherSplash,
+		FinisherPotDrop,
+		FinisherTrident,
+	};
 
-        void Step(const InputFrame& p1, const InputFrame& p2);
-        bool TogglePause();
-        void SetPaused(bool value);
-        void ToggleDebugBoxes();
-        void RestartMatch();
-        WorldSnapshot Snapshot() const;
+	struct ProjectileRuntime
+	{
+		int runtimeId = 0;
+		int ownerIndex = 0;
+		ProjectileDef def{};
+		float x = 0.0f;
+		float y = 0.0f;
+		float velocityX = 0.0f;
+		int facing = 1;
+		int life = 0;
+		int ageFrames = 0;
+	};
 
-        CombatPhase Phase() const { return phase; }
-        bool Paused() const { return paused; }
+	struct ProjectileSnapshot
+	{
+		int runtimeId = 0;
+		int ownerIndex = 0;
+		const char* id = "";
+		float x = 0.0f;
+		float y = 0.0f;
+		int facing = 1;
+		Rect worldBox{};
+		bool active = true;
+	};
 
-    private:
-        void StepIntro();
-        void StepActive(const InputFrame& p1, const InputFrame& p2);
-        void StepRoundOver();
-        void UpdateFacing();
-        void ResolveHits();
-        void ResolvePushboxes();
-        void FinishRound(int winner, bool knockout);
-        const char* CurrentBanner() const;
+	struct ActiveGrabState
+	{
+		bool active = false;
+		int attackerIndex = 0;
+		int defenderIndex = 1;
+		MoveDef move{};
+	};
 
-        Fighter fighters[2];
-        int frame = 0;
-        CombatPhase phase = CombatPhase::Intro;
-        int phaseFrame = 0;
-        int round = 1;
-        int timeFrames = kRoundTimeFrames;
-        bool paused = false;
-        bool debugBoxes = false;
-        bool roundDraw = false;
-        int roundWinner = -1;
-        int comboHits[2] = {0, 0};
-        int lastDamage = 0;
-        const char* banner = "ROUND 1";
-        char bannerBuffer[24] = "ROUND 1";
-        int bannerFrames = 90;
-    };
+	struct WorldSnapshot
+	{
+		int frame = 0;
+		CombatPhase phase = CombatPhase::Intro;
+		int phaseFrame = 0;
+		int round = 1;
+		int timeSeconds = 99;
+		bool paused = false;
+		bool debugBoxes = false;
+		bool roundDraw = false;
+		int roundWinner = -1;
+		int matchWinner = -1;
+		int finisherWinner = -1;
+		bool finisherCompleted = false;
+		StageId stage = StageId::CaisDaCidade;
+		GameMode mode = GameMode::VsCpu;
+		const char* banner = "";
+		std::array<FighterSnapshot, 2> fighters{};
+		std::vector<ProjectileSnapshot> projectiles;
+		bool grabActive = false;
+		int lastDamage = 0;
+	};
+
+	class CombatWorld
+	{
+	public:
+		CombatWorld(
+			const FighterDef& PlayerOne,
+			const FighterDef& PlayerTwo,
+			GameMode InMode = GameMode::LocalVersus,
+			StageId InStage = StageId::CaisDaCidade);
+
+		void Step(const InputFrame& P1Input, const InputFrame& P2Input);
+		void TogglePause();
+		void ToggleDebugBoxes();
+		void RestartMatch();
+		void ResetTrainingPositions();
+		WorldSnapshot Snapshot() const;
+		std::vector<SoundEvent> DrainSounds();
+		uint64_t ComputeStateHash() const;
+
+		CombatPhase Phase() const { return phase; }
+		bool IsPaused() const { return paused; }
+		StageId Stage() const { return stage; }
+		GameMode Mode() const { return mode; }
+
+		std::array<FighterRuntime, 2> fighters;
+
+	private:
+		void StepIntro();
+		void StepActive(const InputFrame& P1Input, const InputFrame& P2Input);
+		void StepFinishReady(const InputFrame& P1Input, const InputFrame& P2Input);
+		void StepStageFinish();
+		void StepRoundOver();
+		void SpawnProjectiles(int OwnerIndex);
+		void UpdateProjectiles();
+		void ResolveHits(const InputFrame& P1Input, const InputFrame& P2Input);
+		void UpdateActiveGrab();
+		void ResolvePushboxes();
+		void FinishRound(int WinnerIndex, bool bKnockout);
+		void StartNextRound();
+
+		GameMode mode = GameMode::LocalVersus;
+		StageId stage = StageId::CaisDaCidade;
+		int frame = 0;
+		CombatPhase phase = CombatPhase::Intro;
+		int phaseFrame = 0;
+		int round = 1;
+		int timeFrames = kRoundTimeFrames;
+		bool paused = false;
+		bool debugBoxes = false;
+		bool roundDraw = false;
+		int roundWinner = -1;
+		int matchWinner = -1;
+		int finisherWinner = -1;
+		bool finisherCompleted = false;
+		int lastDamage = 0;
+		int nextProjectileId = 1;
+		std::array<int, 2> comboCounts{0, 0};
+		std::array<int, 2> comboTimers{0, 0};
+		std::vector<ProjectileRuntime> projectiles;
+		ActiveGrabState activeGrab{};
+		std::vector<SoundEvent> soundEvents;
+	};
+
+	InputFrame BuildCpuInput(const CombatWorld& World, int CpuIndex, AiDifficulty Difficulty = AiDifficulty::Normal);
 }

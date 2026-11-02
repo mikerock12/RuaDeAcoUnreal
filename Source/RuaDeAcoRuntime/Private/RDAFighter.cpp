@@ -1,500 +1,739 @@
 #include "RDAFighter.h"
-
 #include <algorithm>
 #include <cmath>
 
 namespace RDA
 {
-    Fighter::Fighter(const FighterDef& definition, float startX, int facingValue)
-        : def(definition)
-        , facing(facingValue < 0 ? -1 : 1)
-    {
-        x = startX;
-        previousX = startX;
-        health = def.stats.maxHealth;
-    }
+	FighterRuntime::FighterRuntime(const FighterDef& InDef, float StartX, int StartFacing)
+		: def(&InDef)
+	{
+		ResetForRound(StartX, StartFacing);
+		roundWins = 0;
+	}
 
-    void Fighter::BeginFrame(const InputFrame& in, float opponentX)
-    {
-        previousX = x;
-        previousY = y;
-        input = in;
-        invulnerableFrames = std::max(0, invulnerableFrames - 1);
+	void FighterRuntime::ResetForRound(float StartX, int StartFacing)
+	{
+		ResetPosition(StartX, StartFacing);
+		health = def->stats.maxHealth;
+	}
 
-        if (hitStopFrames > 0)
-        {
-            hitStopFrames -= 1;
-            frozen = true;
-            return;
-        }
-        frozen = false;
+	void FighterRuntime::ResetPosition(float StartX, int StartFacing)
+	{
+		x = StartX;
+		y = static_cast<float>(kGroundY);
+		velocityX = 0.0f;
+		velocityY = 0.0f;
+		airDriftX = 0.0f;
+		facing = StartFacing >= 0 ? 1 : -1;
+		state = FighterState::Idle;
+		stateFrame = 0;
+		grounded = true;
+		currentMove = nullptr;
+		moveHasRegisteredContact = false;
+		hitStopFrames = 0;
+		stunFrames = 0;
+		knockdownFrames = 0;
+		freezeFrames = 0;
+		armorHits = 0;
+		parryFrames = 0;
+		parryRiposteDamage = 0;
+		damageReductionFrames = 0;
+		damageReductionMultiplier = 1.0f;
+		victimRotation = 0.0f;
+		visible = true;
+		pendingProjectileIndex = -1;
+		lastPunchFrame = -100;
+		lastKickFrame = -100;
+		lastDownFrame = -100;
+		lastForwardFrame = -100;
+		lastBackFrame = -100;
+	}
 
-        if (state == FighterState::Knockout || state == FighterState::Victory)
-        {
-            return;
-        }
+	void FighterRuntime::ForceState(FighterState NewState)
+	{
+		currentMove = nullptr;
+		moveHasRegisteredContact = false;
+		velocityX = 0.0f;
+		state = NewState;
+		stateFrame = 0;
+	}
 
-        if (state == FighterState::Landing)
-        {
-            return;
-        }
+	void FighterRuntime::ForceMeter(int NewMeter)
+	{
+		meter = std::clamp(NewMeter, 0, kMaxMeter);
+	}
 
-        if (state == FighterState::HitStun)
-        {
-            x += velocityX;
-            velocityX *= 0.88f;
-            UpdateVertical();
-            return;
-        }
+	void FighterRuntime::EnterGrabbedState(FighterState VictimState, float AnchorX, float AnchorY, float RotationRad, int VictimFacing)
+	{
+		currentMove = nullptr;
+		moveHasRegisteredContact = false;
+		velocityX = 0.0f;
+		velocityY = 0.0f;
+		airDriftX = 0.0f;
+		x = std::clamp(AnchorX, static_cast<float>(kStageLeft), static_cast<float>(kStageRight));
+		y = std::min(static_cast<float>(kGroundY), AnchorY);
+		grounded = y >= static_cast<float>(kGroundY) - 0.5f;
+		facing = VictimFacing >= 0 ? 1 : -1;
+		victimRotation = RotationRad;
+		state = VictimState;
+	}
 
-        if (state == FighterState::Knockdown || state == FighterState::WakeUp)
-        {
-            return;
-        }
+	void FighterRuntime::ReleaseFromGrab(float ThrowVelX, float ThrowVelY, bool bSlamToKnockdown)
+	{
+		victimRotation = 0.0f;
+		currentMove = nullptr;
+		if (bSlamToKnockdown)
+		{
+			y = static_cast<float>(kGroundY);
+			grounded = true;
+			velocityX = ThrowVelX;
+			velocityY = 0.0f;
+			state = FighterState::Knockdown;
+			stateFrame = 0;
+			knockdownFrames = 26;
+		}
+		else
+		{
+			grounded = false;
+			velocityX = ThrowVelX;
+			velocityY = ThrowVelY;
+			state = FighterState::Thrown;
+			stateFrame = 0;
+		}
+	}
 
-        if (blockStunFrames > 0)
-        {
-            Transition(input.down ? FighterState::BlockCrouching : FighterState::BlockStanding);
-            x += velocityX;
-            velocityX *= 0.82f;
-            return;
-        }
+	bool FighterRuntime::ConsumePendingProjectile(ProjectileDef& OutDef)
+	{
+		if (pendingProjectileIndex < 0 || pendingProjectileIndex >= def->projectileCount)
+		{
+			return false;
+		}
+		OutDef = def->projectiles[static_cast<size_t>(pendingProjectileIndex)];
+		pendingProjectileIndex = -1;
+		return true;
+	}
 
-        if (activeMove)
-        {
-            ApplyMoveMotion();
-            return;
-        }
+	void FighterRuntime::BeginFrame(const InputFrame& Input, int WorldFrame)
+	{
+		if (parryFrames > 0) parryFrames -= 1;
+		if (damageReductionFrames > 0)
+		{
+			damageReductionFrames -= 1;
+			if (damageReductionFrames == 0) damageReductionMultiplier = 1.0f;
+		}
 
-        if (y < kGroundY)
-        {
-            if (input.punchPressed)
-            {
-                StartMove(def.airPunch);
-                ApplyMoveMotion();
-                return;
-            }
-            if (input.kickPressed)
-            {
-                StartMove(def.airKick);
-                ApplyMoveMotion();
-                return;
-            }
-            x += airDriftX;
-            UpdateVertical();
-            if (y >= kGroundY)
-            {
-                airDriftX = 0.0f;
-                Transition(FighterState::Landing);
-            }
-            else
-            {
-                Transition(velocityY < 0.0f ? FighterState::Jump : FighterState::Fall);
-            }
-            return;
-        }
+		if (Input.punchPressed) lastPunchFrame = WorldFrame;
+		if (Input.kickPressed) lastKickFrame = WorldFrame;
+		if (Input.downPressed || Input.down) lastDownFrame = WorldFrame;
+		const bool bHoldingForward = (facing > 0 && Input.right) || (facing < 0 && Input.left);
+		const bool bHoldingBack = (facing > 0 && Input.left) || (facing < 0 && Input.right);
+		if (bHoldingForward) lastForwardFrame = WorldFrame;
+		if (bHoldingBack) lastBackFrame = WorldFrame;
 
-        if (input.block)
-        {
-            Transition(input.down ? FighterState::BlockCrouching : FighterState::BlockStanding);
-            return;
-        }
+		if (hitStopFrames > 0)
+		{
+			return;
+		}
 
-        if (input.upPressed)
-        {
-            const int horizontal = (input.right ? 1 : 0) - (input.left ? 1 : 0);
-            const bool movingForward = horizontal == facing;
-            const float jumpDrift = movingForward ? def.stats.jumpForwardSpeed : def.stats.jumpBackwardSpeed;
-            airDriftX = static_cast<float>(horizontal) * jumpDrift;
-            velocityY = -def.stats.jumpSpeed;
-            Transition(FighterState::Jump);
-            UpdateVertical();
-            return;
-        }
+		if (state == FighterState::Knockout || state == FighterState::Victory)
+		{
+			ApplyHorizontalFriction();
+			return;
+		}
 
-        if (const MoveDef* move = SelectMove())
-        {
-            StartMove(*move);
-            return;
-        }
+		if (state == FighterState::GrabbedFront || state == FighterState::GrabbedLifted)
+		{
+			return;
+		}
 
-        if (input.down)
-        {
-            Transition(FighterState::Crouch);
-            return;
-        }
+		if (freezeFrames > 0)
+		{
+			freezeFrames -= 1;
+			state = FighterState::Frozen;
+			ApplyHorizontalFriction();
+			if (freezeFrames == 0)
+			{
+				state = FighterState::Idle;
+				stateFrame = 0;
+			}
+			return;
+		}
 
-        const int horizontal = (input.right ? 1 : 0) - (input.left ? 1 : 0);
-        if (horizontal == 0)
-        {
-            Transition(FighterState::Idle);
-            return;
-        }
+		if (state == FighterState::Thrown)
+		{
+			if (grounded)
+			{
+				state = FighterState::Knockdown;
+				stateFrame = 0;
+				knockdownFrames = 24;
+			}
+			return;
+		}
 
-        const bool movingForward = horizontal == facing;
-        const float speed = movingForward ? def.stats.walkSpeed : def.stats.backwardSpeed;
-        x += static_cast<float>(horizontal) * speed;
-        Transition(movingForward ? FighterState::WalkForward : FighterState::WalkBackward);
+		if (state == FighterState::Knockdown)
+		{
+			ApplyHorizontalFriction();
+			if (grounded && stateFrame >= knockdownFrames)
+			{
+				state = FighterState::WakeUp;
+				stateFrame = 0;
+			}
+			return;
+		}
 
-        if (opponentX != x)
-        {
-            facing = opponentX > x ? 1 : -1;
-        }
-    }
+		if (state == FighterState::WakeUp)
+		{
+			velocityX = 0.0f;
+			if (stateFrame >= kWakeUpFrames)
+			{
+				state = FighterState::Idle;
+				stateFrame = 0;
+			}
+			return;
+		}
 
-    void Fighter::CapturePose()
-    {
-        evaluatedHitboxes.clear();
-        evaluatedHurtboxes.clear();
+		if (state == FighterState::HitStun || state == FighterState::BlockStanding || state == FighterState::BlockCrouching)
+		{
+			ApplyHorizontalFriction();
+			if (stunFrames > 0)
+			{
+				stunFrames -= 1;
+				if (stunFrames == 0)
+				{
+					state = Input.down && grounded ? FighterState::Crouch : FighterState::Idle;
+					stateFrame = 0;
+				}
+				return;
+			}
+		}
 
-        if (activeMove
-            && stateFrame >= activeMove->hitbox.activeFrom
-            && stateFrame <= activeMove->hitbox.activeTo
-            && !(activeMove->air && Grounded()))
-        {
-            evaluatedHitboxes.push_back(activeMove->hitbox);
-        }
+		if (currentMove)
+		{
+			if (currentMove->grantArmorFrame >= 0 && stateFrame == currentMove->grantArmorFrame)
+			{
+				armorHits = currentMove->grantArmorHits;
+			}
+			if (currentMove->grantParryFrame >= 0 && stateFrame == currentMove->grantParryFrame)
+			{
+				parryFrames = currentMove->grantParryDuration;
+				parryRiposteDamage = currentMove->grantParryDamage;
+			}
+			if (currentMove->grantDamageReductionFrame >= 0 && stateFrame == currentMove->grantDamageReductionFrame)
+			{
+				damageReductionFrames = currentMove->grantDamageReductionDuration;
+				damageReductionMultiplier = currentMove->grantDamageReductionMultiplier;
+			}
+			if (currentMove->spawnProjectileFrame >= 0 && stateFrame == currentMove->spawnProjectileFrame)
+			{
+				pendingProjectileIndex = currentMove->projectileIndex;
+			}
 
-        if (CanReceiveHit())
-        {
-            const PoseBoxes& pose = CurrentPose();
-            evaluatedHurtboxes.push_back(pose.head);
-            evaluatedHurtboxes.push_back(pose.body);
-            evaluatedHurtboxes.push_back(pose.legs);
-            evaluatedPushbox = pose.pushbox;
-        }
-        else
-        {
-            evaluatedPushbox = CurrentPose().pushbox;
-        }
-    }
+			if (stateFrame >= currentMove->totalFrames)
+			{
+				currentMove = nullptr;
+				moveHasRegisteredContact = false;
+				armorHits = 0;
+				state = grounded ? (Input.down ? FighterState::Crouch : FighterState::Idle) : FighterState::Fall;
+				stateFrame = 0;
+			}
+			else
+			{
+				if (currentMove->moveTo > 0 && stateFrame >= currentMove->moveFrom && stateFrame <= currentMove->moveTo)
+				{
+					velocityX = currentMove->moveVelX * static_cast<float>(facing);
+				}
+				else if (grounded)
+				{
+					velocityX = 0.0f;
+				}
+				return;
+			}
+		}
 
-    void Fighter::FinishFrame()
-    {
-        ClampToStage();
-        if (frozen)
-        {
-            return;
-        }
+		if (state == FighterState::Landing)
+		{
+			velocityX = 0.0f;
+			if (TryStartMove(Input, WorldFrame))
+			{
+				return;
+			}
+			if (stateFrame >= kLandingFrames)
+			{
+				state = Input.down ? FighterState::Crouch : FighterState::Idle;
+				stateFrame = 0;
+			}
+			return;
+		}
 
-        if (state == FighterState::Knockout || state == FighterState::Victory)
-        {
-            stateFrame += 1;
-            return;
-        }
+		if (TryStartMove(Input, WorldFrame))
+		{
+			return;
+		}
 
-        if (state == FighterState::HitStun)
-        {
-            hitStunFrames = std::max(0, hitStunFrames - 1);
-            stateFrame += 1;
-            if (hitStunFrames == 0)
-            {
-                if (knockdownPending)
-                {
-                    y = kGroundY;
-                    velocityY = 0.0f;
-                    Transition(FighterState::Knockdown);
-                }
-                else
-                {
-                    Transition(y < kGroundY ? FighterState::Fall : FighterState::Idle);
-                }
-            }
-            return;
-        }
+		const int MoveDir = (Input.right ? 1 : 0) - (Input.left ? 1 : 0);
+		const bool bHoldingBackward = MoveDir != 0 && MoveDir != facing;
 
-        if (blockStunFrames > 0)
-        {
-            blockStunFrames -= 1;
-            stateFrame += 1;
-            if (blockStunFrames == 0)
-            {
-                Transition(FighterState::Idle);
-            }
-            return;
-        }
+		if ((Input.block || (bHoldingBackward && Input.down)) && grounded && Input.block)
+		{
+			velocityX = 0.0f;
+			state = Input.down ? FighterState::BlockCrouching : FighterState::BlockStanding;
+			return;
+		}
 
-        if (state == FighterState::Knockdown)
-        {
-            stateFrame += 1;
-            if (stateFrame >= 42)
-            {
-                invulnerableFrames = 23;
-                Transition(FighterState::WakeUp);
-            }
-            return;
-        }
+		if (Input.upPressed && grounded)
+		{
+			grounded = false;
+			velocityY = -def->stats.jumpSpeed;
+			if (MoveDir == 0)
+			{
+				airDriftX = 0.0f;
+			}
+			else
+			{
+				const float Speed = MoveDir == facing ? def->stats.jumpForwardSpeed : def->stats.jumpBackwardSpeed;
+				airDriftX = static_cast<float>(MoveDir) * Speed;
+			}
+			velocityX = airDriftX;
+			state = FighterState::Jump;
+			stateFrame = 0;
+			return;
+		}
 
-        if (state == FighterState::WakeUp)
-        {
-            stateFrame += 1;
-            if (stateFrame >= kWakeUpFrames)
-            {
-                Transition(FighterState::Idle);
-            }
-            return;
-        }
+		if (!grounded)
+		{
+			velocityX = airDriftX;
+			state = velocityY < 0.0f ? FighterState::Jump : FighterState::Fall;
+			return;
+		}
 
-        if (state == FighterState::Landing)
-        {
-            stateFrame += 1;
-            if (stateFrame >= kLandingFrames)
-            {
-                Transition(FighterState::Idle);
-            }
-            return;
-        }
+		if (Input.down)
+		{
+			velocityX = 0.0f;
+			state = FighterState::Crouch;
+			return;
+		}
 
-        if (activeMove)
-        {
-            stateFrame += 1;
-            if (stateFrame >= activeMove->totalFrames)
-            {
-                activeMove = nullptr;
-                Transition(y < kGroundY ? FighterState::Fall : FighterState::Idle);
-            }
-            return;
-        }
+		if (MoveDir == 0)
+		{
+			velocityX = 0.0f;
+			state = FighterState::Idle;
+			return;
+		}
 
-        stateFrame += 1;
-    }
+		const bool Forward = MoveDir == facing;
+		velocityX = static_cast<float>(MoveDir) * (Forward ? def->stats.walkSpeed : def->stats.backwardSpeed);
+		state = Forward ? FighterState::WalkForward : FighterState::WalkBackward;
+	}
 
-    void Fighter::ApplyHit(const Hitbox& hitbox, int attackerFacing, bool blocked, int comboHits)
-    {
-        const int damage = CalculateDamage(hitbox.damage, hitbox.chipDamage, blocked, comboHits);
-        health = std::max(0, health - damage);
-        hitStopFrames = std::max(hitStopFrames, hitbox.hitStop);
+	bool FighterRuntime::TryStartMove(const InputFrame& Input, int WorldFrame)
+	{
+		if (!grounded)
+		{
+			if (Input.kickPressed)
+			{
+				StartMove(def->airHeavy);
+				return true;
+			}
+			if (Input.punchPressed)
+			{
+				StartMove(def->airLight);
+				return true;
+			}
+			return false;
+		}
 
-        if (blocked)
-        {
-            blockStunFrames = hitbox.blockStun;
-            Transition(input.down ? FighterState::BlockCrouching : FighterState::BlockStanding);
-            velocityX = static_cast<float>(attackerFacing) * hitbox.knockbackX * 0.35f;
-        }
-        else
-        {
-            const bool counterHit = Attacking();
-            activeMove = nullptr;
-            hitStunFrames = CalculateHitStun(hitbox.hitStun, counterHit, comboHits);
-            knockdownPending = hitbox.knockdown;
-            airDriftX = 0.0f;
-            velocityX = static_cast<float>(attackerFacing) * hitbox.knockbackX;
-            velocityY = hitbox.knockbackY;
-            Transition(FighterState::HitStun);
-        }
+		// Universal Grab: simultaneous Light + Heavy (within 3 frames) or explicit grab button
+		const bool bSimultaneousGrab =
+			(Input.punchPressed && Input.kick) ||
+			(Input.kickPressed && Input.punch) ||
+			(std::abs(lastPunchFrame - lastKickFrame) <= 3 && (Input.punchPressed || Input.kickPressed));
+		if (Input.grabPressed || bSimultaneousGrab)
+		{
+			StartMove(def->universalGrab);
+			return true;
+		}
 
-        if (health <= 0)
-        {
-            Transition(FighterState::Knockout);
-        }
-    }
+		// Super move: Down + Special or Super button with >= 50 meter
+		if ((Input.superPressed || (Input.specialPressed && Input.down)) && meter >= def->superMove.meterCost)
+		{
+			meter = std::max(0, meter - def->superMove.meterCost);
+			StartMove(def->superMove);
+			return true;
+		}
 
-    void Fighter::AddHitStop(int frames)
-    {
-        hitStopFrames = std::max(hitStopFrames, frames);
-    }
+		// Specials: Special button (Forward/Neutral -> Special1, Back/Motion -> Special2)
+		if (Input.specialPressed)
+		{
+			const bool bBackSpecial = (facing > 0 && Input.left) || (facing < 0 && Input.right) ||
+				(WorldFrame - lastBackFrame <= 10);
+			StartMove(bBackSpecial ? def->special2 : def->special1);
+			return true;
+		}
 
-    void Fighter::SetMatchState(FighterState next)
-    {
-        activeMove = nullptr;
-        velocityX = 0.0f;
-        velocityY = 0.0f;
-        airDriftX = 0.0f;
-        hitStopFrames = 0;
-        hitStunFrames = 0;
-        blockStunFrames = 0;
-        Transition(next);
-    }
+		const int MoveDir = (Input.right ? 1 : 0) - (Input.left ? 1 : 0);
+		const bool Forward = MoveDir == facing;
 
-    void Fighter::ResetRound(float startX, int facingValue)
-    {
-        x = startX;
-        previousX = startX;
-        y = kGroundY;
-        previousY = kGroundY;
-        velocityX = 0.0f;
-        velocityY = 0.0f;
-        airDriftX = 0.0f;
-        facing = facingValue < 0 ? -1 : 1;
-        health = def.stats.maxHealth;
-        invulnerableFrames = 0;
-        hitStopFrames = 0;
-        hitStunFrames = 0;
-        blockStunFrames = 0;
-        knockdownPending = false;
-        frozen = false;
-        hitRegistered = false;
-        activeMove = nullptr;
-        Transition(FighterState::Idle);
-    }
+		if (Input.down)
+		{
+			if (Input.kickPressed)
+			{
+				StartMove(def->crouchHeavy);
+				return true;
+			}
+			if (Input.punchPressed)
+			{
+				StartMove(def->crouchLight);
+				return true;
+			}
+			return false;
+		}
 
-    void Fighter::ResetMatch(float startX, int facingValue)
-    {
-        roundWins = 0;
-        ResetRound(startX, facingValue);
-    }
+		if (Forward && Input.kickPressed)
+		{
+			StartMove(def->forwardHeavy);
+			return true;
+		}
 
-    void Fighter::ClampToStage()
-    {
-        x = std::clamp(x, kStageLeft, kStageRight);
-    }
+		if (Forward && Input.punchPressed)
+		{
+			StartMove(def->forwardLight);
+			return true;
+		}
 
-    FighterSnapshot Fighter::MakeSnapshot() const
-    {
-        FighterSnapshot snap;
-        snap.id = def.id;
-        snap.name = def.name;
-        snap.x = x;
-        snap.y = y;
-        snap.previousX = previousX;
-        snap.previousY = previousY;
-        snap.airDriftX = airDriftX;
-        snap.facing = facing;
-        snap.state = state;
-        snap.stateFrame = stateFrame;
-        snap.health = health;
-        snap.maxHealth = def.stats.maxHealth;
-        snap.activeMoveId = activeMove ? activeMove->id : nullptr;
-        snap.moveFrame = activeMove ? stateFrame : 0;
-        snap.moveTotalFrames = activeMove ? activeMove->totalFrames : 1;
-        snap.hitActiveFrom = activeMove ? activeMove->hitbox.activeFrom : 0;
-        snap.hitActiveTo = activeMove ? activeMove->hitbox.activeTo : 0;
-        snap.anim = ResolveAnim();
-        snap.attacking = activeMove != nullptr;
-        snap.pushboxWorld = ToWorld(evaluatedPushbox, x, y, facing);
-        for (const Hurtbox& hurt : evaluatedHurtboxes)
-        {
-            snap.hurtboxesWorld.push_back(ToWorld(hurt.box, x, y, facing));
-        }
-        for (const Hitbox& hit : evaluatedHitboxes)
-        {
-            snap.hitboxesWorld.push_back(ToWorld(hit.box, x, y, facing));
-        }
-        return snap;
-    }
+		if (Input.kickPressed)
+		{
+			StartMove(def->standingHeavy);
+			return true;
+		}
 
-    bool Fighter::CanReceiveHit() const
-    {
-        return invulnerableFrames <= 0
-            && state != FighterState::Knockdown
-            && state != FighterState::Knockout
-            && state != FighterState::Victory;
-    }
+		if (Input.punchPressed)
+		{
+			StartMove(def->standingLight);
+			return true;
+		}
 
-    bool Fighter::IsBlocking(HitLevel level) const
-    {
-        const bool guarding = state == FighterState::BlockStanding
-            || state == FighterState::BlockCrouching
-            || blockStunFrames > 0;
-        if (!guarding || activeMove != nullptr)
-        {
-            return false;
-        }
-        const bool crouching = state == FighterState::BlockCrouching;
-        if (level == HitLevel::Overhead) return !crouching;
-        if (level == HitLevel::Low) return crouching;
-        return true;
-    }
+		return false;
+	}
 
-    void Fighter::Transition(FighterState next)
-    {
-        if (state != next)
-        {
-            state = next;
-            stateFrame = 0;
-        }
-    }
+	void FighterRuntime::StartMove(const MoveDef& Move)
+	{
+		currentMove = &Move;
+		moveHasRegisteredContact = false;
+		state = Move.state;
+		stateFrame = 0;
+		if (grounded)
+		{
+			velocityX = 0.0f;
+		}
+	}
 
-    void Fighter::StartMove(const MoveDef& move)
-    {
-        activeMove = &move;
-        hitRegistered = false;
-        Transition(move.state);
-    }
+	void FighterRuntime::FinishFrame()
+	{
+		if (hitStopFrames > 0)
+		{
+			hitStopFrames -= 1;
+			return;
+		}
 
-    void Fighter::ApplyMoveMotion()
-    {
-        if (activeMove && activeMove->air && y < kGroundY)
-        {
-            x += airDriftX;
-        }
-        if (y < kGroundY || velocityY != 0.0f)
-        {
-            UpdateVertical();
-        }
-        if (activeMove && activeMove->air && y >= kGroundY && velocityY == 0.0f)
-        {
-            activeMove = nullptr;
-            airDriftX = 0.0f;
-            Transition(FighterState::Landing);
-        }
-    }
+		if (state == FighterState::GrabbedFront || state == FighterState::GrabbedLifted)
+		{
+			stateFrame += 1;
+			return;
+		}
 
-    void Fighter::UpdateVertical()
-    {
-        y += velocityY;
-        velocityY += def.stats.gravity;
-        if (y >= kGroundY)
-        {
-            y = kGroundY;
-            velocityY = 0.0f;
-        }
-    }
+		x += velocityX;
+		y += velocityY;
 
-    const PoseBoxes& Fighter::CurrentPose() const
-    {
-        if (!Grounded() || state == FighterState::Jump || state == FighterState::Fall)
-        {
-            return def.airborne;
-        }
-        if (state == FighterState::Crouch
-            || state == FighterState::BlockCrouching
-            || state == FighterState::Landing
-            || (activeMove && (activeMove->animation == AnimId::CrouchLight || activeMove->animation == AnimId::CrouchHeavy)))
-        {
-            return def.crouching;
-        }
-        return def.standing;
-    }
+		if (!grounded)
+		{
+			velocityY += def->stats.gravity;
+			if (y >= static_cast<float>(kGroundY))
+			{
+				y = static_cast<float>(kGroundY);
+				velocityY = 0.0f;
+				airDriftX = 0.0f;
+				grounded = true;
+				if (currentMove && currentMove->air)
+				{
+					currentMove = nullptr;
+					moveHasRegisteredContact = false;
+				}
+				if (state == FighterState::Thrown)
+				{
+					state = FighterState::Knockdown;
+					stateFrame = 0;
+					knockdownFrames = 24;
+				}
+				else if (state != FighterState::Knockdown && state != FighterState::Knockout)
+				{
+					state = FighterState::Landing;
+					stateFrame = 0;
+				}
+				x = std::clamp(x, static_cast<float>(kStageLeft), static_cast<float>(kStageRight));
+				return;
+			}
+		}
 
-    AnimId Fighter::ResolveAnim() const
-    {
-        if (activeMove) return activeMove->animation;
-        switch (state)
-        {
-        case FighterState::WalkForward: return AnimId::Walk;
-        case FighterState::WalkBackward: return AnimId::WalkBackward;
-        case FighterState::Jump:
-        {
-            const float relative = airDriftX * static_cast<float>(facing);
-            if (relative > 0.01f) return AnimId::JumpForward;
-            if (relative < -0.01f) return AnimId::JumpBackward;
-            return AnimId::JumpNeutral;
-        }
-        case FighterState::Fall: return AnimId::Fall;
-        case FighterState::Landing: return AnimId::Landing;
-        case FighterState::Crouch: return AnimId::Crouch;
-        case FighterState::BlockStanding: return AnimId::BlockStanding;
-        case FighterState::BlockCrouching: return AnimId::BlockCrouching;
-        case FighterState::HitStun: return AnimId::Hit;
-        case FighterState::Knockdown: return AnimId::Knockdown;
-        case FighterState::WakeUp: return AnimId::WakeUp;
-        case FighterState::Knockout: return AnimId::Knockout;
-        case FighterState::Victory: return AnimId::Victory;
-        default: return AnimId::Idle;
-        }
-    }
+		x = std::clamp(x, static_cast<float>(kStageLeft), static_cast<float>(kStageRight));
+		stateFrame += 1;
+	}
 
-    const MoveDef* Fighter::SelectMove() const
-    {
-        if (input.punchPressed)
-        {
-            return input.down ? &def.crouchPunch : &def.punch;
-        }
-        if (input.kickPressed)
-        {
-            return input.down ? &def.crouchKick : &def.kick;
-        }
-        return nullptr;
-    }
+	bool FighterRuntime::HasActiveHitbox(HitboxDef& OutHitbox, Rect& OutWorldRect) const
+	{
+		if (!currentMove || moveHasRegisteredContact)
+		{
+			return false;
+		}
+		if (stateFrame < currentMove->hitbox.activeFrom || stateFrame > currentMove->hitbox.activeTo)
+		{
+			return false;
+		}
+		OutHitbox = currentMove->hitbox;
+		OutWorldRect = ToWorldRect(OutHitbox.rect, x, y, facing);
+		return true;
+	}
+
+	std::vector<Rect> FighterRuntime::CurrentHurtboxesWorld() const
+	{
+		std::vector<Rect> Out;
+		if (state == FighterState::WakeUp || state == FighterState::Knockout ||
+			state == FighterState::GrabbedFront || state == FighterState::GrabbedLifted)
+		{
+			return Out;
+		}
+
+		const bool Crouching = state == FighterState::Crouch
+			|| state == FighterState::BlockCrouching
+			|| (currentMove && currentMove->crouch);
+
+		if (Crouching)
+		{
+			Out.reserve(def->crouchingHurtboxes.size());
+			for (const Rect& Box : def->crouchingHurtboxes)
+			{
+				Out.push_back(ToWorldRect(Box, x, y, facing));
+			}
+		}
+		else
+		{
+			Out.reserve(def->standingHurtboxes.size());
+			for (const Rect& Box : def->standingHurtboxes)
+			{
+				Out.push_back(ToWorldRect(Box, x, y, facing));
+			}
+		}
+		return Out;
+	}
+
+	Rect FighterRuntime::PushboxWorld() const
+	{
+		return ToWorldRect(def->stats.pushbox, x, y, facing);
+	}
+
+	AppliedHit FighterRuntime::ReceiveHit(const HitboxDef& Hitbox, int AttackerFacing, bool bAllowGrabTech)
+	{
+		if (Hitbox.kind == HitKind::Throw)
+		{
+			if (!grounded || state == FighterState::HitStun || state == FighterState::Knockdown || state == FighterState::WakeUp)
+			{
+				return AppliedHit{};
+			}
+			if (bAllowGrabTech)
+			{
+				velocityX = static_cast<float>(AttackerFacing) * 3.2f;
+				stunFrames = 10;
+				state = FighterState::BlockStanding;
+				stateFrame = 0;
+				return AppliedHit{0, false, false, false, true, false};
+			}
+			currentMove = nullptr;
+			moveHasRegisteredContact = false;
+			hitStopFrames = Hitbox.hitStop;
+			return AppliedHit{0, false, false, true, false, false};
+		}
+
+		if (parryFrames > 0 && Hitbox.level != HitLevel::Low)
+		{
+			parryFrames = 0;
+			hitStopFrames = 8;
+			meter = std::min(kMaxMeter, meter + 18);
+			return AppliedHit{0, true, false, false, false, true};
+		}
+
+		const bool Blocking = state == FighterState::BlockStanding || state == FighterState::BlockCrouching;
+		const bool LowBlock = state == FighterState::BlockCrouching;
+		const bool CanBlock = Blocking
+			&& !(Hitbox.level == HitLevel::Low && !LowBlock)
+			&& !(Hitbox.level == HitLevel::Overhead && LowBlock);
+
+		if (CanBlock)
+		{
+			const int Chip = std::max(0, static_cast<int>( std::round(static_cast<float>(Hitbox.chipDamage) * damageReductionMultiplier)));
+			health = std::max(1, health - Chip);
+			stunFrames = Hitbox.blockStun;
+			hitStopFrames = Hitbox.hitStop;
+			velocityX = static_cast<float>(AttackerFacing) * Hitbox.knockbackX * 0.55f;
+			meter = std::min(kMaxMeter, meter + 4);
+			stateFrame = 0;
+			return AppliedHit{Chip, true, false, false, false, false};
+		}
+
+		const int FinalDamage = std::max(1, static_cast<int>(std::round(static_cast<float>(Hitbox.damage) * damageReductionMultiplier)));
+		health = std::max(0, health - FinalDamage);
+		hitStopFrames = Hitbox.hitStop;
+		meter = std::min(kMaxMeter, meter + 6);
+
+		if (armorHits > 0 && health > 0 && !Hitbox.knockdown)
+		{
+			armorHits -= 1;
+			return AppliedHit{FinalDamage, false, false, false, false, false};
+		}
+
+		currentMove = nullptr;
+		moveHasRegisteredContact = false;
+		velocityX = static_cast<float>(AttackerFacing) * (Hitbox.knockbackX / std::max(0.5f, def->stats.weight));
+
+		if (health <= 0)
+		{
+			state = FighterState::Knockout;
+			stateFrame = 0;
+			velocityY = -4.0f;
+			grounded = false;
+			return AppliedHit{FinalDamage, false, true, false, false, false};
+		}
+
+		if (Hitbox.freezeFrames > 0)
+		{
+			freezeFrames = Hitbox.freezeFrames;
+			state = FighterState::Frozen;
+			stateFrame = 0;
+			return AppliedHit{FinalDamage, false, false, false, false, false};
+		}
+
+		if (Hitbox.knockdown || !grounded)
+		{
+			state = FighterState::Knockdown;
+			stateFrame = 0;
+			knockdownFrames = 26;
+			if (Hitbox.knockbackY < 0.0f)
+			{
+				velocityY = Hitbox.knockbackY;
+				grounded = false;
+			}
+		}
+		else
+		{
+			state = FighterState::HitStun;
+			stateFrame = 0;
+			stunFrames = Hitbox.hitStun;
+		}
+
+		return AppliedHit{FinalDamage, false, false, false, false, false};
+	}
+
+	void FighterRuntime::NotifyAttackConnected(bool bBlocked, const MoveDef& Move)
+	{
+		moveHasRegisteredContact = true;
+		hitStopFrames = Move.hitbox.hitStop;
+		meter = std::min(kMaxMeter, meter + (bBlocked ? Move.meterGainOnBlock : Move.meterGainOnHit));
+	}
+
+	void FighterRuntime::ApplyHorizontalFriction()
+	{
+		if (!grounded)
+		{
+			return;
+		}
+		velocityX *= 0.78f;
+		if (std::fabs(velocityX) < 0.08f)
+		{
+			velocityX = 0.0f;
+		}
+	}
+
+	AnimId FighterRuntime::CurrentAnim() const
+	{
+		if (currentMove)
+		{
+			return currentMove->anim;
+		}
+		switch (state)
+		{
+		case FighterState::WalkForward: return AnimId::Walk;
+		case FighterState::WalkBackward: return AnimId::WalkBackward;
+		case FighterState::Jump:
+			if (airDriftX * static_cast<float>(facing) > 0.1f) return AnimId::JumpForward;
+			if (airDriftX * static_cast<float>(facing) < -0.1f) return AnimId::JumpBackward;
+			return AnimId::JumpNeutral;
+		case FighterState::Fall: return AnimId::Fall;
+		case FighterState::Landing: return AnimId::Landing;
+		case FighterState::Crouch: return AnimId::Crouch;
+		case FighterState::BlockStanding: return AnimId::BlockStanding;
+		case FighterState::BlockCrouching: return AnimId::BlockCrouching;
+		case FighterState::HitStun: return AnimId::Hit;
+		case FighterState::Knockdown: return AnimId::Knockdown;
+		case FighterState::WakeUp: return AnimId::WakeUp;
+		case FighterState::GrabbedFront: return AnimId::GrabbedFront;
+		case FighterState::GrabbedLifted: return AnimId::GrabbedLifted;
+		case FighterState::Thrown: return AnimId::Thrown;
+		case FighterState::Frozen: return AnimId::Frozen;
+		case FighterState::Victory: return AnimId::Victory;
+		case FighterState::Knockout: return AnimId::Knockout;
+		default: return AnimId::Idle;
+		}
+	}
+
+	FighterSnapshot FighterRuntime::Snapshot() const
+	{
+		FighterSnapshot Out{};
+		Out.id = def->id;
+		Out.name = def->name;
+		Out.x = x;
+		Out.y = y;
+		Out.velocityX = velocityX;
+		Out.velocityY = velocityY;
+		Out.facing = facing;
+		Out.state = state;
+		Out.anim = CurrentAnim();
+		Out.stateFrame = stateFrame;
+		Out.health = health;
+		Out.maxHealth = def->stats.maxHealth;
+		Out.meter = meter;
+		Out.roundWins = roundWins;
+		Out.grounded = grounded;
+		Out.attacking = currentMove != nullptr;
+		Out.moveId = currentMove ? currentMove->id : "";
+		Out.moveLabel = currentMove ? currentMove->label : "";
+		Out.moveFrame = stateFrame;
+		Out.moveTotalFrames = currentMove ? currentMove->totalFrames : 0;
+		Out.hitActiveFrom = currentMove ? currentMove->hitbox.activeFrom : 0;
+		Out.hitActiveTo = currentMove ? currentMove->hitbox.activeTo : 0;
+		Out.armorHits = armorHits;
+		Out.parryFrames = parryFrames;
+		Out.damageReductionFrames = damageReductionFrames;
+		Out.freezeFrames = freezeFrames;
+		Out.victimRotation = victimRotation;
+		Out.visible = visible;
+		Out.pushboxWorld = PushboxWorld();
+		Out.hurtboxesWorld = CurrentHurtboxesWorld();
+
+		HitboxDef Hit{};
+		Rect WorldHit{};
+		if (HasActiveHitbox(Hit, WorldHit))
+		{
+			Out.hitboxesWorld.push_back(WorldHit);
+		}
+		return Out;
+	}
+
+	int MoveAnimFrame(const MoveDef& Move, int StateFrame, int SheetFrames)
+	{
+		if (SheetFrames <= 1)
+		{
+			return 0;
+		}
+		const int Clamped = std::clamp(StateFrame, 0, std::max(1, Move.totalFrames));
+		const int Frame = (Clamped * SheetFrames) / std::max(1, Move.totalFrames);
+		return std::clamp(Frame, 0, SheetFrames - 1);
+	}
 }

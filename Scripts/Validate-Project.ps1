@@ -25,8 +25,13 @@ foreach ($rel in $required) {
     }
 }
 
-$phaser = "D:\PROJETOS\RuaDeAco"
-if (Test-Path (Join-Path $phaser ".git")) {
+$phaserCandidates = @(
+    $env:RUA_DE_ACO_WEB_DIR,
+    (Join-Path (Split-Path -Parent $Root) "RuaDeAco"),
+    "D:\PROJETOS\RuaDeAco"
+) | Where-Object { $_ }
+$phaser = $phaserCandidates | Where-Object { Test-Path (Join-Path $_ ".git") } | Select-Object -First 1
+if ($phaser) {
     Push-Location $phaser
     $dirty = git status --porcelain
     Pop-Location

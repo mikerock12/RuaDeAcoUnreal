@@ -1,9 +1,10 @@
-# Unreal
+# Unreal & CMake
 Binaries/
 DerivedDataCache/
 Intermediate/
 Saved/
 Build/
+build/
 *.VC.db
 *.opensdf
 *.opendb
@@ -19,8 +20,12 @@ Build/
 .idea/
 *.log
 
-# Keep packaged prototype out of git; publish via GitHub Releases
+# Keep packaged prototype and signing keys out of git; publish via GitHub Releases
 Saved/Packages/
+*.keystore
+*.jks
+*.apk
+*.exe
 
 # OS
 Thumbs.db
