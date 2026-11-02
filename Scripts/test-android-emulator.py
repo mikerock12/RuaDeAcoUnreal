@@ -15,6 +15,7 @@ import re
 import subprocess
 import time
 import traceback
+import xml.etree.ElementTree as ET
 from pathlib import Path
 from PIL import Image, ImageChops, ImageStat
 
@@ -108,6 +109,7 @@ class AndroidQA:
 
     def wait_menu(self):
         deadline = time.monotonic() + 50
+        onboarding_checks = 0
         while time.monotonic() < deadline:
             self.assert_alive()
             try:
@@ -117,15 +119,45 @@ class AndroidQA:
                     return
             except (AssertionError, OSError):
                 pass
+            if onboarding_checks < 3:
+                self.dismiss_fullscreen_hint()
+                onboarding_checks += 1
             time.sleep(1)
         raise AssertionError("Rendered main menu did not appear within 50 seconds")
+
+    def dismiss_fullscreen_hint(self):
+        """Only dismiss an identified Android SystemUI onboarding button by its bounds."""
+        try:
+            self.shell("uiautomator", "dump", "/sdcard/rda-qa-window.xml", timeout=15)
+            xml = self.adb("exec-out", "cat", "/sdcard/rda-qa-window.xml", timeout=15)
+            tree = ET.fromstring(xml)
+        except (ET.ParseError, subprocess.TimeoutExpired, AssertionError):
+            return
+        for node in tree.iter("node"):
+            if node.get("package") != "com.android.systemui":
+                continue
+            text = (node.get("text", "") or node.get("content-desc", "")).strip().lower()
+            if text not in {"got it", "ok", "entendi"}:
+                continue
+            match = re.fullmatch(r"\[(\d+),(\d+)\]\[(\d+),(\d+)\]", node.get("bounds", ""))
+            if not match:
+                continue
+            x1, y1, x2, y2 = map(int, match.groups())
+            if x2 <= x1 or y2 <= y1:
+                continue
+            self.shell("input", "tap", str((x1 + x2) // 2), str((y1 + y2) // 2))
+            self.trace.append({"uiAction": "dismiss-known-fullscreen-hint", "package": node.get("package"), "text": text, "bounds": node.get("bounds")})
+            time.sleep(0.4)
+            return
 
     def run(self, apk: Path):
         self.adb("wait-for-device", timeout=90)
         self.shell("wm", "size", "1280x720")
+        self.shell("wm", "density", "160")
         self.shell("settings", "put", "system", "accelerometer_rotation", "0")
         self.shell("settings", "put", "system", "user_rotation", "0")
         self.shell("settings", "put", "global", "policy_control", "immersive.full=" + PACKAGE)
+        self.shell("settings", "put", "secure", "immersive_mode_confirmations", "confirmed")
         self.adb("install", "-r", str(apk.resolve()), timeout=120)
         self.adb("logcat", "-c")
         device = {"abi": self.shell("getprop", "ro.product.cpu.abi").strip(),
