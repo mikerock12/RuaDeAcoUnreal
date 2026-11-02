@@ -38,3 +38,5 @@ Leia `README.md`, `IMPLEMENTACAO_RUA_DE_ACO_UNREAL.md` e `contexto.md` antes de 
   - `RuaDeAco-0.2.0-Windows-x64.zip`: `50.990.468` bytes, SHA-256 `3ade0f795dec70ad8710a8425f0d6143e05c86efab7662be7a2a464e6b51a7c2`
   - `RuaDeAco-0.2.0-Android-arm64.apk`: `38.670.466` bytes, SHA-256 `6b379f441d196268a25301581ee413dd107656af95f82c2558574cef688912a5` (`apksigner verify` v2/v3 aprovado)
   Próxima etapa: PR/merge em `mikerock12/RuaDeAcoUnreal` e início da Fase G5 (`MikeAndDenyse-Nightfall`). Responsável: Coordenador SLT Games.
+
+- **2026-11-01 / Fases G5 e G6 Concluídas no Ecossistema SLT Games**: PR #1 deste repositório (`RuaDeAcoUnreal`) mesclado em `main` (`9dc9232`), e `MikeAndDenyse-Nightfall` concluiu `NightfallNative` C++20 + raylib (`77/77` checks + UDP LAN loopback) e empacotamento v1.0.0. Próxima etapa: Fase G7 (publicação da Release `v0.2.0` neste repositório e `v1.0.0` em `MikeAndDenyse-Nightfall`). Responsável: Coordenador SLT Games.
