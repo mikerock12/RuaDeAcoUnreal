@@ -61,7 +61,9 @@ Copy-Item -LiteralPath $BaseApk -Destination $Unsigned -Force
 Push-Location $Stage
 try { Run-Checked (Join-Path $Jdk 'bin/jar.exe') @('uf', $Unsigned, 'classes.dex', 'lib') } finally { Pop-Location }
 $Aligned = Join-Path $BuildDir 'aligned.apk'
-Run-Checked (Join-Path $BuildTools 'zipalign.exe') @('-f', '-P', '16', '4', $Unsigned, $Aligned)
+$Portable = Join-Path $BuildDir 'portable.apk'
+Run-Checked 'python' @((Join-Path $PSScriptRoot 'normalize-apk-paths.py'), $Unsigned, $Portable, '--assets', (Join-Path $BuildDir 'assets'))
+Run-Checked (Join-Path $BuildTools 'zipalign.exe') @('-f', '-P', '16', '4', $Portable, $Aligned)
 $Suffix = if ($Abi -eq 'arm64-v8a') { 'arm64' } else { 'x86_64-QA' }
 $Final = Join-Path $ReleaseDir "RuaDeAco-$Version-Android-$Suffix.apk"
 if ($UnsignedOnly) {

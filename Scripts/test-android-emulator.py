@@ -15,6 +15,7 @@ import re
 import subprocess
 import time
 import traceback
+import zipfile
 import xml.etree.ElementTree as ET
 from pathlib import Path
 from PIL import Image, ImageChops, ImageStat
@@ -151,6 +152,12 @@ class AndroidQA:
             return
 
     def run(self, apk: Path):
+        with zipfile.ZipFile(apk) as package:
+            raw_names = [entry.orig_filename for entry in package.infolist()]
+            assert not any("\\" in name for name in raw_names), "APK contains paths Android cannot resolve"
+            assert "assets/Content/RuaDeAco/Art/UI/rua-de-aco-logo.png" in raw_names, "Canonical APK logo missing"
+            assert sum(name.startswith("assets/") and not name.endswith("/") for name in raw_names) == 338, "Canonical APK must contain all 338 original assets"
+            assert package.testzip() is None, "APK CRC check failed"
         self.adb("wait-for-device", timeout=90)
         self.shell("wm", "size", "1280x720")
         self.shell("wm", "density", "160")
