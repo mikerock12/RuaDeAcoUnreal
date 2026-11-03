@@ -497,7 +497,7 @@ namespace
 		Input.grabPressed=Input.superPressed=Input.debugPressed=false;
 	}
 
-	void ReadTouchInput(RDA::InputFrame& OutP1, const Rectangle& DestViewport, bool& OutTouchDetected)
+	void ReadTouchInput(RDA::InputFrame& OutP1, const Rectangle& DestViewport, bool& OutTouchDetected, bool AllowGameplayControls)
 	{
 		static RDA::InputFrame Previous{};
 		static bool PreviousGrab = false, PreviousSuper = false;
@@ -505,7 +505,9 @@ namespace
 		bool Grab = false, Super = false;
 		const int Count = GetTouchPointCount();
 		if (Count > 0) OutTouchDetected = true;
-		const int Points = Count > 0 ? Count : (IsMouseButtonDown(MOUSE_LEFT_BUTTON) ? 1 : 0);
+		// Menu targets can overlap the invisible joystick/buttons. Reset touch
+		// edges outside a match instead of interpreting a stage tap as direction.
+		const int Points = AllowGameplayControls ? (Count > 0 ? Count : (IsMouseButtonDown(MOUSE_LEFT_BUTTON) ? 1 : 0)) : 0;
 		for (int i = 0; i < Points; ++i)
 		{
 			Vector2 P = PointerLogical(DestViewport, Count > 0 ? GetTouchPosition(i) : GetMousePosition());
@@ -563,7 +565,7 @@ namespace
 		Previous[static_cast<size_t>(Pad)]=Out;
 	}
 
-	RDA::InputFrame ReadPlayerOneInput(const Rectangle& DestViewport, bool& InOutTouchActive)
+	RDA::InputFrame ReadPlayerOneInput(const Rectangle& DestViewport, bool& InOutTouchActive, bool AllowGameplayTouch)
 	{
 		RDA::InputFrame Out{};
 		Out.left = IsKeyDown(KEY_A);
@@ -591,7 +593,7 @@ namespace
 
 		ReadGamepadInput(Out,0);
 
-		ReadTouchInput(Out, DestViewport, InOutTouchActive);
+		ReadTouchInput(Out, DestViewport, InOutTouchActive, AllowGameplayTouch);
 		return Out;
 	}
 
@@ -648,7 +650,13 @@ int main(int argc, char** argv)
 	}
 
 	SetConfigFlags(RenderSmokeDirectory.empty() ? FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT : FLAG_WINDOW_HIDDEN);
+#if defined(PLATFORM_ANDROID)
+	// Use the physical EGL surface. raylib 5.5 otherwise scales its requested
+	// window in addition to our own centered 640x360 framebuffer viewport.
+	InitWindow(0, 0, "Rua de Aco — Edicao Nativa C++20 (6 Lutadores / 3 Arenas)");
+#else
 	InitWindow(1280, 720, "Rua de Aco — Edicao Nativa C++20 (6 Lutadores / 3 Arenas)");
+#endif
 	RDAAssets::Initialize();
 	SetExitKey(KEY_NULL);
 	SetTargetFPS(RenderSmokeDirectory.empty() ? 60 : 0);
@@ -820,7 +828,7 @@ int main(int argc, char** argv)
 			DrawH
 		};
 
-		RDA::InputFrame P1 = ReadPlayerOneInput(DestViewport, bShowTouchOverlay);
+		RDA::InputFrame P1 = ReadPlayerOneInput(DestViewport, bShowTouchOverlay, Screen == AppScreen::Match);
 		P1.pausePressed |= IsKeyPressed(KEY_BACK);
 		static bool PauseWasDown=false;
 		bool PauseDown=false;
@@ -928,6 +936,7 @@ int main(int argc, char** argv)
 					const RDA::StageId Stage = static_cast<RDA::StageId>(SelectedStage);
 					PrepareFighterVisuals(SelectedP1,SelectedP2);
 					World = std::make_unique<RDA::CombatWorld>(F1, F2, SelectedMode, Stage);
+					TraceLog(LOG_INFO,"RDA_MATCH_STAGE: %d p1=%d p2=%d",static_cast<int>(World->Stage()),SelectedP1,SelectedP2);
 					bShowMoveList = false;
 					bTrainingCpuActive = false;
 					if (StageVisuals[static_cast<size_t>(SelectedStage)].hasMusic)

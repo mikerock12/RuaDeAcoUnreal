@@ -50,7 +50,10 @@ class AndroidQA:
                 str(round((self.height - 360 * scale) / 2 + y * scale)))
 
     def tap(self, x: float, y: float, wait: float = 0.65):
-        self.shell("input", "tap", *self.point(x, y))
+        # adb's zero-duration tap can put down/up in a single rendered frame.
+        # Use a stationary human-length touch, retaining all visual assertions.
+        point = self.point(x, y)
+        self.shell("input", "swipe", *point, *point, "120")
         time.sleep(wait)
 
     def hold(self, x: float, y: float, milliseconds: int):
@@ -159,7 +162,6 @@ class AndroidQA:
             assert sum(name.startswith("assets/") and not name.endswith("/") for name in raw_names) == 338, "Canonical APK must contain all 338 original assets"
             assert package.testzip() is None, "APK CRC check failed"
         self.adb("wait-for-device", timeout=90)
-        self.shell("wm", "size", "1280x720")
         self.shell("wm", "density", "160")
         self.shell("settings", "put", "system", "accelerometer_rotation", "0")
         self.shell("settings", "put", "system", "user_rotation", "0")
@@ -173,38 +175,57 @@ class AndroidQA:
                   "physicalDevice": False, "gpu": "CI emulator SwiftShader"}
         assert device["abi"] == "x86_64", "QA artifact must run on the x86_64 emulator"
         portrait_checks = []
-        for fighter, name in enumerate(FIGHTERS):
+        display_checks = []
+        current_display = None
+        cases = [("16:9", fighter) for fighter in range(6)] + [("20:9-portrait-natural", fighter) for fighter in range(3)]
+        for display, fighter in cases:
+            name = FIGHTERS[fighter]
+            capture_prefix = "" if display == "16:9" else "wide-"
             self.shell("am", "force-stop", PACKAGE)
+            if display != current_display:
+                # The second profile starts from a naturally portrait phone.
+                # The Activity must rotate its physical surface to landscape.
+                self.shell("wm", "size", "1280x720" if display == "16:9" else "720x1600")
+                current_display = display
             self.shell("am", "start", "-W", "-n", COMPONENT)
             self.wait_menu()
-            self.capture(f"{fighter:02}-{name}-00-title")
+            expected_ratio = 1280 / 720 if display == "16:9" else 1600 / 720
+            assert abs(self.width / self.height - expected_ratio) < 0.02, f"Wrong physical surface for {display}: {self.width}x{self.height}"
+            if fighter == 0:
+                display_checks.append({"profile": display, "width": self.width, "height": self.height})
+            self.capture(f"{capture_prefix}{fighter:02}-{name}-00-title")
             self.tap(320, 218)  # Training; stationary opponent for this UI smoke.
-            selection = self.capture(f"{fighter:02}-{name}-01-selection")
+            selection = self.capture(f"{capture_prefix}{fighter:02}-{name}-01-selection")
             for index in range(6):
                 crop = selection.crop((33 + 98 * index, 54, 108 + 98 * index, 125))
                 assert max(ImageStat.Stat(crop).stddev) > 12, f"Missing/blank portrait {index}"
-            portrait_checks.append({"p1": name, "sixPortraitsRendered": True})
             self.tap(71 + 98 * fighter, 105)
-            self.capture(f"{fighter:02}-{name}-02-p1-chosen")
+            self.capture(f"{capture_prefix}{fighter:02}-{name}-02-p1-chosen")
             self.tap(71 + 98 * ((fighter + 1) % 6), 105)
-            self.capture(f"{fighter:02}-{name}-03-opponent-chosen")
+            self.capture(f"{capture_prefix}{fighter:02}-{name}-03-opponent-chosen")
             self.tap(121 + 198 * (fighter % 3), 300, wait=4)
-            before = self.capture(f"{fighter:02}-{name}-04-match")
+            before = self.capture(f"{capture_prefix}{fighter:02}-{name}-04-match")
             self.assert_match(before)
+            match_log = self.adb("logcat", "-d", "-s", "raylib:I", "*:S").decode(errors="replace")
+            observed = re.findall(r"RDA_MATCH_STAGE: (\d+) p1=(\d+) p2=(\d+)", match_log)
+            expected = (fighter % 3, fighter, (fighter + 1) % 6)
+            assert observed and tuple(map(int, observed[-1])) == expected, f"Stage/fighter selection mismatch: expected={expected}, observed={observed[-1:]}"
+            portrait_checks.append({"profile": display, "p1": name, "sixPortraitsRendered": True,
+                                    "actualStage": expected[0], "actualFighters": list(expected[1:])})
             self.hold(106, 294, 650)
             self.hold(72, 260, 160)
             self.tap(536, 294)
             self.tap(572, 268)
             self.tap(604, 294)
-            after = self.capture(f"{fighter:02}-{name}-05-after-input")
+            after = self.capture(f"{capture_prefix}{fighter:02}-{name}-05-after-input")
             self.assert_match(after)
             changed = sum(max(pixel) > 12 for pixel in ImageChops.difference(before, after).crop((0, 60, 640, 280)).getdata())
             assert changed > 100, "Gameplay frame did not update after injected input"
             self.tap(614, 20)
-            paused = self.capture(f"{fighter:02}-{name}-06-paused")
+            paused = self.capture(f"{capture_prefix}{fighter:02}-{name}-06-paused")
             self.assert_pause(paused, True)
             self.tap(320, 130)
-            resumed = self.capture(f"{fighter:02}-{name}-07-resumed")
+            resumed = self.capture(f"{capture_prefix}{fighter:02}-{name}-07-resumed")
             self.assert_match(resumed)
             self.assert_pause(resumed, False)
             pid = self.assert_alive()
@@ -213,10 +234,12 @@ class AndroidQA:
             self.shell("am", "start", "-W", "-n", COMPONENT)
             time.sleep(3)
             assert self.assert_alive() == pid, "Process restarted during short background/resume"
-            lifecycle = self.capture(f"{fighter:02}-{name}-08-background-resume")
+            lifecycle = self.capture(f"{capture_prefix}{fighter:02}-{name}-08-background-resume")
             self.assert_match(lifecycle)
-            print(f"Android emulator UI smoke: {name}, arena {fighter % 3}, input/pause/resume captured", flush=True)
-        return {"device": device, "fighters": portrait_checks, "arenasVisited": 3,
+            (self.output / f"{capture_prefix}{fighter:02}-{name}-logcat.txt").write_bytes(self.adb("logcat", "-d", "-v", "threadtime"))
+            print(f"Android emulator UI smoke: {display}, {name}, actual arena {expected[0]}, input/pause/resume captured", flush=True)
+        return {"device": device, "displayProfiles": display_checks, "fighters": portrait_checks,
+                "arenasVisited": len({entry["actualStage"] for entry in portrait_checks}),
                 "inputsInjected": ["right", "jump", "light", "heavy", "special"],
                 "pauseAndResumeObserved": True, "backgroundRetainedMatch": True,
                 "limits": ["No physical ARM64 devices", "No audio-output measurement", "No multitouch assertion",
@@ -257,6 +280,9 @@ def main() -> int:
         crash = (args.output / "crash-buffer.txt").read_text(encoding="utf-8", errors="replace")
         if PACKAGE in crash and re.search(r"Fatal signal|FATAL EXCEPTION|Abort message:", crash):
             result.update(passed=False, crashBufferFailure=True)
+        logs = "\n".join(path.read_text(encoding="utf-8", errors="replace") for path in args.output.glob("*logcat.txt"))
+        if re.search(r"RDA_ASSET_MISSING|RDA_STAGE_ASSET_MISSING|Missing canonical animation|Canonical stage assets incomplete", logs):
+            result.update(passed=False, missingAssetFailure=True)
         result["captures"] = qa.captures
         (args.output / "result.json").write_text(json.dumps(result, indent=2), encoding="utf-8")
     print(json.dumps({key: value for key, value in result.items() if key != "captures"}, indent=2), flush=True)

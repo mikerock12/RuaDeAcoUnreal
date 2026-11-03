@@ -1,7 +1,7 @@
 #requires -Version 5.1
 <#
 .SYNOPSIS
-    Compila, testa e gera o pacote portatil (.zip) e o instalador Inno Setup (.exe) do Rua de Aco 0.2.0 para Windows x64.
+    Compila, testa e gera o pacote portatil (.zip) e o instalador Inno Setup (.exe) do Rua de Aco para Windows x64.
 #>
 [CmdletBinding()]
 param(
@@ -16,11 +16,11 @@ $Root = Split-Path -Parent $PSScriptRoot
 
 # 2. Executa smoke headless no executavel empacotado
 $ExePath = Join-Path $Root "Saved\Packages\Windows\RuaDeAcoUnreal.exe"
-$SmokeOut = & $ExePath "--headless-smoke"
-if ($LASTEXITCODE -ne 0) {
+$SmokeProcess = Start-Process -FilePath $ExePath -ArgumentList '--headless-smoke' -PassThru -Wait -WindowStyle Hidden
+if ($SmokeProcess.ExitCode -ne 0) {
     throw "Falha no smoke headless do executavel Windows."
 }
-Write-Host $SmokeOut
+Write-Host 'Smoke headless do executavel empacotado aprovado.'
 
 # 3. Prepara diretorio de release
 $ReleaseDir = Join-Path $Root "Saved\Packages\Release-$Version"
@@ -33,6 +33,7 @@ $SevenZip = "C:\Program Files\7-Zip\7z.exe"
 $WinPkgDir = Join-Path $Root "Saved\Packages\Windows"
 if (Test-Path $SevenZip) {
     & $SevenZip a -tzip -mx=5 $ZipPath "$WinPkgDir\*" | Out-Null
+    if ($LASTEXITCODE -ne 0) { throw 'Falha ao gerar o ZIP portatil.' }
 } else {
     Compress-Archive -Path "$WinPkgDir\*" -DestinationPath $ZipPath -Force
 }
