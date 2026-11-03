@@ -2,7 +2,7 @@
 
 O [Rua de Aço original TypeScript/Phaser](https://github.com/mikerock12/RuaDeAco) define as regras, os lutadores, os golpes, a arte e o áudio atuais. Este repositório reaproveita a base C++ existente e a atualiza conforme essa referência; a implementação Unreal antiga não é a fonte de gameplay.
 
-A versão 0.3.0 está em validação para Windows x64 e Android ARM64. O mesmo frontend C++/raylib desenha menus, arenas, animações, controles e áudio nas duas plataformas. No Android ele usa NativeActivity; a antiga tela Java simplificada não participa do build.
+A versão de entrega 0.3.0 atende Windows x64 e Android ARM64. O mesmo frontend C++/raylib desenha menus, arenas, animações, controles e áudio nas duas plataformas. No Android ele usa NativeActivity; a antiga tela Java simplificada não participa do build.
 
 - Seis lutadores: Guto Barba, Rafa Maré, Noir Reflexo, Astro Riso, Dante Sinal e Léo Violeta.
 - Três arenas: Cais da Cidade, Cozinha Macabra e Sítio.

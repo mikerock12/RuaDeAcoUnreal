@@ -1,5 +1,13 @@
 # Rua de Aço Nativo (C++20 / raylib / Unreal) — Guia de Agentes (`AGENTS.md`)
 
+## Versão de entrega 0.3.0 — resultado de 03/11/2026
+
+Aplicação e50d6cf validada: CTest 3/3, 46 checks de componentes, 33 replays TypeScript/16.170 passos (campos discretos exatos, tolerância float 0,002). Windows instalado em diretório isolado: 342 arquivos iguais ao ZIP, headless, 29 capturas reais e desinstalação limpa. CI 41588386978 aprovado nos três jobs: Android 15/API 35 x86_64/SwiftShader, nove percursos, seis lutadores e três arenas, em 16:9 e telefone inicialmente em retrato girando para 20:9. As 81 capturas foram revisadas; arena/lutadores, HUD, inputs, pausa e background/retorno corretos, sem erros de assets ou crashes.
+
+APK ARM64 com os 338 assets verificados por SHA-256/CRC, assinatura v2/v3, certificado igual à versão 0.2.0 e alinhamento de 16 KiB. O original TypeScript continua canônico; o frontend C++ reaproveitado acompanha suas regras e apresentação. Touch controla P1; 2P local requer controles externos. Sem aparelhos físicos: atualização ARM64 instalada, áudio ouvido, desempenho e multitouch físico não foram homologados. Replays não comparam hashes completos nem provam igualdade visual pixel a pixel. Publicação e backups são coordenados no AGENTS.md/contexto.md do portal. Responsável: Codex.
+
+Os registros anteriores abaixo documentam a investigação e suas pendências históricas; o resultado atual está neste bloco.
+
 ## Superfície e seleção Android — 03/11/2026
 
 Após a correção ZIP, o CI 41586905713 carregou imagens, menus e partidas reais e completou quatro percursos de entrada/pausa/retorno. Falhou ao retomar a pausa no quinto percurso com `adb input tap` sem duração. A revisão visual também encontrou um erro real: o toque no botão Cais ativava o joystick invisível do menu e incrementava a arena para Cozinha. Os controles de combate touch agora só atuam durante uma partida; seleção emite o estágio real para o smoke exigir igualdade com a escolha.
