@@ -1,0 +1,20 @@
+{
+  "game": "Rua de Aço",
+  "sourceRepository": "mikerock12/RuaDeAco",
+  "sourceCommit": "0a154303a45c96f9e446c3f6dcf0bef4d3980b76",
+  "sourcePath": "public/assets/references/rua-de-aco-logo.png",
+  "sourceSha256": "31fc13d7395b5f952dd4248a96d31259c1f20af913d816b8174a38599ec97104",
+  "method": "Original logo preserved. Aspect-ratio-preserving technical resize and padding to 256x256, followed by multi-size ICO encoding.",
+  "sizes": [
+    16,
+    20,
+    24,
+    32,
+    40,
+    48,
+    64,
+    96,
+    128,
+    256
+  ]
+}

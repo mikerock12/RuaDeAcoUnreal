@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(RuaDeAcoNative VERSION 0.3.0 LANGUAGES C CXX)
+project(RuaDeAcoNative VERSION 0.3.1 LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -40,6 +40,14 @@ elseif(WIN32 AND EXISTS "${RAYLIB_INC_DIR}/raylib.h" AND EXISTS "${RAYLIB_LIB_DI
     add_executable(RuaDeAcoUnreal
         Source/Prototype/PrototypeMain.cpp
     )
+    enable_language(RC)
+    set(SLT_BRANDING_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Platform/Windows/Branding")
+    set(SLT_PRODUCT_NAME "Rua de Aço")
+    set(SLT_VERSION "${PROJECT_VERSION}")
+    string(REPLACE "." "," SLT_VERSION_COMMAS "${PROJECT_VERSION}.0")
+    configure_file(Platform/Windows/GameResources.rc.in "${CMAKE_CURRENT_BINARY_DIR}/GameResources.rc" @ONLY)
+    target_sources(RuaDeAcoUnreal PRIVATE Platform/Windows/WindowsBranding.cpp "${CMAKE_CURRENT_BINARY_DIR}/GameResources.rc")
+    target_include_directories(RuaDeAcoUnreal PRIVATE Platform/Windows)
     target_compile_definitions(RuaDeAcoUnreal PRIVATE NOMINMAX PLATFORM_DESKTOP GRAPHICS_API_OPENGL_33 USE_LIBTYPE_SHARED)
     target_include_directories(RuaDeAcoUnreal PRIVATE "${RAYLIB_INC_DIR}")
     target_link_libraries(RuaDeAcoUnreal PRIVATE

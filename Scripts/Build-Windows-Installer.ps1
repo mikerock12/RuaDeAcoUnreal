@@ -5,14 +5,14 @@
 #>
 [CmdletBinding()]
 param(
-    [string]$Version = "0.3.0"
+    [string]$Version = "0.3.1"
 )
 
 $ErrorActionPreference = "Stop"
 $Root = Split-Path -Parent $PSScriptRoot
 
 # 1. Compila o executavel Release e sincroniza Content/
-& (Join-Path $PSScriptRoot "Build-Windows.ps1") -Configuration Release
+& (Join-Path $PSScriptRoot "Build-Windows.ps1") -Configuration Release -Version $Version
 
 # 2. Executa smoke headless no executavel empacotado
 $ExePath = Join-Path $Root "Saved\Packages\Windows\RuaDeAcoUnreal.exe"
