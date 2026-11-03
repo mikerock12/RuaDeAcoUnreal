@@ -1,5 +1,8 @@
 #include "RDACombatWorld.h"
 #include "raylib.h"
+#if defined(_WIN32)
+#include "WindowsBranding.h"
+#endif
 #include "CanonicalPresentation.h"
 #include "RDAStageVisuals.h"
 #include "RDAPlatformAssets.h"
@@ -659,6 +662,12 @@ int main(int argc, char** argv)
 #endif
 	RDAAssets::Initialize();
 	SetExitKey(KEY_NULL);
+#if defined(_WIN32)
+	const auto IconBytes = SLTBranding::ApplicationIconPng();
+	Image AppIcon = LoadImageFromMemory(".png", IconBytes.data(), static_cast<int>(IconBytes.size()));
+	if (AppIcon.data) { SetWindowIcon(AppIcon); UnloadImage(AppIcon); TraceLog(LOG_INFO, "RDA_APP_ICON: embedded icon applied"); }
+	else TraceLog(LOG_ERROR, "RDA_APP_ICON: embedded icon missing or invalid");
+#endif
 	SetTargetFPS(RenderSmokeDirectory.empty() ? 60 : 0);
 	InitAudioDevice();
 

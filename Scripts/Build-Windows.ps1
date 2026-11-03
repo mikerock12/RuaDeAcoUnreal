@@ -11,7 +11,9 @@
 [CmdletBinding()]
 param(
     [ValidateSet("Debug", "Release")]
-    [string]$Configuration = "Release"
+    [string]$Configuration = "Release",
+    [ValidatePattern('^\d+\.\d+\.\d+$')]
+    [string]$Version = "0.3.1"
 )
 
 $ErrorActionPreference = "Stop"
@@ -38,7 +40,8 @@ $Sources = @(
     (Join-Path $Root "Source\RuaDeAcoRuntime\Private\RDAFighterCatalog.cpp"),
     (Join-Path $Root "Source\RuaDeAcoRuntime\Private\RDAFighter.cpp"),
     (Join-Path $Root "Source\RuaDeAcoRuntime\Private\RDACombatWorld.cpp"),
-    (Join-Path $Root "Source\Prototype\PrototypeMain.cpp")
+    (Join-Path $Root "Source\Prototype\PrototypeMain.cpp"),
+    (Join-Path $Root "Platform\Windows\WindowsBranding.cpp")
 )
 
 $IncludeRuntime = Join-Path $Root "Source\RuaDeAcoRuntime\Public"
@@ -50,6 +53,11 @@ $OptFlags = if ($Configuration -eq "Debug") { @("/Od", "/Zi", "/D_DEBUG") } else
 $Fo = ($ObjDir.TrimEnd('\') + '\')
 $clRsp = Join-Path $ObjDir "compile.rsp"
 $linkRsp = Join-Path $ObjDir "link.rsp"
+$BrandingDir = Join-Path $Root 'Platform/Windows/Branding'
+$ResourceFile = Join-Path $ObjDir 'GameResources.rc'
+$ResourceObject = Join-Path $ObjDir 'GameResources.res'
+$ResourceText = Get-Content -LiteralPath (Join-Path $Root 'Platform/Windows/GameResources.rc.in') -Raw -Encoding UTF8
+$ResourceText.Replace('@SLT_BRANDING_DIR@', $BrandingDir.Replace('\','/')).Replace('@SLT_PRODUCT_NAME@', 'Rua de Aço').Replace('@SLT_VERSION_COMMAS@', "$Version.0".Replace('.',',')).Replace('@SLT_VERSION@', $Version) | Set-Content -LiteralPath $ResourceFile -Encoding UTF8
 
 @(
     "/nologo",
@@ -65,6 +73,7 @@ $linkRsp = Join-Path $ObjDir "link.rsp"
     "/DGRAPHICS_API_OPENGL_33",
     "/I$IncludeRuntime",
     "/I$IncludeRaylib",
+    "/I$(Join-Path $Root 'Platform/Windows')",
     "/Fo$Fo"
 ) + $OptFlags + $Sources | Set-Content -Path $clRsp -Encoding ascii
 
@@ -76,6 +85,7 @@ $objs = $Sources | ForEach-Object { Join-Path $ObjDir ((Split-Path $_ -Leaf) -re
     "/OUT:$ExePath",
     "/LIBPATH:$LibRaylib"
 ) + $objs + @(
+    $ResourceObject,
     "raylibdll.lib",
     "winmm.lib",
     "gdi32.lib",
@@ -86,7 +96,7 @@ $objs = $Sources | ForEach-Object { Join-Path $ObjDir ((Split-Path $_ -Leaf) -re
 ) | Set-Content -Path $linkRsp -Encoding ascii
 
 Write-Host "Compilando prototipo $Configuration..."
-cmd.exe /c "call `"$VcVars`" && cl.exe `"@$clRsp`" && link.exe `"@$linkRsp`""
+cmd.exe /c "call `"$VcVars`" && rc.exe /nologo /fo `"$ResourceObject`" `"$ResourceFile`" && cl.exe `"@$clRsp`" && link.exe `"@$linkRsp`""
 if ($LASTEXITCODE -ne 0) {
     throw "Falha na compilacao (codigo $LASTEXITCODE)."
 }

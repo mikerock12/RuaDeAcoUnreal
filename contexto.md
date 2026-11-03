@@ -83,3 +83,10 @@ Este repositório contém a implementação nativa em C++20 do jogo de luta **Ru
 | 01/11/2026 | **Fases G5 e G6**: PR #1 mesclado em `main` (`9dc9232`); `MikeAndDenyse-Nightfall` v1.0.0 concluído | Pronto para publicação da Release `v0.2.0` na Fase G7 | Coordenador SLT Games |
 | 01/11/2026 | **Fase G7**: Publicação da Release GitHub estável `v0.2.0` (`https://github.com/mikerock12/RuaDeAcoUnreal/releases/tag/v0.2.0`) | 4 assets publicados e verificados por digest SHA-256 | Coordenador SLT Games |
 | 01/11/2026 | **Fase G8**: Publicação de `/games/rua-de-aco/` no portal (`5fe367e`, Worker `f24ab0eb-d181-435b-b8ce-5764468138c8`) | Páginas 200, APIs 200 com SHA-256 v0.2.0 e redirects 302 validados | Coordenador SLT Games |
+
+
+## Ícones Windows — 03/11/2026
+
+Preparada versão 0.3.1. Logo original Rua de Aço preservado, com origem e SHA-256 registrados. ICO com dez tamanhos (16–256 px) incorporado ao jogo e instalador; PNG incorporado ao PE para SetWindowIcon, atalhos e desinstalação apontam ao EXE. CMake/MSVC e Inno Setup compilam os recursos; o script direto do Rua de Aço também. Verificação PE dos quatro executáveis comparou todas as imagens ao ICO aprovado; as duas janelas reais devolveram ícone 256×256 e logs de aplicação. Instalador RDA: 342 arquivos iguais ao ZIP, headless, 29 capturas e desinstalação aprovados. Nightfall: instalador compilado e ícone extraído; execução portátil com ícone conferida. Instalação Nightfall 1.0.1 já existe em Program Files e foi preservada, impedindo repetir o teste de instalação neste host.
+
+APKs recebem apenas versão de manutenção, com a mesma assinatura v2/v3 anterior e alinhamento 16 KiB; gameplay permanece o da correção anterior. PR/CI, releases, portal e backup desta etapa serão consolidados pelo coordenador no contexto do portal. Testes físicos Android continuam pendentes. Responsável: Codex.

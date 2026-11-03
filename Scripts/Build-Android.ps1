@@ -2,8 +2,8 @@
 # Builds the same C++ frontend as Windows. x86_64 is for emulator QA only.
 [CmdletBinding()]
 param(
-    [string]$Version = '0.3.0',
-    [int]$VersionCode = 300,
+    [string]$Version = '0.3.1',
+    [int]$VersionCode = 301,
     [ValidateSet('arm64-v8a', 'x86_64')][string]$Abi = 'arm64-v8a',
     [string]$RaylibSource = $env:RAYLIB_SOURCE,
     [switch]$UnsignedOnly,
