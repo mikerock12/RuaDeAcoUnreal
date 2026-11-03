@@ -37,7 +37,7 @@ def normalize(source: Path, target: Path, assets: Path) -> None:
             with src.open(entry) as reader, dst.open(portable, "w") as writer:
                 shutil.copyfileobj(reader, writer, 1024 * 1024)
     expected = {"assets/" + p.relative_to(assets).as_posix(): p
-                for p in assets.rglob("*") if p.is_file()}
+                for p in assets.rglob("*") if p.is_file() and p.name != ".gitkeep"}
     if not expected:
         raise ValueError("No source assets to verify")
     with zipfile.ZipFile(target) as apk:
