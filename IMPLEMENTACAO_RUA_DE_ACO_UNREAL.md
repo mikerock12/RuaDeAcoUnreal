@@ -1,5 +1,7 @@
 # Rua de Aço Unreal — Plano de Implementação
 
+> Nota de execução (03/11/2026): o plano abaixo é histórico. A base C++ existente é reaproveitada e atualizada conforme `D:\PROJETOS\SoftwaresSmellsLikeTech\RuaDeAco`, fonte canônica atual. O frontend de entrega Windows/Android é C++/raylib; não criar novo projeto. Estado e verificações atuais estão em README.md e contexto.md.
+
 > **Status:** novo projeto, independente do Rua de Aço atual.
 >
 > **Objetivo:** criar uma nova implementação do **Rua de Aço** em **Unreal Engine 5.8 + C++**, tomando o jogo atual em Phaser como referência de gameplay, identidade, personagens, assets e regras, **sem substituir o projeto existente**. Local do projeto Rua de Aço Phaser: D:\PROJETOS\RuaDeAco

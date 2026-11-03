@@ -1,17 +1,33 @@
-name: C++20 Combat Runtime & Parity CI
+name: Native combat, Android build and emulator QA
 
 on:
+  workflow_dispatch:
   push:
     branches: [ main ]
   pull_request:
     branches: [ main ]
 
+permissions:
+  contents: read
+
+concurrency:
+  group: native-qa-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build-and-test-windows:
     runs-on: windows-latest
+    timeout-minutes: 30
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Enable MSVC x64 environment
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
 
       - name: Configure CMake (MSVC Release)
         run: cmake --preset windows-msvc-release
@@ -19,5 +35,110 @@ jobs:
       - name: Build Runtime, Prototype & Golden Tests
         run: cmake --build --preset windows-msvc-release
 
-      - name: Run CTest (44 Golden Parity Checks + Headless Smoke)
+      - name: Run catalog checks, canonical replays and headless smoke
         run: ctest --preset windows-msvc-release --output-on-failure
+
+      - name: Preserve native test evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-native-test-evidence
+          path: build/windows-msvc-release/Testing/Temporary/
+          if-no-files-found: warn
+
+  build-android:
+    runs-on: windows-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: 'platform-tools platforms;android-36 build-tools;36.0.0 ndk;27.0.12077973'
+      - name: Use the installed NDK explicitly
+        shell: pwsh
+        run: |
+          $sdk = if ($env:ANDROID_SDK_ROOT) { $env:ANDROID_SDK_ROOT } else { $env:ANDROID_HOME }
+          if (-not $sdk) { throw 'Android SDK not found' }
+          "ANDROID_SDK_ROOT=$sdk" | Out-File -FilePath $env:GITHUB_ENV -Append
+          "ANDROID_NDK_ROOT=$sdk/ndk/27.0.12077973" | Out-File -FilePath $env:GITHUB_ENV -Append
+      - name: Build x86_64 emulator candidate from shared C++ frontend
+        shell: pwsh
+        run: ./Scripts/Build-Android.ps1 -Abi x86_64 -UnsignedOnly
+      - name: Build unsigned ARM64 candidate from the same source
+        shell: pwsh
+        run: ./Scripts/Build-Android.ps1 -Abi arm64-v8a -UnsignedOnly
+      - name: Sign only the emulator APK with a temporary QA key
+        shell: pwsh
+        run: |
+          $key = Join-Path $env:RUNNER_TEMP 'rda-emulator-only.keystore'
+          $keytool = Join-Path $env:JAVA_HOME 'bin/keytool.exe'
+          & $keytool -genkeypair -keystore $key -alias androiddebugkey -storepass android -keypass android -keyalg RSA -keysize 2048 -validity 2 -dname 'CN=Android Debug,O=Android,C=US'
+          if ($LASTEXITCODE -ne 0) { throw 'Temporary QA signing key failed' }
+          $unsigned = @(Get-ChildItem Saved/Packages/Release-*/*-Android-x86_64-QA-unsigned.apk)
+          if ($unsigned.Count -ne 1) { throw 'Expected exactly one emulator APK' }
+          New-Item -ItemType Directory -Path Saved/EmulatorQA -Force | Out-Null
+          $signer = Join-Path $env:ANDROID_SDK_ROOT 'build-tools/36.0.0/apksigner.bat'
+          & $signer sign --ks $key --ks-key-alias androiddebugkey --ks-pass pass:android --key-pass pass:android --out Saved/EmulatorQA/RuaDeAco-emulator-QA.apk $unsigned[0].FullName
+          if ($LASTEXITCODE -ne 0) { throw 'Emulator QA signing failed' }
+          & $signer verify --verbose Saved/EmulatorQA/RuaDeAco-emulator-QA.apk
+          if ($LASTEXITCODE -ne 0) { throw 'Emulator QA signature verification failed' }
+          Get-FileHash Saved/EmulatorQA/RuaDeAco-emulator-QA.apk -Algorithm SHA256
+      - name: Upload emulator-only signed APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-emulator-qa-apk
+          path: Saved/EmulatorQA/RuaDeAco-emulator-QA.apk
+          if-no-files-found: error
+      - name: Upload unsigned ARM64 build evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-arm64-unsigned-candidate
+          path: Saved/Packages/Release-*/*-Android-arm64-unsigned.apk
+          if-no-files-found: error
+
+  android-emulator-qa:
+    needs: build-android
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: android-emulator-qa-apk
+          path: qa-apk
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install PNG inspection library
+        run: python -m pip install Pillow==11.3.0
+      - name: Enable KVM access
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Install and exercise C++ Android frontend
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          target: google_apis
+          arch: x86_64
+          profile: pixel_2
+          cores: 2
+          ram-size: 2048M
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none
+          script: python Scripts/test-android-emulator.py --apk qa-apk/RuaDeAco-emulator-QA.apk --output android-qa-evidence
+      - name: Preserve screenshots, input trace and logcat even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-emulator-qa-evidence
+          path: android-qa-evidence/
+          if-no-files-found: warn
+          retention-days: 14

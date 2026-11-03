@@ -5,6 +5,7 @@ namespace RDA
 {
 	namespace
 	{
+		#include "../../../Data/generated/RDACanonicalData.inc"
 		constexpr std::array<Rect, 3> kStandardStandingHurtboxes = {{
 			{-11.0f, -68.0f, 22.0f, 22.0f},
 			{-15.0f, -47.0f, 30.0f, 30.0f},
@@ -645,37 +646,37 @@ namespace RDA
 
 	const FighterDef& GetGutoBarba()
 	{
-		static const FighterDef Def = BuildGutoBarba();
+		static const FighterDef Def = [] { auto d=BuildGutoBarba(); EnrichCanonicalDefinition(d); return d; }();
 		return Def;
 	}
 
 	const FighterDef& GetRafaMare()
 	{
-		static const FighterDef Def = BuildRafaMare();
+		static const FighterDef Def = [] { auto d=BuildRafaMare(); EnrichCanonicalDefinition(d); return d; }();
 		return Def;
 	}
 
 	const FighterDef& GetNoirReflexo()
 	{
-		static const FighterDef Def = BuildNoirReflexo();
+		static const FighterDef Def = [] { auto d=BuildNoirReflexo(); EnrichCanonicalDefinition(d); return d; }();
 		return Def;
 	}
 
 	const FighterDef& GetAstroRiso()
 	{
-		static const FighterDef Def = BuildAstroRiso();
+		static const FighterDef Def = [] { auto d=BuildAstroRiso(); EnrichCanonicalDefinition(d); return d; }();
 		return Def;
 	}
 
 	const FighterDef& GetDanteSinal()
 	{
-		static const FighterDef Def = BuildDanteSinal();
+		static const FighterDef Def = [] { auto d=BuildDanteSinal(); EnrichCanonicalDefinition(d); return d; }();
 		return Def;
 	}
 
 	const FighterDef& GetLeoVioleta()
 	{
-		static const FighterDef Def = BuildLeoVioleta();
+		static const FighterDef Def = [] { auto d=BuildLeoVioleta(); EnrichCanonicalDefinition(d); return d; }();
 		return Def;
 	}
 

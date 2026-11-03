@@ -1,5 +1,48 @@
 # Rua de Aço Nativo (C++20 / raylib / Unreal) — Guia de Agentes (`AGENTS.md`)
 
+## Versão de entrega 0.3.0 — resultado de 03/11/2026
+
+Aplicação e50d6cf validada: CTest 3/3, 46 checks de componentes, 33 replays TypeScript/16.170 passos (campos discretos exatos, tolerância float 0,002). Windows instalado em diretório isolado: 342 arquivos iguais ao ZIP, headless, 29 capturas reais e desinstalação limpa. CI 41588386978 aprovado nos três jobs: Android 15/API 35 x86_64/SwiftShader, nove percursos, seis lutadores e três arenas, em 16:9 e telefone inicialmente em retrato girando para 20:9. As 81 capturas foram revisadas; arena/lutadores, HUD, inputs, pausa e background/retorno corretos, sem erros de assets ou crashes.
+
+APK ARM64 com os 338 assets verificados por SHA-256/CRC, assinatura v2/v3, certificado igual à versão 0.2.0 e alinhamento de 16 KiB. O original TypeScript continua canônico; o frontend C++ reaproveitado acompanha suas regras e apresentação. Touch controla P1; 2P local requer controles externos. Sem aparelhos físicos: atualização ARM64 instalada, áudio ouvido, desempenho e multitouch físico não foram homologados. Replays não comparam hashes completos nem provam igualdade visual pixel a pixel. Publicação e backups são coordenados no AGENTS.md/contexto.md do portal. Responsável: Codex.
+
+Os registros anteriores abaixo documentam a investigação e suas pendências históricas; o resultado atual está neste bloco.
+
+## Superfície e seleção Android — 03/11/2026
+
+Após a correção ZIP, o CI 41586905713 carregou imagens, menus e partidas reais e completou quatro percursos de entrada/pausa/retorno. Falhou ao retomar a pausa no quinto percurso com `adb input tap` sem duração. A revisão visual também encontrou um erro real: o toque no botão Cais ativava o joystick invisível do menu e incrementava a arena para Cozinha. Os controles de combate touch agora só atuam durante uma partida; seleção emite o estágio real para o smoke exigir igualdade com a escolha.
+
+Android usa `InitWindow(0,0)` para aproveitar a superfície física, evitando a dupla escala da janela solicitada no raylib 5.5; orientação landscape e fullscreen são configurados antes de iniciar a thread nativa. O driver usa toque imóvel de 120 ms e exige pausa/retomada, arena/lutadores exatos e ausência de erros de assets. A nova matriz cobre seis lutadores em 1280×720 e três arenas adicionais partindo de telefone portrait 720×1600, que deve girar para 1600×720 (20:9). Execução dessa matriz e novos pacotes Windows/Android ainda pendentes. O script do instalador Windows agora aguarda o processo GUI e lê `Process.ExitCode`, sem depender de `$LASTEXITCODE` anterior. Responsáveis: Codex QA Android e coordenador.
+
+## Empacotamento Android — 03/11/2026
+
+O teste real em emulador revelou nomes ZIP com barras invertidas produzidos por aapt2 no Windows. Android não os resolve, embora ferramentas Windows normalizem sua exibição. `Scripts/normalize-apk-paths.py` reescreve os nomes locais e centrais antes de zipalign/assinatura e verifica os 338 assets contra a origem por SHA-256 e CRC. O smoke também rejeita nomes brutos inválidos antes da instalação. Reexecução Android pendente; não publicar candidatos anteriores. Windows instalado: 342 arquivos idênticos ao ZIP, headless e 29 capturas reais aprovados, desinstalação limpa. Componentes finais: 46 checks; CTest 3/3. Responsável: Codex.
+
+## Correção 0.3.0 em validação — 02/11/2026
+
+A implementação 0.2.0 publicada era insuficiente: sua tela Android simplificava o jogo, descartava áudio e os antigos testes chamados golden não executavam os replays TypeScript. Esse histórico não comprova paridade.
+
+O port agora consome definições, colisões calibradas, múltiplas janelas, comandos, eventos, passivas e poses atuais exportados do original. A comparação real cobre 33 replays / 16.170 passos, com igualdade dos campos discretos exportados e tolerância float de 0,002 px; os hashes completos internos não são comparados e não há lockstep nativo com a Web. Os testes de componentes são separados (45 verificações antes da revisão final da CPU). Fonte e método em Docs/PARITY_REPLAYS.md.
+
+Frontend C++/raylib compartilhado com Android NativeActivity, 224 animações canônicas, efeitos/vozes por golpe e lutador, controles multitouch com bordas, menus touch, teclado e dois gamepads. O HUD touch controla P1; versus local 2P requer controles externos ou teclado. Assets são sincronizados do original por Scripts/Sync-CanonicalPresentation.py com manifesto de hashes. As camadas das três arenas e suas finalizações reutilizam a apresentação original. Render smoke Windows e CTest passaram em uma árvore nova; geração dos candidatos finais e execução real Android no CI seguem em validação. Runtime MSVC estático evita depender de uma instalação de Visual Studio/redistribuível no destino.
+
+Pendências antes de concluir: congelar fonte após revisão final da CPU/palcos, repetir build/testes/capturas finais, empacotar e validar instalador, executar emulador Android, conferir assinatura e certificado de atualização, PR/CI/merge, releases, portal e backups privados com restauração. O usuário autorizou reutilizar a chave e a senha Android existentes sem exibi-las/publicá-las. Sem aparelhos físicos disponíveis; não declarar homologação física nem conclusão de áudio/desempenho em ARM64 a partir de compilação ou imagens. Responsável: Codex.
+
+## Localização real dos projetos — 02/11/2026
+
+Raiz de trabalho confirmada: `D:\PROJETOS\SoftwaresSmellsLikeTech`. Não procurar nem criar cópias em `D:\PROJETOS\RuaDeAco`, `D:\PROJETOS\RuaDeAcoUnreal` ou `D:\MikeAndDenyse`: referências a esses locais em registros antigos são históricas.
+
+| Pasta real | Papel |
+|---|---|
+| `D:\PROJETOS\SoftwaresSmellsLikeTech` | Portal existente e coordenação da publicação; preserva seus cinco submódulos de softwares. |
+| `D:\PROJETOS\SoftwaresSmellsLikeTech\RuaDeAco` | Jogo original TypeScript/Phaser atualizado; fonte canônica de regras, lutadores, golpes, apresentação, arte e áudio para o port C++. |
+| `D:\PROJETOS\SoftwaresSmellsLikeTech\RuaDeAcoUnreal` | Base C++ reaproveitada e atualizada conforme o original; sua implementação antiga não define o gameplay nem as capturas atuais. |
+| `D:\PROJETOS\SoftwaresSmellsLikeTech\MikeAndDenyse` | Repositório Nightfall; referência Unity preservada em `NightfallUnity/` e port C++ em `NightfallNative/`. |
+| `D:\PROJETOS\SoftwaresSmellsLikeTech\RuaDeAco_AndroidBuild` | Árvore auxiliar existente de build Android/Capacitor do Rua de Aço; não substitui a fonte canônica `RuaDeAco` nem o build nativo em `RuaDeAcoUnreal`. |
+| `D:\PROJETOS\SoftwaresSmellsLikeTech\RuaDeAco_AudioMasters` | Matrizes de áudio existentes (`music/`); preservar os originais. Não é uma fonte alternativa de gameplay. |
+
+Confirmar o Git de cada pasta antes de editar; estas pastas de jogos são projetos independentes dentro da raiz do portal, não novos submódulos nem assets estáticos a publicar. Capturas do site devem vir da versão indicada em execução e mostrar os lutadores atuais. Responsável: Codex.
+
 Leia `README.md`, `IMPLEMENTACAO_RUA_DE_ACO_UNREAL.md` e `contexto.md` antes de alterar qualquer arquivo deste repositório (`mikerock12/RuaDeAcoUnreal`).
 
 ## Regras Inegociáveis
