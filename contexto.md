@@ -2,7 +2,7 @@
 
 ## Confirmação dos gestos no QA Android — 04/11/2026
 
-O job adicional 41800158248 não confirmou a reabertura das configurações após reiniciar: sua imagem `settings-restored-custom` continha o menu. O reset não ocorreu e o segundo formato alterou valores já personalizados, gerando um falso erro de persistência. O teste agora exige novos logs nativos de cada ação e usa um gesto estacionário de 400 ms, sem repetir gestos nem remover assertions. O jogo e os pacotes 0.4.1 publicados permanecem idênticos; CI do ajuste será registrado após executar. Backup remoto de `deaf2e9` restaurado com hashes/CRC/clone/fsck e portátil executado com exit 0; fontes finais do teste terão snapshot complementar. Responsável: Codex.
+O job adicional 41800158248 não confirmou a reabertura das configurações após reiniciar: sua imagem `settings-restored-custom` continha o menu. O reset não ocorreu e o segundo formato alterou valores já personalizados, gerando um falso erro de persistência. O teste exige novos logs nativos de cada ação e usa um gesto estacionário de 400 ms, sem repetir gestos nem remover assertions. O menu só é considerado pronto após `RDA_SCREEN: 0` do PID atual, além da imagem e geometria, evitando uma imagem anterior durante a carga. Jogo e pacotes 0.4.1 idênticos; os resultados do ajuste estão no [PR7](https://github.com/mikerock12/RuaDeAcoUnreal/pull/7). Backup remoto de `deaf2e9` restaurado com hashes/CRC/clone/fsck e portátil exit 0; snapshot de fontes do PR7 complementa os pacotes imutáveis desse conjunto. Responsável: Codex.
 
 ## Rua de Aco0.4.1 publicado — 04/11/2026
 

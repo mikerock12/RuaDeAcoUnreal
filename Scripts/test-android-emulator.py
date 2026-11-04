@@ -116,7 +116,7 @@ class AndroidQA:
         deadline = time.monotonic() + 50
         onboarding_checks = 0
         while time.monotonic() < deadline:
-            self.assert_alive()
+            pid = self.assert_alive()
             try:
                 image = self.logical(self.image())
                 self.assert_rendered(image)
@@ -124,7 +124,11 @@ class AndroidQA:
                 pixels=list(image.crop(box).getdata())
                 selected=sum(r>150 and g>140 and b<150 for r,g,b in pixels)/len(pixels)
                 if max(self.cyan_fraction(image,box),selected) > 0.3:
-                    log=self.adb("logcat","-d","-s","raylib:I","*:S").decode(errors="replace")
+                    # Android can briefly present the previous process's menu
+                    # while the new NativeActivity still loads its assets.
+                    # Require the current PID to acknowledge its main loop.
+                    log=self.adb("logcat","-d","--pid",pid,"-s","raylib:I","*:S").decode(errors="replace")
+                    assert re.findall(r"RDA_SCREEN: (\d+)",log)[-1:] == ["0"], "Current native process has not entered the menu"
                     geometry=re.findall(r"SLT_BUFFER_GEOMETRY: (\d+) x (\d+) result=(-?\d+)",log)
                     assert geometry and int(geometry[-1][0])>1 and int(geometry[-1][1])>1 and geometry[-1][2]=="0", "Physical buffer geometry was not applied"
                     assert f"SLT_PHYSICAL_RENDER_SIZE: {self.width} x {self.height}" in log, "Framebuffer dimensions differ from the presented surface"
