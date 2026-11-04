@@ -845,7 +845,8 @@ int main(int argc, char** argv)
         if(bHasMenuMusic)SetMusicVolume(MenuMusic,Settings.value.music);
         for(auto& Stage:StageVisuals)if(Stage.hasMusic)SetMusicVolume(Stage.music,Settings.value.music);
         bShowTouchOverlay=Settings.value.touch;
-        if(World && !World->IsPaused() && ((Settings.value.autoPause && !IsWindowFocused()) || Settings.open))World->TogglePause();
+        const bool AndroidPause=SLTPrefs::Mobile&&SLTMobile::PauseRequested.exchange(false);
+        if(World && !World->IsPaused() && (AndroidPause || ((SLTPrefs::Mobile||Settings.value.autoPause) && !IsWindowFocused()) || Settings.open))World->TogglePause();
 		GlobalTicks += 1;
         if(!SettingsSmokeDirectory.empty())Settings.Show((GlobalTicks-1)/2);
 		CameraTrauma=std::max(0.f,CameraTrauma-GetFrameTime());

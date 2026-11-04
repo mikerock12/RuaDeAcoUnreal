@@ -284,6 +284,7 @@ class AndroidQA:
             assert self.assert_alive() == pid, "Process restarted during short background/resume"
             lifecycle = self.capture(f"{capture_prefix}{fighter:02}-{name}-08-background-resume")
             self.assert_match(lifecycle)
+            self.assert_pause(lifecycle, True)
             (self.output / f"{capture_prefix}{fighter:02}-{name}-logcat.txt").write_bytes(self.adb("logcat", "-d", "-v", "threadtime"))
             print(f"Android emulator UI smoke: {display}, {name}, actual arena {expected[0]}, input/pause/resume captured", flush=True)
         return {"device": device, "displayProfiles": display_checks, "fighters": portrait_checks,
