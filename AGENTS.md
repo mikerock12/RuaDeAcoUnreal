@@ -1,4 +1,11 @@
 # Rua de Aço Nativo (C++20 / raylib / Unreal) — Guia de Agentes (`AGENTS.md`)
+## Plataforma e icones Android — 03/11/2026
+
+Configuracoes persistentes e icones APK tradicionais/adaptativos implementados em 0.4.0. Windows tem modos de tela, VSync/FPS e render interno ate4K; Android tem HUD sempre visivel, controles por toque ajustaveis/canhoto, vibracao e instrucoes proprias. Volumes musica/voz/efeitos ligam aos respectivos buses com ganhos canonicos. CTest4/4 e CI41756265525 aprovados, com93capturas/9percursos Android e preferencias apos reinicio. Cliente oficial online integrado ao Windows/WebView2 e Android/WebView, alternativa de navegador e bootstrapper Microsoft assinado; teste adicional de abrir/retornar OnlineActivity esta em CI. Salas e inicio identico em Windows integrado/navegador foram observados; a janela oculta de QA limitou rAF a cerca1FPS e a partida foi interrompida sem resultado. Nao afirmar homologacao de luta sustentada nesse host oculto. As instalacoes existentes foram preservadas; Windows portatil gerou29quadros+5settings, quatroEXEs PE(icon) e APKs comparados com arte aprovada. APK ARM64 assinado com certificado anterior v2/v3 e alinhamento16KiB. Release, merge e backup coordenados no portal.
+
+Sem homologacao Android fisica, audio ouvido, desempenho/toque fisicos ou dupla Wi-Fi. Responsavel: Codex.
+
+
 
 ## Versão de entrega 0.3.0 — resultado de 03/11/2026
 
