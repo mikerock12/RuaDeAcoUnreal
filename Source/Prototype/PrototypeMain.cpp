@@ -683,7 +683,8 @@ int main(int argc, char** argv)
 #if defined(PLATFORM_ANDROID)
 	// Use the physical EGL surface. raylib 5.5 otherwise scales its requested
 	// window in addition to our own centered 640x360 framebuffer viewport.
-	InitWindow(0, 0, "Rua de Aco");
+	const Vector2 PhysicalSurface=SLTMobile::InitialSurfaceSize();
+    InitWindow(static_cast<int>(PhysicalSurface.x),static_cast<int>(PhysicalSurface.y), "Rua de Aco");
 #else
 	InitWindow(1280, 720, "Rua de Aco");
 #endif

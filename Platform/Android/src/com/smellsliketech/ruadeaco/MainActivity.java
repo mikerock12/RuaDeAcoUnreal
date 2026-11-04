@@ -5,6 +5,12 @@ package com.smellsliketech.ruadeaco;
 public class MainActivity extends android.app.NativeActivity {
     static { System.loadLibrary("ruadeaco"); }
 
+    private int[] physicalSurfaceSize(){
+        int width,height;
+        if(android.os.Build.VERSION.SDK_INT>=30){android.graphics.Rect bounds=getWindowManager().getCurrentWindowMetrics().getBounds();width=bounds.width();height=bounds.height();}
+        else {android.graphics.Point size=new android.graphics.Point();getWindowManager().getDefaultDisplay().getRealSize(size);width=size.x;height=size.y;}
+        return new int[]{Math.max(width,height),Math.min(width,height)};
+    }
     private static native void nativeSetPaused(boolean paused);
     @Override protected void onPause(){nativeSetPaused(true);super.onPause();}
     @Override protected void onResume(){super.onResume();nativeSetPaused(false);applyImmersive();}

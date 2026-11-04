@@ -187,6 +187,12 @@ class AndroidQA:
         else:raise AssertionError("Official online WebView did not finish loading")
         activity=self.shell("dumpsys","activity","activities")
         assert "OnlineActivity" in activity, "Online did not open inside the app"
+        deadline=time.monotonic()+120
+        while time.monotonic()<deadline:
+            frame=self.logical(self.image()).resize((160,90))
+            if sum(max(pixel)>25 for pixel in frame.getdata())/(160*90)>.2:break
+            time.sleep(1)
+        else:raise AssertionError("Official client remained in preload; no rendered game")
         self.capture("online-official-client")
         self.shell("input","keyevent","KEYCODE_BACK")
         self.wait_menu()
