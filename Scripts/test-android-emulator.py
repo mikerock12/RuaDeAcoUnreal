@@ -183,7 +183,8 @@ class AndroidQA:
 
     def online_check(self):
         pid=self.assert_alive()
-        self.adb("logcat","-c")
+        # Keep the startup buffer-geometry evidence: wait_menu verifies it again
+        # after returning from OnlineActivity in the same native process.
         self.tap(456,220,wait=2)
         deadline=time.monotonic()+60
         while time.monotonic()<deadline:
