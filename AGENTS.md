@@ -118,3 +118,9 @@ O gate pos-merge encontrou inicializacao intermitente com a imagem comprimida ve
 
 
 Em 04/11/2026, o log do segundo formato Nightfall comprovou NativeWindow temporaria de1x1, apesar de WindowMetrics1000x600. A raylib5.5 calculava screenScale com esse buffer temporario e mantinha o jogo preto/comprimido. cmake/AndroidSurface.cmake preserva o upstream imutavel (SHA-256 a17a8c75...) e compila apenas uma copia de rcore com ANativeWindow_setBuffersGeometry aplicado antes da consulta inicial de dimensoes. A alteracao e marcada no codigo gerado e no log SLT_BUFFER_GEOMETRY. Validacao em andamento, sem nova publicacao desta manutencao. Responsavel: Codex.
+
+## Plataforma0.4.0 publicada — 04/11/2026
+
+PR4 mesclado em eb15db8451c18264a4154a3c411beaad2c642bbf; release estavel v0.4.0 com instalador/ZIP Windows e APK ARM64, digests remotos e seis downloads do portal conferidos. CTest4/4,46 checks,33 replays/16.170 passos, CI41784045643 e main41786346768 aprovados. QA Android emulado: nove percursos/94 capturas, seis lutadores, tres arenas, configuracoes/persistencia,16:9/20:9 e online oficial renderizado com retorno ao mesmo PID. Dois clientes de navegador compararam21 hashes ateframe1200; host Windows oculto nao demonstrou partida sustentada. Certificado anterior/v2/v3/16KiB e icones tradicionais/adaptativos conferidos.
+
+Portal PR46 publicado no Worker75e932af-689b-4629-8fd3-72b5b964bc91: configuracoes e capturas atuais, versoes/plataformas explicitas; verify60/60 e19 checks Chrome aprovados, seis APIs/302/HEAD e seis binarios SHA/tamanho, privado401. Windows portatil executado com29 cenas e cinco ajustes; instalacao existente preservada. Original RuaDeAco permanece canonico e inalterado em0a15430; este port mantem o audio original. Backup privado final desta versao em consolidacao pelo portal. Sem Android fisico/dupla Wi-Fi, audio/performance/multitouch ARM64 ou atualizacao instalada fisica homologados. Responsavel: Codex.
