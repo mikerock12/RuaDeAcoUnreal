@@ -1,5 +1,9 @@
 # Contexto do Projeto — Rua de Aço Nativo (`contexto.md`)
 
+## Confirmação dos gestos no QA Android — 04/11/2026
+
+O job adicional 41800158248 não confirmou a reabertura das configurações após reiniciar: sua imagem `settings-restored-custom` continha o menu. O reset não ocorreu e o segundo formato alterou valores já personalizados, gerando um falso erro de persistência. O teste exige novos logs nativos de cada ação e usa um gesto estacionário de 400 ms, sem repetir gestos nem remover assertions. O menu só é considerado pronto após `RDA_SCREEN: 0` do PID atual, além da imagem e geometria, evitando uma imagem anterior durante a carga. Jogo e pacotes 0.4.1 idênticos; os resultados do ajuste estão no [PR7](https://github.com/mikerock12/RuaDeAcoUnreal/pull/7). Backup remoto de `deaf2e9` restaurado com hashes/CRC/clone/fsck e portátil exit 0; snapshot de fontes do PR7 complementa os pacotes imutáveis desse conjunto. Responsável: Codex.
+
 ## Rua de Aco0.4.1 publicado — 04/11/2026
 
 Release estavel [v0.4.1](https://github.com/mikerock12/RuaDeAcoUnreal/releases/tag/v0.4.1), PR5/merge92dc13be89d48acf3e0f0cf69c5fe33c2e872dd7. Corrige retrato transitorio reportado por ANativeWindow mesmo apos aceitar buffer paisagem: framebuffer usa as dimensoes fisicas da Activity. Upstream raylib5.5 preservado e copia alterada identificada. Nove percursos/94frames Android emulado,16:9/20:9,seis lutadores,tres arenas,configuracoes/persistencia e online/retorno aprovados noCI PR41795213645 e main41797067186; CTest4/4,46checks,33replays/16.170passos. Nenhuma assertion visual foi afrouxada.
