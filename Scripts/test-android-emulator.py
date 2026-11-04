@@ -291,6 +291,7 @@ class AndroidQA:
         for filename, args in [("logcat.txt", ("logcat", "-d", "-v", "threadtime")),
                                ("crash-buffer.txt", ("logcat", "-b", "crash", "-d")),
                                ("activity.txt", ("shell", "dumpsys", "activity", "activities")),
+                               ("window.txt", ("shell", "dumpsys", "window")),
                                ("memory.txt", ("shell", "dumpsys", "meminfo", PACKAGE))]:
             try:
                 (self.output / filename).write_bytes(self.adb(*args, check=False, timeout=20))

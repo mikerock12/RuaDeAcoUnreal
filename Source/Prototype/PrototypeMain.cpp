@@ -1445,6 +1445,9 @@ int main(int argc, char** argv)
         if(Settings.value.showFps)DrawFPS(8,GetScreenHeight()-22);
 
         Settings.Draw();
+        #if defined(PLATFORM_ANDROID)
+        if(GlobalTicks<=3)TraceLog(LOG_INFO,"RDA_PRESENTED_FRAME: %d screen=%dx%d render=%dx%d viewport=%.0fx%.0f focused=%d",GlobalTicks,GetScreenWidth(),GetScreenHeight(),GetRenderWidth(),GetRenderHeight(),DestViewport.width,DestViewport.height,IsWindowFocused());
+        #endif
 		EndDrawing();
         if(!SettingsSmokeDirectory.empty() && GlobalTicks%2==0){Image capture=LoadImageFromScreen();std::string file=(fs::path(SettingsSmokeDirectory)/("settings-"+std::to_string((GlobalTicks-1)/2)+".png")).string();bool saved=ExportImage(capture,file.c_str());UnloadImage(capture);if(!saved)return 9;if(GlobalTicks>=10)break;}
 
