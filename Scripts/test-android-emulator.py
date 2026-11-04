@@ -119,7 +119,7 @@ class AndroidQA:
             try:
                 image = self.logical(self.image())
                 self.assert_rendered(image)
-                if self.cyan_fraction(image, (160, 120, 162, 298)) > 0.3:
+                if self.cyan_fraction(image, (336, 200, 338, 238)) > 0.3:
                     return
             except (AssertionError, OSError):
                 pass
@@ -153,6 +153,26 @@ class AndroidQA:
             self.trace.append({"uiAction": "dismiss-known-fullscreen-hint", "package": node.get("package"), "text": text, "bounds": node.get("bounds")})
             time.sleep(0.4)
             return
+
+    def settings_check(self, prefix: str):
+        self.tap(184, 276)
+        def option(x, y): self.tap(x * 2 / 3, y * 2 / 3)
+        for tab in range(5):
+            option(114 + 184 * tab, 108)
+            self.capture(prefix + f"settings-{tab}")
+        option(482, 108); option(684, 185)
+        option(850, 108); option(882, 263); option(882, 341)
+        option(666, 108); option(882, 263)
+        option(852, 45)
+        self.shell("am", "force-stop", PACKAGE)
+        self.adb("logcat", "-c")
+        self.shell("am", "start", "-W", "-n", COMPONENT)
+        self.wait_menu()
+        log=self.adb("logcat","-d","-s","raylib:I","*:S").decode(errors="replace")
+        assert re.search(r"SLT_PREFS_LOADED: mobile=1 master=0.80 left=1 size=1.05 deadzone=0.245",log), "Preferences did not survive restart"
+        self.tap(184,276); option(850,108)
+        self.capture(prefix + "settings-restored-custom")
+        option(126,500); option(852,45)
 
     def run(self, apk: Path):
         with zipfile.ZipFile(apk) as package:
@@ -194,7 +214,9 @@ class AndroidQA:
             if fighter == 0:
                 display_checks.append({"profile": display, "width": self.width, "height": self.height})
             self.capture(f"{capture_prefix}{fighter:02}-{name}-00-title")
-            self.tap(320, 218)  # Training; stationary opponent for this UI smoke.
+            if fighter == 0:
+                self.settings_check(capture_prefix)
+            self.tap(184, 220)  # Training; stationary opponent for this UI smoke.
             selection = self.capture(f"{capture_prefix}{fighter:02}-{name}-01-selection")
             for index in range(6):
                 crop = selection.crop((33 + 98 * index, 54, 108 + 98 * index, 125))

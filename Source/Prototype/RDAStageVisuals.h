@@ -17,6 +17,7 @@ namespace RDAStageVisuals
 class StageRenderer
 {
   public:
+    bool decorativeEffects=true;
     bool Load(const std::filesystem::path &artRoot)
     {
         Unload();
@@ -839,6 +840,7 @@ class StageRenderer
     }
     void DrawFarmAmbience() const
     {
+        if(!decorativeEffects)return;
         for (const auto &egg : eggs)
             if (egg.active)
             {

@@ -2,8 +2,8 @@
 # Builds the same C++ frontend as Windows. x86_64 is for emulator QA only.
 [CmdletBinding()]
 param(
-    [string]$Version = '0.3.1',
-    [int]$VersionCode = 301,
+    [string]$Version = '0.4.0',
+    [int]$VersionCode = 400,
     [ValidateSet('arm64-v8a', 'x86_64')][string]$Abi = 'arm64-v8a',
     [string]$RaylibSource = $env:RAYLIB_SOURCE,
     [switch]$UnsignedOnly,
@@ -51,7 +51,7 @@ $Classes = Join-Path $BuildDir 'classes'
 $Stage = Join-Path $BuildDir 'stage'
 $Lib = Join-Path $Stage "lib/$Abi"
 New-Item -ItemType Directory -Force -Path $Classes, $Lib | Out-Null
-$JavaFiles = @(Get-ChildItem $Gen -Recurse -Filter '*.java' | ForEach-Object FullName) + @(Join-Path $AndroidDir 'src/com/smellsliketech/ruadeaco/MainActivity.java')
+$JavaFiles = @(Get-ChildItem $Gen -Recurse -Filter '*.java' | ForEach-Object FullName) + @(Get-ChildItem (Join-Path $AndroidDir 'src') -Recurse -Filter '*.java' | ForEach-Object FullName)
 Run-Checked (Join-Path $Jdk 'bin/javac.exe') (@('-source', '11', '-target', '11', '-encoding', 'UTF-8', '-classpath', $PlatformJar, '-d', $Classes) + $JavaFiles)
 $ClassFiles = @(Get-ChildItem $Classes -Recurse -Filter '*.class' | ForEach-Object FullName)
 Run-Checked (Join-Path $BuildTools 'd8.bat') (@('--lib', $PlatformJar, '--min-api', '26', '--output', $Stage) + $ClassFiles)
