@@ -127,6 +127,7 @@ class AndroidQA:
                     log=self.adb("logcat","-d","-s","raylib:I","*:S").decode(errors="replace")
                     geometry=re.findall(r"SLT_BUFFER_GEOMETRY: (\d+) x (\d+) result=(-?\d+)",log)
                     assert geometry and int(geometry[-1][0])>1 and int(geometry[-1][1])>1 and geometry[-1][2]=="0", "Physical buffer geometry was not applied"
+                    assert f"SLT_PHYSICAL_RENDER_SIZE: {self.width} x {self.height}" in log, "Framebuffer dimensions differ from the presented surface"
                     return
             except (AssertionError, OSError):
                 pass

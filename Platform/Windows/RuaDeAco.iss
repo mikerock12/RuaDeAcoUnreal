@@ -1,6 +1,6 @@
 #define MyAppName "Rua de Aco"
 #ifndef MyAppVersion
-#define MyAppVersion "0.4.0"
+#define MyAppVersion "0.4.1"
 #endif
 #define MyAppPublisher "Smells Like Tech"
 #define MyAppURL "https://softwares.smellsliketech.com.br/games/rua-de-aco/"
