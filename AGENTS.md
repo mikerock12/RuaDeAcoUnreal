@@ -1,5 +1,11 @@
 # Rua de Aço Nativo (C++20 / raylib / Unreal) — Guia de Agentes (`AGENTS.md`)
 
+## Confirmação dos gestos no QA Android — 04/11/2026
+
+O CI adicional de documentação 41800158248 revelou um falso diagnóstico de persistência: o gesto de reabrir configurações após reiniciar não foi reconhecido, a captura `settings-restored-custom` mostrava o menu e o reset seguinte nunca ocorreu. No perfil seguinte, o teste alterava novamente os valores já personalizados. Os valores carregados correspondiam aos salvos; não era perda das preferências.
+
+O script usa um gesto estacionário de 400 ms e exige novos logs nativos após abrir/reabrir configurações, selecionar a aba, restaurar os valores padrão e fechar. Cada gesto é enviado uma vez; nenhuma assertion ou requisito de persistência foi removido. Binários 0.4.1 e código do jogo inalterados. Validação de sintaxe concluída; CI deste ajuste será registrado após a execução. O backup completo de `deaf2e9` foi baixado do Drive, restaurado com SHA/CRC/clone/fsck e o portátil recuperado executou com exit 0. Responsável: Codex.
+
 ## Rua de Aco0.4.1 publicado — 04/11/2026
 
 Release estavel [v0.4.1](https://github.com/mikerock12/RuaDeAcoUnreal/releases/tag/v0.4.1), PR5/merge92dc13be89d48acf3e0f0cf69c5fe33c2e872dd7. Corrige retrato transitorio reportado por ANativeWindow mesmo apos aceitar buffer paisagem: framebuffer usa as dimensoes fisicas da Activity. Upstream raylib5.5 preservado e copia alterada identificada. Nove percursos/94frames Android emulado,16:9/20:9,seis lutadores,tres arenas,configuracoes/persistencia e online/retorno aprovados noCI PR41795213645 e main41797067186; CTest4/4,46checks,33replays/16.170passos. Nenhuma assertion visual foi afrouxada.

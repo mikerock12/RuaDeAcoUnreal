@@ -54,7 +54,7 @@ class AndroidQA:
         # adb's zero-duration tap can put down/up in a single rendered frame.
         # Use a stationary human-length touch, retaining all visual assertions.
         point = self.point(x, y)
-        self.shell("input", "swipe", *point, *point, "120")
+        self.shell("input", "swipe", *point, *point, "400")
         time.sleep(wait)
 
     def hold(self, x: float, y: float, milliseconds: int):
@@ -163,7 +163,21 @@ class AndroidQA:
             return
 
     def settings_check(self, prefix: str):
-        self.tap(184, 276)
+        def marks(pattern):
+            log = self.adb("logcat", "-d", "-s", "raylib:I", "*:S").decode(errors="replace")
+            return len(re.findall(pattern, log))
+
+        def action_confirmed(action, pattern, description):
+            before = marks(pattern)
+            action()
+            deadline = time.monotonic() + 12
+            while time.monotonic() < deadline:
+                if marks(pattern) > before:
+                    return
+                time.sleep(0.25)
+            raise AssertionError(description + ": no new native acknowledgement after one gesture")
+
+        action_confirmed(lambda: self.tap(184, 276), r"SLT_SETTINGS: opened mobile=1", "Open settings")
         def option(x, y): self.tap(x * 2 / 3, y * 2 / 3)
         for tab in range(5):
             option(114 + 184 * tab, 108)
@@ -178,9 +192,11 @@ class AndroidQA:
         self.wait_menu()
         log=self.adb("logcat","-d","-s","raylib:I","*:S").decode(errors="replace")
         assert re.search(r"SLT_PREFS_LOADED: mobile=1 master=0.80 left=1 size=1.05 deadzone=0.245",log), "Preferences did not survive restart"
-        self.tap(184,276); option(850,108)
+        action_confirmed(lambda: self.tap(184,276), r"SLT_SETTINGS: opened mobile=1", "Reopen settings after restart")
+        action_confirmed(lambda: option(850,108), r"SLT_SETTINGS_TAB: 4", "Select restored touch settings")
         self.capture(prefix + "settings-restored-custom")
-        option(126,500); option(852,45)
+        action_confirmed(lambda: option(126,500), r"SLT_PREFS_SAVED: master=0\.85 left=0 size=1\.00 deadzone=0\.220", "Restore defaults before next display profile")
+        action_confirmed(lambda: option(852,45), r"SLT_SETTINGS: saved quality=", "Close restored defaults")
 
     def online_check(self):
         pid=self.assert_alive()
