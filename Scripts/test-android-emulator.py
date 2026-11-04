@@ -175,6 +175,23 @@ class AndroidQA:
         self.capture(prefix + "settings-restored-custom")
         option(126,500); option(852,45)
 
+    def online_check(self):
+        pid=self.assert_alive()
+        self.adb("logcat","-c")
+        self.tap(456,220,wait=2)
+        deadline=time.monotonic()+60
+        while time.monotonic()<deadline:
+            log=self.adb("logcat","-d","-s","RDAOnline:I","*:S").decode(errors="replace")
+            if "OFFICIAL_CLIENT_READY" in log:break
+            time.sleep(1)
+        else:raise AssertionError("Official online WebView did not finish loading")
+        activity=self.shell("dumpsys","activity","activities")
+        assert "OnlineActivity" in activity, "Online did not open inside the app"
+        self.capture("online-official-client")
+        self.shell("input","keyevent","KEYCODE_BACK")
+        self.wait_menu()
+        assert self.assert_alive()==pid, "Online return replaced the native process"
+
     def run(self, apk: Path):
         verify_icons(apk,Path(__file__).resolve().parents[1]/"Platform/Android",self.output)
         with zipfile.ZipFile(apk) as package:
@@ -218,6 +235,7 @@ class AndroidQA:
             self.capture(f"{capture_prefix}{fighter:02}-{name}-00-title")
             if fighter == 0:
                 self.settings_check(capture_prefix)
+                if display == "16:9":self.online_check()
             self.tap(184, 220)  # Training; stationary opponent for this UI smoke.
             selection = self.capture(f"{capture_prefix}{fighter:02}-{name}-01-selection")
             for index in range(6):

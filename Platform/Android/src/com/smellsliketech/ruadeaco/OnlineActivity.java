@@ -28,6 +28,7 @@ public final class OnlineActivity extends Activity {
         getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN|View.SYSTEM_UI_FLAG_HIDE_NAVIGATION|View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
         LinearLayout content=new LinearLayout(this);content.setOrientation(LinearLayout.VERTICAL);content.setBackgroundColor(Color.BLACK);
         LinearLayout toolbar=new LinearLayout(this);Button back=new Button(this);back.setText("Voltar ao jogo offline");back.setOnClickListener(view->finish());toolbar.addView(back);
+        Button browser=new Button(this);browser.setText("Navegador");browser.setOnClickListener(view->{try{startActivity(new android.content.Intent(android.content.Intent.ACTION_VIEW,android.net.Uri.parse(GAME)));}catch(android.content.ActivityNotFoundException error){android.widget.Toast.makeText(this,"Instale um navegador para usar esta opcao",android.widget.Toast.LENGTH_LONG).show();}});toolbar.addView(browser);
         state=new TextView(this);state.setTextColor(Color.WHITE);state.setText("Carregando online...");toolbar.addView(state,new LinearLayout.LayoutParams(0,-1,1));content.addView(toolbar);
         web=new WebView(this);content.addView(web,new LinearLayout.LayoutParams(-1,0,1));setContentView(content);
         WebSettings settings=web.getSettings();settings.setJavaScriptEnabled(true);settings.setDomStorageEnabled(true);
@@ -51,7 +52,7 @@ public final class OnlineActivity extends Activity {
                     String script="(()=>{try{let s=JSON.parse(localStorage.getItem('rua-de-aco:settings:v1')||'{}');Object.assign(s,{masterVolume:"+master+",musicVolume:"+music+",effectsVolume:"+effects+",touchOpacity:"+opacity+",muted:"+(master==0)+"});localStorage.setItem('rua-de-aco:settings:v1',JSON.stringify(s));}catch(e){}})();";
                     view.evaluateJavascript(script,result->view.reload());return;
                 }
-                web.setVisibility(View.VISIBLE);state.setText("Escolha Online para criar ou entrar em uma sala");
+                web.setVisibility(View.VISIBLE);state.setText("Escolha Online para criar ou entrar em uma sala");android.util.Log.i("RDAOnline","OFFICIAL_CLIENT_READY");
             }
             @Override public void onReceivedError(WebView view,WebResourceRequest request,WebResourceError error){if(request.isForMainFrame()){pageError=true;state.setText("Falha de conexao. Volte e tente novamente.");}}
         });

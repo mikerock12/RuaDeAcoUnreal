@@ -32,7 +32,8 @@ constexpr wchar_t Origin[]=L"https://mikerock12.github.io/RuaDeAco/";
 void Resize(HWND window) {
     RECT bounds{};GetClientRect(window,&bounds);
     MoveWindow(GetDlgItem(window,100),8,7,205,32,TRUE);
-    MoveWindow(statusLabel,225,14,std::max(10L,bounds.right-235),22,TRUE);
+    MoveWindow(GetDlgItem(window,102),220,7,185,32,TRUE);
+    MoveWindow(statusLabel,420,14,std::max(10L,bounds.right-430),22,TRUE);
     bounds.top=46;if(controller)controller->put_Bounds(bounds);
 }
 void Error(const wchar_t* text) { if(statusLabel)SetWindowTextW(statusLabel,text); }
@@ -42,6 +43,7 @@ LRESULT CALLBACK Procedure(HWND window,UINT message,WPARAM wp,LPARAM lp) {
         case WM_SETFOCUS:if(controller)controller->MoveFocus(COREWEBVIEW2_MOVE_FOCUS_REASON_PROGRAMMATIC);return 0;
         case WM_COMMAND:
             if(LOWORD(wp)==100){DestroyWindow(window);return 0;}
+            if(LOWORD(wp)==102){ShellExecuteW(window,L"open",Origin,nullptr,nullptr,SW_SHOWNORMAL);return 0;}
             if(LOWORD(wp)==101){
                 wchar_t executable[MAX_PATH]{};GetModuleFileNameW(nullptr,executable,MAX_PATH);
                 auto installer=std::filesystem::path(executable).parent_path()/L"MicrosoftEdgeWebview2Setup.exe";
@@ -70,7 +72,8 @@ void Run(HWND parent) {
     if(stopping){DestroyWindow(window);CoUninitialize();return;}
     if(qaPort)SetTimer(window,1,180000,nullptr);
     CreateWindowW(L"BUTTON",L"Voltar ao jogo offline",WS_CHILD|WS_VISIBLE,8,7,205,32,window,reinterpret_cast<HMENU>(100),type.hInstance,nullptr);
-    statusLabel=CreateWindowW(L"STATIC",L"Carregando as salas oficiais...",WS_CHILD|WS_VISIBLE,225,14,800,22,window,nullptr,type.hInstance,nullptr);
+    CreateWindowW(L"BUTTON",L"Abrir no navegador",WS_CHILD|WS_VISIBLE,220,7,185,32,window,reinterpret_cast<HMENU>(102),type.hInstance,nullptr);
+    statusLabel=CreateWindowW(L"STATIC",L"Carregando as salas oficiais...",WS_CHILD|WS_VISIBLE,420,14,800,22,window,nullptr,type.hInstance,nullptr);
     ShowWindow(window,SW_SHOW);UpdateWindow(window);ShowWindow(parent,SW_HIDE);
     PWSTR local=nullptr;SHGetKnownFolderPath(FOLDERID_LocalAppData,0,nullptr,&local);
     std::filesystem::path profile=local?local:L".";CoTaskMemFree(local);
