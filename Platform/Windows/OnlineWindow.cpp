@@ -39,6 +39,7 @@ void Error(const wchar_t* text) { if(statusLabel)SetWindowTextW(statusLabel,text
 LRESULT CALLBACK Procedure(HWND window,UINT message,WPARAM wp,LPARAM lp) {
     switch(message) {
         case WM_SIZE:Resize(window);return 0;
+        case WM_SETFOCUS:if(controller)controller->MoveFocus(COREWEBVIEW2_MOVE_FOCUS_REASON_PROGRAMMATIC);return 0;
         case WM_COMMAND:
             if(LOWORD(wp)==100){DestroyWindow(window);return 0;}
             if(LOWORD(wp)==101){
@@ -105,7 +106,7 @@ void Run(HWND parent) {
                     BOOL success=FALSE;args->get_IsSuccess(&success);Error(success?L"Online oficial - escolha Online para criar ou entrar em uma sala":L"Falha de conexao. Confira sua internet e volte para tentar novamente.");return S_OK;
                 }).Get(),&token);
                 if(!profileSettings.empty())web->AddScriptToExecuteOnDocumentCreated(profileSettings.c_str(),nullptr);
-                Resize(window);web->Navigate(Origin);return S_OK;
+                Resize(window);controller->MoveFocus(COREWEBVIEW2_MOVE_FOCUS_REASON_PROGRAMMATIC);web->Navigate(Origin);return S_OK;
             }).Get());
         }).Get());
     if(FAILED(setup))Error(L"Online requer Microsoft Edge WebView2 Runtime. Instale o componente oficial da Microsoft.");

@@ -19,6 +19,7 @@ import zipfile
 import xml.etree.ElementTree as ET
 from pathlib import Path
 from PIL import Image, ImageChops, ImageStat
+from android_icons import verify as verify_icons
 
 PACKAGE = "com.smellsliketech.ruadeaco"
 COMPONENT = PACKAGE + "/.MainActivity"
@@ -119,7 +120,7 @@ class AndroidQA:
             try:
                 image = self.logical(self.image())
                 self.assert_rendered(image)
-                if self.cyan_fraction(image, (336, 200, 338, 238)) > 0.3:
+                if self.cyan_fraction(image, (335, 200, 337, 238)) > 0.3:
                     return
             except (AssertionError, OSError):
                 pass
@@ -175,6 +176,7 @@ class AndroidQA:
         option(126,500); option(852,45)
 
     def run(self, apk: Path):
+        verify_icons(apk,Path(__file__).resolve().parents[1]/"Platform/Android",self.output)
         with zipfile.ZipFile(apk) as package:
             raw_names = [entry.orig_filename for entry in package.infolist()]
             assert not any("\\" in name for name in raw_names), "APK contains paths Android cannot resolve"
