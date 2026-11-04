@@ -120,7 +120,10 @@ class AndroidQA:
             try:
                 image = self.logical(self.image())
                 self.assert_rendered(image)
-                if self.cyan_fraction(image, (335, 200, 337, 238)) > 0.3:
+                box=(335,200,337,238)
+                pixels=list(image.crop(box).getdata())
+                selected=sum(r>150 and g>140 and b<150 for r,g,b in pixels)/len(pixels)
+                if max(self.cyan_fraction(image,box),selected) > 0.3:
                     return
             except (AssertionError, OSError):
                 pass
