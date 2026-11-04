@@ -124,6 +124,9 @@ class AndroidQA:
                 pixels=list(image.crop(box).getdata())
                 selected=sum(r>150 and g>140 and b<150 for r,g,b in pixels)/len(pixels)
                 if max(self.cyan_fraction(image,box),selected) > 0.3:
+                    log=self.adb("logcat","-d","-s","raylib:I","*:S").decode(errors="replace")
+                    geometry=re.findall(r"SLT_BUFFER_GEOMETRY: (\d+) x (\d+) result=(-?\d+)",log)
+                    assert geometry and int(geometry[-1][0])>1 and int(geometry[-1][1])>1 and geometry[-1][2]=="0", "Physical buffer geometry was not applied"
                     return
             except (AssertionError, OSError):
                 pass

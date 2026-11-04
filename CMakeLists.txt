@@ -31,6 +31,8 @@ if(ANDROID)
         URL https://github.com/raysan5/raylib/archive/refs/tags/5.5.tar.gz
         URL_HASH SHA256=aea98ecf5bc5c5e0b789a76de0083a21a70457050ea4cc2aec7566935f5e258e)
     FetchContent_MakeAvailable(raylib)
+    include(cmake/AndroidSurface.cmake)
+    slt_android_buffer_geometry("${raylib_SOURCE_DIR}")
     add_library(ruadeaco SHARED Source/Prototype/PrototypeMain.cpp)
     target_compile_definitions(ruadeaco PRIVATE PLATFORM_ANDROID GRAPHICS_API_OPENGL_ES2)
     target_include_directories(ruadeaco PRIVATE "${ANDROID_NDK}/sources/android/native_app_glue")
