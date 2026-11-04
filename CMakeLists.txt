@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(RuaDeAcoNative VERSION 0.3.1 LANGUAGES C CXX)
+project(RuaDeAcoNative VERSION 0.4.0 LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -31,15 +31,27 @@ if(ANDROID)
         URL https://github.com/raysan5/raylib/archive/refs/tags/5.5.tar.gz
         URL_HASH SHA256=aea98ecf5bc5c5e0b789a76de0083a21a70457050ea4cc2aec7566935f5e258e)
     FetchContent_MakeAvailable(raylib)
+    include(cmake/AndroidSurface.cmake)
+    slt_android_buffer_geometry("${raylib_SOURCE_DIR}")
     add_library(ruadeaco SHARED Source/Prototype/PrototypeMain.cpp)
     target_compile_definitions(ruadeaco PRIVATE PLATFORM_ANDROID GRAPHICS_API_OPENGL_ES2)
     target_include_directories(ruadeaco PRIVATE "${ANDROID_NDK}/sources/android/native_app_glue")
     target_link_libraries(ruadeaco PRIVATE RuaDeAcoRuntime raylib)
     target_link_options(ruadeaco PRIVATE "-uANativeActivity_onCreate" "-Wl,-z,max-page-size=16384" "-Wl,--no-undefined")
 elseif(WIN32 AND EXISTS "${RAYLIB_INC_DIR}/raylib.h" AND EXISTS "${RAYLIB_LIB_DIR}/raylibdll.lib")
-    add_executable(RuaDeAcoUnreal
+    add_executable(RuaDeAcoUnreal WIN32
         Source/Prototype/PrototypeMain.cpp
     )
+    include(FetchContent)
+    FetchContent_Declare(webview2sdk URL https://api.nuget.org/v3-flatcontainer/microsoft.web.webview2/1.0.4314.35/microsoft.web.webview2.1.0.4314.35.nupkg
+        URL_HASH SHA256=90778deb1b77e36292828b4b5833c9255c27533f40e0ddd55891ae718944edc4 DOWNLOAD_EXTRACT_TIMESTAMP TRUE)
+    FetchContent_MakeAvailable(webview2sdk)
+    target_sources(RuaDeAcoUnreal PRIVATE Platform/Windows/OnlineWindow.cpp)
+    target_include_directories(RuaDeAcoUnreal PRIVATE "${webview2sdk_SOURCE_DIR}/build/native/include")
+    target_link_libraries(RuaDeAcoUnreal PRIVATE "${webview2sdk_SOURCE_DIR}/build/native/x64/WebView2LoaderStatic.lib" ole32 oleaut32 shlwapi version)
+    if(MSVC)
+        target_link_options(RuaDeAcoUnreal PRIVATE /ENTRY:mainCRTStartup)
+    endif()
     enable_language(RC)
     set(SLT_BRANDING_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Platform/Windows/Branding")
     set(SLT_PRODUCT_NAME "Rua de Aço")
@@ -64,6 +76,12 @@ endif()
 
 if(NOT ANDROID)
 enable_testing()
+if(WIN32)
+    add_executable(RuaDeAcoPreferencesTests Tests/PreferencesTests.cpp)
+    target_include_directories(RuaDeAcoPreferencesTests PRIVATE Source/Prototype "${RAYLIB_INC_DIR}")
+    target_link_libraries(RuaDeAcoPreferencesTests PRIVATE "${RAYLIB_LIB_DIR}/raylibdll.lib")
+    add_test(NAME RuaDeAcoPreferencesTests COMMAND RuaDeAcoPreferencesTests)
+endif()
 add_executable(RuaDeAcoTests
     Tests/RDAGoldenTests.cpp
 )

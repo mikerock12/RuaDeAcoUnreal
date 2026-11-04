@@ -5,6 +5,18 @@ package com.smellsliketech.ruadeaco;
 public class MainActivity extends android.app.NativeActivity {
     static { System.loadLibrary("ruadeaco"); }
 
+    private int[] physicalSurfaceSize(){
+        int width,height;
+        if(android.os.Build.VERSION.SDK_INT>=30){android.graphics.Rect bounds=getWindowManager().getCurrentWindowMetrics().getBounds();width=bounds.width();height=bounds.height();}
+        else {android.graphics.Point size=new android.graphics.Point();getWindowManager().getDefaultDisplay().getRealSize(size);width=size.x;height=size.y;}
+        return new int[]{Math.max(width,height),Math.min(width,height)};
+    }
+    private static native void nativeSetPaused(boolean paused);
+    @Override protected void onPause(){nativeSetPaused(true);super.onPause();}
+    @Override protected void onResume(){super.onResume();nativeSetPaused(false);applyImmersive();}
+    @Override public void onWindowFocusChanged(boolean focused){super.onWindowFocusChanged(focused);android.util.Log.i("RDAPlatform","WINDOW_FOCUS "+focused);if(focused)applyImmersive();}
+    private void applyImmersive(){getWindow().getDecorView().setSystemUiVisibility(android.view.View.SYSTEM_UI_FLAG_FULLSCREEN|android.view.View.SYSTEM_UI_FLAG_HIDE_NAVIGATION|android.view.View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY|android.view.View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN|android.view.View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION|android.view.View.SYSTEM_UI_FLAG_LAYOUT_STABLE);}
+
     @Override public void onCreate(android.os.Bundle state) {
         // Configure the first surface before NativeActivity starts C++.
         setRequestedOrientation(android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
@@ -15,4 +27,9 @@ public class MainActivity extends android.app.NativeActivity {
             android.view.View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION | android.view.View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
         super.onCreate(state);
     }
+    public void vibrateCombat() {
+        android.os.Vibrator vibrator=(android.os.Vibrator)getSystemService(android.content.Context.VIBRATOR_SERVICE);
+        if(vibrator!=null&&vibrator.hasVibrator())vibrator.vibrate(android.os.VibrationEffect.createOneShot(18,60));
+    }
+    public void openOnline(float master,float music,float effects,float opacity) { runOnUiThread(()->startActivity(new android.content.Intent(this,OnlineActivity.class).putExtra("master",master).putExtra("music",music).putExtra("effects",effects).putExtra("opacity",opacity))); }
 }

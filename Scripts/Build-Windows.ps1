@@ -13,7 +13,7 @@ param(
     [ValidateSet("Debug", "Release")]
     [string]$Configuration = "Release",
     [ValidatePattern('^\d+\.\d+\.\d+$')]
-    [string]$Version = "0.3.1"
+    [string]$Version = "0.4.0"
 )
 
 $ErrorActionPreference = "Stop"
@@ -41,13 +41,15 @@ $Sources = @(
     (Join-Path $Root "Source\RuaDeAcoRuntime\Private\RDAFighter.cpp"),
     (Join-Path $Root "Source\RuaDeAcoRuntime\Private\RDACombatWorld.cpp"),
     (Join-Path $Root "Source\Prototype\PrototypeMain.cpp"),
-    (Join-Path $Root "Platform\Windows\WindowsBranding.cpp")
+    (Join-Path $Root "Platform\Windows\WindowsBranding.cpp"),
+    (Join-Path $Root "Platform\Windows\OnlineWindow.cpp")
 )
 
 $IncludeRuntime = Join-Path $Root "Source\RuaDeAcoRuntime\Public"
 $IncludeRaylib = Join-Path $Root "ThirdParty\raylib\include"
 $LibRaylib = Join-Path $Root "ThirdParty\raylib\lib"
 $ExePath = Join-Path $OutDir "RuaDeAcoUnreal.exe"
+$WebView2 = & (Join-Path $PSScriptRoot "Ensure-WebView2.ps1")
 
 $OptFlags = if ($Configuration -eq "Debug") { @("/Od", "/Zi", "/D_DEBUG") } else { @("/O2", "/DNDEBUG") }
 $Fo = ($ObjDir.TrimEnd('\') + '\')
@@ -72,6 +74,7 @@ $ResourceText.Replace('@SLT_BRANDING_DIR@', $BrandingDir.Replace('\','/')).Repla
     "/DUSE_LIBTYPE_SHARED",
     "/DGRAPHICS_API_OPENGL_33",
     "/I$IncludeRuntime",
+    "/I$WebView2/build/native/include",
     "/I$IncludeRaylib",
     "/I$(Join-Path $Root 'Platform/Windows')",
     "/Fo$Fo"
@@ -83,10 +86,16 @@ $objs = $Sources | ForEach-Object { Join-Path $ObjDir ((Split-Path $_ -Leaf) -re
     "/SUBSYSTEM:WINDOWS",
     "/ENTRY:mainCRTStartup",
     "/OUT:$ExePath",
-    "/LIBPATH:$LibRaylib"
+    "/LIBPATH:$LibRaylib",
+    "/LIBPATH:$WebView2/build/native/x64"
 ) + $objs + @(
     $ResourceObject,
     "raylibdll.lib",
+    "WebView2LoaderStatic.lib",
+    "ole32.lib",
+    "oleaut32.lib",
+    "shlwapi.lib",
+    "version.lib",
     "winmm.lib",
     "gdi32.lib",
     "user32.lib",
@@ -111,7 +120,14 @@ if (Test-Path $ContentDst) {
     Remove-Item -LiteralPath $ResolvedTarget -Recurse -Force
 }
 Copy-Item $ContentSrc $ContentDst -Recurse -Force
+Copy-Item (Join-Path $WebView2 "LICENSE.txt") (Join-Path $OutDir "LICENSE-WebView2.txt") -Force
+Copy-Item (Join-Path $WebView2 "NOTICE.txt") (Join-Path $OutDir "NOTICE-WebView2.txt") -Force
 
 Write-Host ""
+$Bootstrapper=Join-Path $Root 'Intermediate/MicrosoftEdgeWebview2Setup.exe'
+if(-not(Test-Path -LiteralPath $Bootstrapper)){Invoke-WebRequest 'https://go.microsoft.com/fwlink/p/?LinkId=2124703' -OutFile $Bootstrapper}
+$Signature=Get-AuthenticodeSignature -LiteralPath $Bootstrapper
+if($Signature.Status -ne 'Valid' -or $Signature.SignerCertificate.Subject -notmatch 'O=Microsoft Corporation'){throw 'Microsoft WebView2 bootstrapper signature invalid'}
+Copy-Item -LiteralPath $Bootstrapper -Destination $OutDir -Force
 Write-Host "EXE: $ExePath"
 Write-Host "Para jogar: Start-Process `"$ExePath`""

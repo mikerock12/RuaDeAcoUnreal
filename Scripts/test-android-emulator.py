@@ -19,6 +19,7 @@ import zipfile
 import xml.etree.ElementTree as ET
 from pathlib import Path
 from PIL import Image, ImageChops, ImageStat
+from android_icons import verify as verify_icons
 
 PACKAGE = "com.smellsliketech.ruadeaco"
 COMPONENT = PACKAGE + "/.MainActivity"
@@ -119,7 +120,13 @@ class AndroidQA:
             try:
                 image = self.logical(self.image())
                 self.assert_rendered(image)
-                if self.cyan_fraction(image, (160, 120, 162, 298)) > 0.3:
+                box=(335,200,337,238)
+                pixels=list(image.crop(box).getdata())
+                selected=sum(r>150 and g>140 and b<150 for r,g,b in pixels)/len(pixels)
+                if max(self.cyan_fraction(image,box),selected) > 0.3:
+                    log=self.adb("logcat","-d","-s","raylib:I","*:S").decode(errors="replace")
+                    geometry=re.findall(r"SLT_BUFFER_GEOMETRY: (\d+) x (\d+) result=(-?\d+)",log)
+                    assert geometry and int(geometry[-1][0])>1 and int(geometry[-1][1])>1 and geometry[-1][2]=="0", "Physical buffer geometry was not applied"
                     return
             except (AssertionError, OSError):
                 pass
@@ -154,7 +161,52 @@ class AndroidQA:
             time.sleep(0.4)
             return
 
+    def settings_check(self, prefix: str):
+        self.tap(184, 276)
+        def option(x, y): self.tap(x * 2 / 3, y * 2 / 3)
+        for tab in range(5):
+            option(114 + 184 * tab, 108)
+            self.capture(prefix + f"settings-{tab}")
+        option(482, 108); option(684, 185)
+        option(850, 108); option(882, 263); option(882, 341)
+        option(666, 108); option(882, 263)
+        option(852, 45)
+        self.shell("am", "force-stop", PACKAGE)
+        self.adb("logcat", "-c")
+        self.shell("am", "start", "-W", "-n", COMPONENT)
+        self.wait_menu()
+        log=self.adb("logcat","-d","-s","raylib:I","*:S").decode(errors="replace")
+        assert re.search(r"SLT_PREFS_LOADED: mobile=1 master=0.80 left=1 size=1.05 deadzone=0.245",log), "Preferences did not survive restart"
+        self.tap(184,276); option(850,108)
+        self.capture(prefix + "settings-restored-custom")
+        option(126,500); option(852,45)
+
+    def online_check(self):
+        pid=self.assert_alive()
+        # Keep the startup buffer-geometry evidence: wait_menu verifies it again
+        # after returning from OnlineActivity in the same native process.
+        self.tap(456,220,wait=2)
+        deadline=time.monotonic()+60
+        while time.monotonic()<deadline:
+            log=self.adb("logcat","-d","-s","RDAOnline:I","*:S").decode(errors="replace")
+            if "OFFICIAL_CLIENT_READY" in log:break
+            time.sleep(1)
+        else:raise AssertionError("Official online WebView did not finish loading")
+        activity=self.shell("dumpsys","activity","activities")
+        assert "OnlineActivity" in activity, "Online did not open inside the app"
+        deadline=time.monotonic()+120
+        while time.monotonic()<deadline:
+            frame=self.logical(self.image()).resize((160,90))
+            if sum(max(pixel)>25 for pixel in frame.getdata())/(160*90)>.2:break
+            time.sleep(1)
+        else:raise AssertionError("Official client remained in preload; no rendered game")
+        self.capture("online-official-client")
+        self.shell("input","keyevent","KEYCODE_BACK")
+        self.wait_menu()
+        assert self.assert_alive()==pid, "Online return replaced the native process"
+
     def run(self, apk: Path):
+        verify_icons(apk,Path(__file__).resolve().parents[1]/"Platform/Android",self.output)
         with zipfile.ZipFile(apk) as package:
             raw_names = [entry.orig_filename for entry in package.infolist()]
             assert not any("\\" in name for name in raw_names), "APK contains paths Android cannot resolve"
@@ -194,7 +246,10 @@ class AndroidQA:
             if fighter == 0:
                 display_checks.append({"profile": display, "width": self.width, "height": self.height})
             self.capture(f"{capture_prefix}{fighter:02}-{name}-00-title")
-            self.tap(320, 218)  # Training; stationary opponent for this UI smoke.
+            if fighter == 0:
+                self.settings_check(capture_prefix)
+                if display == "16:9":self.online_check()
+            self.tap(184, 220)  # Training; stationary opponent for this UI smoke.
             selection = self.capture(f"{capture_prefix}{fighter:02}-{name}-01-selection")
             for index in range(6):
                 crop = selection.crop((33 + 98 * index, 54, 108 + 98 * index, 125))
@@ -236,6 +291,7 @@ class AndroidQA:
             assert self.assert_alive() == pid, "Process restarted during short background/resume"
             lifecycle = self.capture(f"{capture_prefix}{fighter:02}-{name}-08-background-resume")
             self.assert_match(lifecycle)
+            self.assert_pause(lifecycle, True)
             (self.output / f"{capture_prefix}{fighter:02}-{name}-logcat.txt").write_bytes(self.adb("logcat", "-d", "-v", "threadtime"))
             print(f"Android emulator UI smoke: {display}, {name}, actual arena {expected[0]}, input/pause/resume captured", flush=True)
         return {"device": device, "displayProfiles": display_checks, "fighters": portrait_checks,
@@ -249,6 +305,7 @@ class AndroidQA:
         for filename, args in [("logcat.txt", ("logcat", "-d", "-v", "threadtime")),
                                ("crash-buffer.txt", ("logcat", "-b", "crash", "-d")),
                                ("activity.txt", ("shell", "dumpsys", "activity", "activities")),
+                               ("window.txt", ("shell", "dumpsys", "window")),
                                ("memory.txt", ("shell", "dumpsys", "meminfo", PACKAGE))]:
             try:
                 (self.output / filename).write_bytes(self.adb(*args, check=False, timeout=20))

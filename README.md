@@ -2,14 +2,22 @@
 
 O [Rua de Aço original TypeScript/Phaser](https://github.com/mikerock12/RuaDeAco) define as regras, os lutadores, os golpes, a arte e o áudio atuais. Este repositório reaproveita a base C++ existente e a atualiza conforme essa referência; a implementação Unreal antiga não é a fonte de gameplay.
 
-A versão de entrega 0.3.1 atende Windows x64 e Android ARM64. O mesmo frontend C++/raylib desenha menus, arenas, animações, controles e áudio nas duas plataformas. No Android ele usa NativeActivity; a antiga tela Java simplificada não participa do build.
+A versão de entrega 0.4.0 atende Windows x64 e Android ARM64. O mesmo frontend C++/raylib desenha menus, arenas, animações, controles e áudio nas duas plataformas. No Android ele usa NativeActivity; a antiga tela Java simplificada não participa do build.
 
 - Seis lutadores: Guto Barba, Rafa Maré, Noir Reflexo, Astro Riso, Dante Sinal e Léo Violeta.
 - Três arenas: Cais da Cidade, Cozinha Macabra e Sítio.
 - Comandos, colisões calibradas, múltiplas janelas de golpes, agarrões, especiais, supers, passivas e finalizações importados do contrato original.
 - Versus CPU, versus local e treinamento. Dois jogadores locais exigem teclados ou controles externos; o HUD touch controla P1.
 - Cenas, poses e efeitos usam assets originais e metadados por animação. Apenas os lutadores da partida carregam todas as suas folhas.
-- O multiplayer por sala continua disponível na edição Web; os ports nativos não anunciam lockstep com ela.
+- Jogar Online abre o cliente oficial TypeScript dentro do app, com as mesmas salas da Web e opção de abrir no navegador. O combate offline continua C++; seus hashes internos não são usados no protocolo da Web.
+
+## Configurar a plataforma
+
+Abra Configurações no início ou na pausa. Tela, Gráficos, Áudio, Controles e Celular salvam as preferências no dispositivo. Windows oferece janela, sem bordas, tela cheia, resolução de janela, VSync, limite de quadros e renderização interna até 4K. As teclas de P1/P2 e os botões de gamepad podem ser remapeados.
+
+Android mantém o HUD touch visível e oferece tamanho, opacidade, margem, modo canhoto e vibração, além de qualidade, FPS, brilho e volumes. As instruções de treinamento e pausa têm ações por toque. Ícones tradicionais e adaptativos usam o logo original aprovado para o Windows.
+
+O online requer internet. No Windows, o instalador inclui o bootstrapper Microsoft WebView2, verifica se o runtime existe e o instala apenas quando necessário. O portátil oferece o instalador do componente; a janela online também permite abrir o site oficial no navegador. SDK WebView2 e licenças acompanham o pacote. Referência: [distribuição oficial Microsoft](https://learn.microsoft.com/en-us/microsoft-edge/webview2/concepts/distribution).
 
 ## Fonte, testes e limites
 
@@ -25,7 +33,7 @@ Com MSVC x64, CMake e Ninja:
 cmake --preset windows-msvc-release
 cmake --build --preset windows-msvc-release
 ctest --preset windows-msvc-release --output-on-failure
-./Scripts/Build-Windows-Installer.ps1 -Version 0.3.1
+./Scripts/Build-Windows-Installer.ps1 -Version 0.4.0
 ```
 
 Depois de atualizar o exportador na pasta irmã `../RuaDeAco`:
@@ -44,7 +52,7 @@ Android requer SDK/Build Tools 36, NDK 27.0.12077973, JDK 17, CMake e Ninja. ray
 
 O APK x86_64 serve exclusivamente ao emulador de QA. O APK unsigned ainda não é instalável. Para assinar uma atualização, configure `SLT_ANDROID_KEYSTORE`, `SLT_ANDROID_STORE_PASS` e `SLT_ANDROID_KEY_PASS` no ambiente e omita `-UnsignedOnly`. A chave de produção existente é reutilizada; o script não gera outra identidade. Não versionar chaves, senhas ou binários.
 
-Os artefatos ficam em `Saved/Packages/Release-0.3.1/`. APKs públicos exigem assinatura v2/v3, compatibilidade de certificado e alinhamento de 16 KiB conferidos. O instalador Windows não possui assinatura Authenticode comercial.
+Os artefatos ficam em `Saved/Packages/Release-0.4.0/`. APKs públicos exigem assinatura v2/v3, compatibilidade de certificado e alinhamento de 16 KiB conferidos. O instalador Windows não possui assinatura Authenticode comercial.
 
 O módulo Unreal em `Source/RuaDeAco/` é preservado como frontend opcional. O caminho distribuível leve usa `Source/Prototype/`; o core `Source/RuaDeAcoRuntime/` permanece independente de raylib e Unreal.
 

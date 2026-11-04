@@ -2,10 +2,17 @@
 #include "raylib.h"
 #if defined(_WIN32)
 #include "WindowsBranding.h"
+#include "OnlineWindow.h"
 #endif
 #include "CanonicalPresentation.h"
 #include "RDAStageVisuals.h"
 #include "RDAPlatformAssets.h"
+#include "GamePreferences.h"
+#include "MobileServices.h"
+#if defined(PLATFORM_ANDROID)
+extern "C" JNIEXPORT void JNICALL Java_com_smellsliketech_ruadeaco_MainActivity_nativeSetPaused(JNIEnv*,jclass,jboolean paused){SLTMobile::SetBackground(paused);}
+#endif
+#include "rlgl.h"
 
 #include <algorithm>
 #include <array>
@@ -22,6 +29,10 @@
 namespace
 {
 	namespace fs = std::filesystem;
+	SLTPrefs::Preferences* Preferences=nullptr;
+    float CameraTrauma=0;
+    bool AssetLoading=false;
+    double LastLoadingPaint=0;
 
 	constexpr Color kInk{5, 7, 17, 255};
 	constexpr Color kPanel{12, 18, 36, 235};
@@ -125,6 +136,7 @@ namespace
 		std::array<Sound, RDA::kFighterCount> specialSfx{};
 		std::array<Sound, RDA::kFighterCount> superSfx{};
 		std::unordered_map<std::string,std::pair<Sound,Sound>> moveSounds;
+        std::unordered_map<std::string,std::pair<float,float>> moveGains;
 
 		void Unload()
 		{
@@ -231,34 +243,40 @@ namespace
 			Sound Effect=LoadSfxOrFallback(SfxRoot/Cue.effect,240,760,0.32f,0.48f,0.25f);
 			SetSoundVolume(Voice,Cue.voiceGain); SetSoundVolume(Effect,Cue.effectGain); SetSoundPitch(Effect,Cue.rate);
 			Bank.moveSounds.emplace(std::string(Cue.fighter)+"/"+Cue.move,std::make_pair(Voice,Effect));
+            Bank.moveGains.emplace(std::string(Cue.fighter)+"/"+Cue.move,std::make_pair(Cue.voiceGain,Cue.effectGain));
 		}
 		return Bank;
 	}
 
 	void PlayWorldSound(const SoundBank& Bank, RDA::SoundEvent Ev, RDA::FighterId ActiveFighter)
 	{
+        if(Ev==RDA::SoundEvent::HitHeavy||Ev==RDA::SoundEvent::GrabSlam) {
+            CameraTrauma=.20f;
+            if(Preferences&&Preferences->value.vibration)SLTMobile::Call("vibrateCombat");
+        }
+
 		if (!Bank.audioReady) return;
 		const size_t FIdx = static_cast<size_t>(ActiveFighter) % RDA::kFighterCount;
 		switch (Ev)
 		{
-		case RDA::SoundEvent::Fight: PlaySound(Bank.fight); break;
-		case RDA::SoundEvent::Swing: PlaySound(Bank.swing); break;
-		case RDA::SoundEvent::HitLight: PlaySound(Bank.hitLight); break;
-		case RDA::SoundEvent::HitHeavy: PlaySound(Bank.hitHeavy); break;
-		case RDA::SoundEvent::Block: PlaySound(Bank.block); break;
-		case RDA::SoundEvent::Jump: PlaySound(Bank.jump); break;
+		case RDA::SoundEvent::Fight: (SetSoundVolume(Bank.fight,Preferences->value.voice),PlaySound(Bank.fight)); break;
+		case RDA::SoundEvent::Swing: (SetSoundVolume(Bank.swing,Preferences->value.effects),PlaySound(Bank.swing)); break;
+		case RDA::SoundEvent::HitLight: (SetSoundVolume(Bank.hitLight,Preferences->value.effects),PlaySound(Bank.hitLight)); break;
+		case RDA::SoundEvent::HitHeavy: (SetSoundVolume(Bank.hitHeavy,Preferences->value.effects),PlaySound(Bank.hitHeavy)); break;
+		case RDA::SoundEvent::Block: (SetSoundVolume(Bank.block,Preferences->value.effects),PlaySound(Bank.block)); break;
+		case RDA::SoundEvent::Jump: (SetSoundVolume(Bank.jump,Preferences->value.effects),PlaySound(Bank.jump)); break;
 		case RDA::SoundEvent::Knockdown:
-		case RDA::SoundEvent::GrabSlam: PlaySound(Bank.knockdown); break;
-		case RDA::SoundEvent::GrabStart: PlaySound(Bank.hitLight); break;
-		case RDA::SoundEvent::SpecialCast: PlaySound(Bank.specialSfx[FIdx]); break;
-		case RDA::SoundEvent::SuperCast: PlaySound(Bank.superSfx[FIdx]); break;
-		case RDA::SoundEvent::FinishReady: PlaySound(Bank.finalize); break;
+		case RDA::SoundEvent::GrabSlam: (SetSoundVolume(Bank.knockdown,Preferences->value.effects),PlaySound(Bank.knockdown)); break;
+		case RDA::SoundEvent::GrabStart: (SetSoundVolume(Bank.hitLight,Preferences->value.effects),PlaySound(Bank.hitLight)); break;
+		case RDA::SoundEvent::SpecialCast: (SetSoundVolume(Bank.specialSfx[FIdx],Preferences->value.effects),PlaySound(Bank.specialSfx[FIdx])); break;
+		case RDA::SoundEvent::SuperCast: (SetSoundVolume(Bank.superSfx[FIdx],Preferences->value.effects),PlaySound(Bank.superSfx[FIdx])); break;
+		case RDA::SoundEvent::FinishReady: (SetSoundVolume(Bank.finalize,Preferences->value.voice),PlaySound(Bank.finalize)); break;
 		case RDA::SoundEvent::FinisherMonsterRoar:
 		case RDA::SoundEvent::FinisherPotDrop:
-		case RDA::SoundEvent::FinisherTrident: PlaySound(Bank.monsterRoar); break;
-		case RDA::SoundEvent::FinisherSplash: PlaySound(Bank.hitHeavy); break;
-		case RDA::SoundEvent::RoundEnd: PlaySound(Bank.roundEnd); break;
-		case RDA::SoundEvent::MatchWin: PlaySound(Bank.matchWin); break;
+		case RDA::SoundEvent::FinisherTrident: (SetSoundVolume(Bank.monsterRoar,Preferences->value.effects),PlaySound(Bank.monsterRoar)); break;
+		case RDA::SoundEvent::FinisherSplash: (SetSoundVolume(Bank.hitHeavy,Preferences->value.effects),PlaySound(Bank.hitHeavy)); break;
+		case RDA::SoundEvent::RoundEnd: (SetSoundVolume(Bank.roundEnd,Preferences->value.voice),PlaySound(Bank.roundEnd)); break;
+		case RDA::SoundEvent::MatchWin: (SetSoundVolume(Bank.matchWin,Preferences->value.voice),PlaySound(Bank.matchWin)); break;
 		default: break;
 		}
 	}
@@ -267,7 +285,7 @@ namespace
 		if (!Bank.audioReady || Cue.event==RDA::SoundEvent::Swing) return;
 		const std::string Key=std::string(World.fighters[static_cast<size_t>(Cue.fighterIndex)].def->canonicalId)+"/"+Cue.moveId;
 		auto Found=Bank.moveSounds.find(Key);
-		if(Found!=Bank.moveSounds.end()) { PlaySound(Found->second.first); PlaySound(Found->second.second); }
+		if(Found!=Bank.moveSounds.end()) { auto Gains=Bank.moveGains.at(Key);SetSoundVolume(Found->second.first,Preferences->value.voice*Gains.first);SetSoundVolume(Found->second.second,Preferences->value.effects*Gains.second);PlaySound(Found->second.first); PlaySound(Found->second.second); }
 	}
 
 	fs::path FindContentRoot()
@@ -316,6 +334,9 @@ namespace
 			return Texture2D{};
 		}
 		Texture2D Tex = LoadTexture(Path.generic_string().c_str());
+        if(AssetLoading && GetTime()-LastLoadingPaint>.045) {
+            BeginDrawing();ClearBackground(kInk);DrawText("CARREGANDO LUTADORES...",GetScreenWidth()/2-155,GetScreenHeight()/2,22,kCyan);EndDrawing();LastLoadingPaint=GetTime();
+        }
 		if (Tex.id != 0)
 		{
 			SetTextureFilter(Tex, TEXTURE_FILTER_POINT);
@@ -455,10 +476,10 @@ namespace
 	{
 		if (!bShowTouch) return;
 		// Left radial D-pad in 640x360 logical space
-		const int PadX = 72;
-		const int PadY = 294;
-		DrawCircle(PadX, PadY, 42.0f, Color{12, 18, 36, 120});
-		DrawCircleLines(PadX, PadY, 42.0f, Color{41, 217, 255, 160});
+		const Vector2 Pad=Preferences->ControlPoint({72,294},640,360);
+        const int PadX=static_cast<int>(Pad.x),PadY=static_cast<int>(Pad.y);
+		DrawCircle(PadX, PadY, 42.0f*Preferences->value.touchSize, ColorAlpha(kPanel,Preferences->value.touchOpacity));
+		DrawCircleLines(PadX, PadY, 42.0f*Preferences->value.touchSize, ColorAlpha(kCyan,Preferences->value.touchOpacity));
 		DrawText("L", PadX - 32, PadY - 4, 8, ActiveInput.left ? kYellow : kMuted);
 		DrawText("R", PadX + 26, PadY - 4, 8, ActiveInput.right ? kYellow : kMuted);
 		DrawText("U", PadX - 3, PadY - 34, 8, ActiveInput.up ? kYellow : kMuted);
@@ -471,15 +492,16 @@ namespace
 			{572, 268, "H", kPink, ActiveInput.kick},
 			{604, 294, "S", kYellow, ActiveInput.special},
 			{572, 320, "B", kGreen, ActiveInput.block},
-			{500, 268, "GRAB", kWhite, ActiveInput.grabPressed},
+			{500, 268, "AG", kWhite, ActiveInput.grabPressed},
 			{500, 320, "SUP", kDanger, ActiveInput.superPressed},
 		};
 		for (const BtnSpec& B : Btns)
 		{
-			DrawCircle(B.x, B.y, 16.0f, B.active ? ColorAlpha(B.col, 0.65f) : Color{12, 18, 36, 130});
-			DrawCircleLines(B.x, B.y, 16.0f, B.col);
+            Vector2 Center=Preferences->ControlPoint({static_cast<float>(B.x),static_cast<float>(B.y)},640,360);
+			DrawCircle(static_cast<int>(Center.x), static_cast<int>(Center.y), 16.0f*Preferences->value.touchSize, B.active ? ColorAlpha(B.col, 0.65f) : ColorAlpha(kPanel,Preferences->value.touchOpacity));
+			DrawCircleLines(static_cast<int>(Center.x), static_cast<int>(Center.y),16.0f*Preferences->value.touchSize,B.col);
 			const int Tw = MeasureText(B.label, 6);
-			DrawText(B.label, B.x - Tw / 2, B.y - 3, 6, kWhite);
+			DrawText(B.label,static_cast<int>(Center.x)-Tw/2,static_cast<int>(Center.y)-3,6,kWhite);
 		}
 	}
 
@@ -513,15 +535,15 @@ namespace
 		const int Points = AllowGameplayControls ? (Count > 0 ? Count : (IsMouseButtonDown(MOUSE_LEFT_BUTTON) ? 1 : 0)) : 0;
 		for (int i = 0; i < Points; ++i)
 		{
-			Vector2 P = PointerLogical(DestViewport, Count > 0 ? GetTouchPosition(i) : GetMousePosition());
+			Vector2 P = Preferences->ControlInput(PointerLogical(DestViewport, Count > 0 ? GetTouchPosition(i) : GetMousePosition()),640,360);
 			if (P.x < 0 || P.x > RDA::kLogicalWidth || P.y < 0 || P.y > RDA::kLogicalHeight) continue;
 			const float Dx = P.x - 72, Dy = P.y - 294;
-			if (Dx * Dx + Dy * Dy <= 54 * 54)
+			if (Dx * Dx + Dy * Dy <= 54 * 54*Preferences->value.touchSize*Preferences->value.touchSize)
 			{
 				Touch.left |= Dx < -10; Touch.right |= Dx > 10;
 				Touch.up |= Dy < -14; Touch.down |= Dy > 14;
 			}
-			auto Hit = [&](float X, float Y) { return (P.x-X)*(P.x-X)+(P.y-Y)*(P.y-Y) <= 20*20; };
+			auto Hit = [&](float X, float Y) { return (P.x-X)*(P.x-X)+(P.y-Y)*(P.y-Y) <= 20*20*Preferences->value.touchSize*Preferences->value.touchSize; };
 			Touch.punch |= Hit(536,294); Touch.kick |= Hit(572,268);
 			Touch.special |= Hit(604,294); Touch.block |= Hit(572,320);
 			Grab |= Hit(500,268); Super |= Hit(500,320);
@@ -542,22 +564,22 @@ namespace
 		{
 			const float AxisX = GetGamepadAxisMovement(Pad, GAMEPAD_AXIS_LEFT_X);
 			const float AxisY = GetGamepadAxisMovement(Pad, GAMEPAD_AXIS_LEFT_Y);
-			Out.left = Out.left || AxisX < -0.35f || IsGamepadButtonDown(Pad, GAMEPAD_BUTTON_LEFT_FACE_LEFT);
-			Out.right = Out.right || AxisX > 0.35f || IsGamepadButtonDown(Pad, GAMEPAD_BUTTON_LEFT_FACE_RIGHT);
-			Out.up = Out.up || AxisY < -0.45f || IsGamepadButtonDown(Pad, GAMEPAD_BUTTON_LEFT_FACE_UP);
-			Out.down = Out.down || AxisY > 0.45f || IsGamepadButtonDown(Pad, GAMEPAD_BUTTON_LEFT_FACE_DOWN);
-			Out.punch = Out.punch || IsGamepadButtonDown(Pad, GAMEPAD_BUTTON_RIGHT_FACE_LEFT);
-			Out.kick = Out.kick || IsGamepadButtonDown(Pad, GAMEPAD_BUTTON_RIGHT_FACE_UP);
-			Out.special = Out.special || IsGamepadButtonDown(Pad, GAMEPAD_BUTTON_RIGHT_FACE_RIGHT);
-			Out.block = Out.block || IsGamepadButtonDown(Pad, GAMEPAD_BUTTON_RIGHT_FACE_DOWN);
+			Out.left = Out.left || AxisX < -Preferences->value.deadzone || IsGamepadButtonDown(Pad, GAMEPAD_BUTTON_LEFT_FACE_LEFT);
+			Out.right = Out.right || AxisX > Preferences->value.deadzone || IsGamepadButtonDown(Pad, GAMEPAD_BUTTON_LEFT_FACE_RIGHT);
+			Out.up = Out.up || AxisY < -Preferences->value.deadzone || IsGamepadButtonDown(Pad, GAMEPAD_BUTTON_LEFT_FACE_UP);
+			Out.down = Out.down || AxisY > Preferences->value.deadzone || IsGamepadButtonDown(Pad, GAMEPAD_BUTTON_LEFT_FACE_DOWN);
+			Out.punch = Out.punch || IsGamepadButtonDown(Pad, Preferences->value.buttons[0]);
+			Out.kick = Out.kick || IsGamepadButtonDown(Pad, Preferences->value.buttons[1]);
+			Out.special = Out.special || IsGamepadButtonDown(Pad, Preferences->value.buttons[2]);
+			Out.block = Out.block || IsGamepadButtonDown(Pad, Preferences->value.buttons[3]);
 
 			Out.upPressed = Out.upPressed || IsGamepadButtonPressed(Pad, GAMEPAD_BUTTON_LEFT_FACE_UP);
-			Out.punchPressed = Out.punchPressed || IsGamepadButtonPressed(Pad, GAMEPAD_BUTTON_RIGHT_FACE_LEFT);
-			Out.kickPressed = Out.kickPressed || IsGamepadButtonPressed(Pad, GAMEPAD_BUTTON_RIGHT_FACE_UP);
-			Out.specialPressed = Out.specialPressed || IsGamepadButtonPressed(Pad, GAMEPAD_BUTTON_RIGHT_FACE_RIGHT);
-			Out.blockPressed = Out.blockPressed || IsGamepadButtonPressed(Pad, GAMEPAD_BUTTON_RIGHT_FACE_DOWN);
-			Out.grabPressed = Out.grabPressed || IsGamepadButtonPressed(Pad, GAMEPAD_BUTTON_RIGHT_TRIGGER_1);
-			Out.superPressed = Out.superPressed || IsGamepadButtonPressed(Pad, GAMEPAD_BUTTON_RIGHT_TRIGGER_2);
+			Out.punchPressed = Out.punchPressed || IsGamepadButtonPressed(Pad, Preferences->value.buttons[0]);
+			Out.kickPressed = Out.kickPressed || IsGamepadButtonPressed(Pad, Preferences->value.buttons[1]);
+			Out.specialPressed = Out.specialPressed || IsGamepadButtonPressed(Pad, Preferences->value.buttons[2]);
+			Out.blockPressed = Out.blockPressed || IsGamepadButtonPressed(Pad, Preferences->value.buttons[3]);
+			Out.grabPressed = Out.grabPressed || IsGamepadButtonPressed(Pad, Preferences->value.buttons[4]);
+			Out.superPressed = Out.superPressed || IsGamepadButtonPressed(Pad, Preferences->value.buttons[5]);
 			Out.pausePressed = Out.pausePressed || IsGamepadButtonPressed(Pad, GAMEPAD_BUTTON_MIDDLE_RIGHT);
 			Out.confirmPressed = Out.confirmPressed || IsGamepadButtonPressed(Pad, GAMEPAD_BUTTON_RIGHT_FACE_DOWN);
 		}
@@ -571,25 +593,25 @@ namespace
 	RDA::InputFrame ReadPlayerOneInput(const Rectangle& DestViewport, bool& InOutTouchActive, bool AllowGameplayTouch)
 	{
 		RDA::InputFrame Out{};
-		Out.left = IsKeyDown(KEY_A);
-		Out.right = IsKeyDown(KEY_D);
-		Out.up = IsKeyDown(KEY_W);
-		Out.down = IsKeyDown(KEY_S);
-		Out.punch = IsKeyDown(KEY_F);
-		Out.kick = IsKeyDown(KEY_G);
-		Out.special = IsKeyDown(KEY_H);
-		Out.block = IsKeyDown(KEY_R);
+		Out.left = Preferences->Down(0,0);
+		Out.right = Preferences->Down(0,1);
+		Out.up = Preferences->Down(0,2);
+		Out.down = Preferences->Down(0,3);
+		Out.punch = Preferences->Down(0,4);
+		Out.kick = Preferences->Down(0,5);
+		Out.special = Preferences->Down(0,6);
+		Out.block = Preferences->Down(0,7);
 
-		Out.upPressed = IsKeyPressed(KEY_W);
-		Out.downPressed = IsKeyPressed(KEY_S);
-		Out.leftPressed = IsKeyPressed(KEY_A);
-		Out.rightPressed = IsKeyPressed(KEY_D);
-		Out.punchPressed = IsKeyPressed(KEY_F);
-		Out.kickPressed = IsKeyPressed(KEY_G);
-		Out.specialPressed = IsKeyPressed(KEY_H);
-		Out.blockPressed = IsKeyPressed(KEY_R);
-		Out.grabPressed = IsKeyPressed(KEY_T) || (IsKeyDown(KEY_F) && IsKeyPressed(KEY_G)) || (IsKeyPressed(KEY_F) && IsKeyDown(KEY_G));
-		Out.superPressed = IsKeyPressed(KEY_Y);
+		Out.upPressed = Preferences->Pressed(0,2);
+		Out.downPressed = Preferences->Pressed(0,3);
+		Out.leftPressed = Preferences->Pressed(0,0);
+		Out.rightPressed = Preferences->Pressed(0,1);
+		Out.punchPressed = Preferences->Pressed(0,4);
+		Out.kickPressed = Preferences->Pressed(0,5);
+		Out.specialPressed = Preferences->Pressed(0,6);
+		Out.blockPressed = Preferences->Pressed(0,7);
+		Out.grabPressed = Preferences->Pressed(0,8) || (Preferences->Down(0,4) && Preferences->Pressed(0,5)) || (Preferences->Pressed(0,4) && Preferences->Down(0,5));
+		Out.superPressed = Preferences->Pressed(0,9);
 		Out.pausePressed = IsKeyPressed(KEY_ESCAPE) || IsKeyPressed(KEY_P);
 		Out.confirmPressed = IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_SPACE);
 		Out.debugPressed = IsKeyPressed(KEY_F1);
@@ -603,25 +625,25 @@ namespace
 	RDA::InputFrame ReadPlayerTwoKeyboardInput()
 	{
 		RDA::InputFrame Out{};
-		Out.left = IsKeyDown(KEY_LEFT);
-		Out.right = IsKeyDown(KEY_RIGHT);
-		Out.up = IsKeyDown(KEY_UP);
-		Out.down = IsKeyDown(KEY_DOWN);
-		Out.punch = IsKeyDown(KEY_J);
-		Out.kick = IsKeyDown(KEY_K);
-		Out.special = IsKeyDown(KEY_L);
-		Out.block = IsKeyDown(KEY_U);
+		Out.left = Preferences->Down(1,0);
+		Out.right = Preferences->Down(1,1);
+		Out.up = Preferences->Down(1,2);
+		Out.down = Preferences->Down(1,3);
+		Out.punch = Preferences->Down(1,4);
+		Out.kick = Preferences->Down(1,5);
+		Out.special = Preferences->Down(1,6);
+		Out.block = Preferences->Down(1,7);
 
-		Out.upPressed = IsKeyPressed(KEY_UP);
-		Out.downPressed = IsKeyPressed(KEY_DOWN);
-		Out.leftPressed = IsKeyPressed(KEY_LEFT);
-		Out.rightPressed = IsKeyPressed(KEY_RIGHT);
-		Out.punchPressed = IsKeyPressed(KEY_J);
-		Out.kickPressed = IsKeyPressed(KEY_K);
-		Out.specialPressed = IsKeyPressed(KEY_L);
-		Out.blockPressed = IsKeyPressed(KEY_U);
-		Out.grabPressed = IsKeyPressed(KEY_I) || (IsKeyDown(KEY_J) && IsKeyPressed(KEY_K)) || (IsKeyPressed(KEY_J) && IsKeyDown(KEY_K));
-		Out.superPressed = IsKeyPressed(KEY_O);
+		Out.upPressed = Preferences->Pressed(1,2);
+		Out.downPressed = Preferences->Pressed(1,3);
+		Out.leftPressed = Preferences->Pressed(1,0);
+		Out.rightPressed = Preferences->Pressed(1,1);
+		Out.punchPressed = Preferences->Pressed(1,4);
+		Out.kickPressed = Preferences->Pressed(1,5);
+		Out.specialPressed = Preferences->Pressed(1,6);
+		Out.blockPressed = Preferences->Pressed(1,7);
+		Out.grabPressed = Preferences->Pressed(1,8) || (Preferences->Down(1,4) && Preferences->Pressed(1,5)) || (Preferences->Pressed(1,4) && Preferences->Down(1,5));
+		Out.superPressed = Preferences->Pressed(1,9);
 		ReadGamepadInput(Out,1);
 		return Out;
 	}
@@ -630,8 +652,13 @@ namespace
 int main(int argc, char** argv)
 {
 	std::string RenderSmokeDirectory;
+    std::string SettingsSmokeDirectory;
 	for (int i = 1; i < argc; ++i)
 	{
+#if defined(_WIN32)
+        if(std::strcmp(argv[i],"--online-qa-port")==0&&i+1<argc)return RDAOnline::Smoke(std::atoi(argv[++i]));
+#endif
+		if(std::strcmp(argv[i],"--settings-smoke")==0 && i+1<argc)SettingsSmokeDirectory=argv[++i];
 		if (std::strcmp(argv[i], "--render-smoke") == 0 && i + 1 < argc) RenderSmokeDirectory = argv[++i];
 		if (std::strcmp(argv[i], "--headless-smoke") == 0)
 		{
@@ -652,15 +679,33 @@ int main(int argc, char** argv)
 		}
 	}
 
-	SetConfigFlags(RenderSmokeDirectory.empty() ? FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT : FLAG_WINDOW_HIDDEN);
+	SetConfigFlags(RenderSmokeDirectory.empty() && SettingsSmokeDirectory.empty() ? FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT : FLAG_WINDOW_HIDDEN);
 #if defined(PLATFORM_ANDROID)
 	// Use the physical EGL surface. raylib 5.5 otherwise scales its requested
 	// window in addition to our own centered 640x360 framebuffer viewport.
-	InitWindow(0, 0, "Rua de Aco — Edicao Nativa C++20 (6 Lutadores / 3 Arenas)");
+	const Vector2 PhysicalSurface=SLTMobile::InitialSurfaceSize();
+    InitWindow(static_cast<int>(PhysicalSurface.x),static_cast<int>(PhysicalSurface.y), "Rua de Aco");
 #else
-	InitWindow(1280, 720, "Rua de Aco — Edicao Nativa C++20 (6 Lutadores / 3 Arenas)");
+	InitWindow(1280, 720, "Rua de Aco");
 #endif
 	RDAAssets::Initialize();
+#if defined(PLATFORM_ANDROID)
+    fs::path SettingsPath=fs::path(GetAndroidApp()->activity->internalDataPath)/"preferences.cfg";
+#else
+    const char* LocalData=std::getenv("LOCALAPPDATA");
+    fs::path SettingsPath=fs::path(LocalData?LocalData:GetApplicationDirectory())/"SmellsLikeTech/RuaDeAco/preferences.cfg";
+#endif
+    SLTPrefs::Preferences Settings(SettingsPath,true); Preferences=&Settings;
+    auto LaunchOnline=[&](){
+#if defined(_WIN32)
+        RDAOnline::Open(GetWindowHandle(),Settings.value.master,Settings.value.music,Settings.value.effects,Settings.value.touchOpacity);
+#elif defined(PLATFORM_ANDROID)
+        SLTMobile::OpenOnline(Settings.value.master,Settings.value.music,Settings.value.effects,Settings.value.touchOpacity);
+#endif
+    };
+    if(!RenderSmokeDirectory.empty()) { Settings.Defaults();Settings.value.quality=0; }
+    Settings.ApplyWindow(!RenderSmokeDirectory.empty()||!SettingsSmokeDirectory.empty());
+
 	SetExitKey(KEY_NULL);
 #if defined(_WIN32)
 	const auto IconBytes = SLTBranding::ApplicationIconPng();
@@ -668,10 +713,10 @@ int main(int argc, char** argv)
 	if (AppIcon.data) { SetWindowIcon(AppIcon); UnloadImage(AppIcon); TraceLog(LOG_INFO, "RDA_APP_ICON: embedded icon applied"); }
 	else TraceLog(LOG_ERROR, "RDA_APP_ICON: embedded icon missing or invalid");
 #endif
-	SetTargetFPS(RenderSmokeDirectory.empty() ? 60 : 0);
+	SetTargetFPS(RenderSmokeDirectory.empty() ? Settings.value.fps : 0);
 	InitAudioDevice();
 
-	RenderTexture2D Canvas = LoadRenderTexture(RDA::kLogicalWidth, RDA::kLogicalHeight);
+	RenderTexture2D Canvas = LoadRenderTexture(RDA::kLogicalWidth*Settings.RenderScale(), RDA::kLogicalHeight*Settings.RenderScale());
 	SetTextureFilter(Canvas.texture, TEXTURE_FILTER_POINT);
 
 	const fs::path ContentRoot = FindContentRoot();
@@ -689,6 +734,7 @@ int main(int argc, char** argv)
 	}
 	auto PrepareFighterVisuals = [&](int One, int Two)
 	{
+        AssetLoading=true;
 		for (int i=0;i<RDA::kFighterCount;++i)
 		{
 			auto& Bank = FighterVisuals[static_cast<size_t>(i)];
@@ -703,6 +749,7 @@ int main(int argc, char** argv)
 				Bank.animations.clear(); Bank.effects.clear();
 			}
 		}
+        AssetLoading=false;
 	};
 
 	std::array<StageVisualBank, RDA::kStageCount> StageVisuals{};
@@ -774,6 +821,7 @@ int main(int argc, char** argv)
 
 	std::unique_ptr<RDA::CombatWorld> World;
 	if (!RenderSmokeDirectory.empty()) fs::create_directories(RenderSmokeDirectory);
+    if(!SettingsSmokeDirectory.empty())fs::create_directories(SettingsSmokeDirectory);
 	AppScreen LoggedScreen = static_cast<AppScreen>(-1);
 	bool LoggedPause = false;
 	double SimulationAccumulator = 0;
@@ -782,7 +830,26 @@ int main(int argc, char** argv)
 
 	while (!WindowShouldClose())
 	{
+        const bool SettingsWasOpen=Settings.open;
+        Settings.Update();
+        if(Settings.changed) {
+            if(Settings.windowChanged)Settings.ApplyWindow(!RenderSmokeDirectory.empty()||!SettingsSmokeDirectory.empty());
+            if(Canvas.texture.width!=RDA::kLogicalWidth*Settings.RenderScale()) { UnloadRenderTexture(Canvas);Canvas=LoadRenderTexture(RDA::kLogicalWidth*Settings.RenderScale(),RDA::kLogicalHeight*Settings.RenderScale());SetTextureFilter(Canvas.texture,TEXTURE_FILTER_POINT); }
+        }
+        #if defined(_WIN32)
+        SetMasterVolume(RDAOnline::Active()?0:Settings.value.master);
+        if(RenderSmokeDirectory.empty())SetTargetFPS(RDAOnline::Active()?15:Settings.value.fps);
+#else
+        SetMasterVolume(!SLTMobile::Background&&IsWindowFocused()?Settings.value.master:0);
+#endif
+        if(bHasMenuMusic)SetMusicVolume(MenuMusic,Settings.value.music);
+        for(auto& Stage:StageVisuals)if(Stage.hasMusic)SetMusicVolume(Stage.music,Settings.value.music);
+        bShowTouchOverlay=Settings.value.touch;
+        const bool AndroidPause=SLTPrefs::Mobile&&SLTMobile::PauseRequested.exchange(false);
+        if(World && !World->IsPaused() && (AndroidPause || ((SLTPrefs::Mobile||Settings.value.autoPause) && !IsWindowFocused()) || Settings.open))World->TogglePause();
 		GlobalTicks += 1;
+        if(!SettingsSmokeDirectory.empty())Settings.Show((GlobalTicks-1)/2);
+		CameraTrauma=std::max(0.f,CameraTrauma-GetFrameTime());
 		const double FrameSeconds = RenderSmokeDirectory.empty() ? std::min(GetFrameTime(),0.1f) : 1.0/60.0;
 		if (Screen != AppScreen::Match) { SimulationAccumulator=0; PendingP1={}; PendingP2={}; }
 		if (!RenderSmokeDirectory.empty())
@@ -816,18 +883,19 @@ int main(int argc, char** argv)
 				SimulationAccumulator=0; Screen=AppScreen::Match;
 			}
 		}
-		if (IsKeyPressed(KEY_F11) || (IsKeyDown(KEY_LEFT_ALT) && IsKeyPressed(KEY_ENTER)))
+		if (!SLTPrefs::Mobile && !SettingsWasOpen && (IsKeyPressed(KEY_F11) || (IsKeyDown(KEY_LEFT_ALT) && IsKeyPressed(KEY_ENTER))))
 		{
 			ToggleFullscreen();
 		}
-		if (IsKeyPressed(KEY_F4))
+		if (!SLTPrefs::Mobile && !SettingsWasOpen && IsKeyPressed(KEY_F4))
 		{
-			bShowTouchOverlay = !bShowTouchOverlay;
+			Settings.value.touch = !Settings.value.touch; Settings.Save();
 		}
 
 		const float ScaleX = static_cast<float>(GetScreenWidth()) / static_cast<float>(RDA::kLogicalWidth);
 		const float ScaleY = static_cast<float>(GetScreenHeight()) / static_cast<float>(RDA::kLogicalHeight);
-		const float Scale = std::max(0.01f, std::min(ScaleX, ScaleY));
+		const float RawScale = std::max(0.01f, std::min(ScaleX, ScaleY));
+        const float Scale=Settings.value.integerScale&&RawScale>=1?std::floor(RawScale):RawScale;
 		const float DrawW = static_cast<float>(RDA::kLogicalWidth) * Scale;
 		const float DrawH = static_cast<float>(RDA::kLogicalHeight) * Scale;
 		const Rectangle DestViewport{
@@ -837,22 +905,30 @@ int main(int argc, char** argv)
 			DrawH
 		};
 
-		RDA::InputFrame P1 = ReadPlayerOneInput(DestViewport, bShowTouchOverlay, Screen == AppScreen::Match);
-		P1.pausePressed |= IsKeyPressed(KEY_BACK);
+		RDA::InputFrame P1 = ReadPlayerOneInput(DestViewport, bShowTouchOverlay, Screen == AppScreen::Match && !Settings.open && World && !World->IsPaused());
+        if(SettingsWasOpen||Settings.open)P1={};
+		P1.pausePressed |= !SettingsWasOpen && !Settings.open && IsKeyPressed(KEY_BACK);
 		static bool PauseWasDown=false;
 		bool PauseDown=false;
 		for(int i=0;i<GetTouchPointCount();++i) { auto P=PointerLogical(DestViewport,GetTouchPosition(i)); PauseDown|=CheckCollisionPointRec(P,Rectangle{590,0,50,46}); }
-		if(Screen==AppScreen::Match) P1.pausePressed|=PauseDown&&!PauseWasDown;
+		if(Screen==AppScreen::Match && !SettingsWasOpen && !Settings.open) P1.pausePressed|=PauseDown&&!PauseWasDown;
 		PauseWasDown=PauseDown;
 		static bool PointerWasDown = false;
 		const bool PointerDown = GetTouchPointCount() > 0 || IsMouseButtonDown(MOUSE_LEFT_BUTTON);
-		const bool PointerTap = PointerDown && !PointerWasDown;
+		const bool PointerTap = PointerDown && !PointerWasDown && !SettingsWasOpen && !Settings.open;
 		PointerWasDown = PointerDown;
 		const Vector2 Pointer = PointerLogical(DestViewport, GetTouchPointCount() > 0 ? GetTouchPosition(0) : GetMousePosition());
 		auto Tap = [&](float X, float Y, float W, float H) { return PointerTap && CheckCollisionPointRec(Pointer, Rectangle{X,Y,W,H}); };
+        if((Screen!=AppScreen::Match && Tap(548,326,88,30)) || (!SLTPrefs::Mobile&&!SettingsWasOpen&&!Settings.open&&IsKeyPressed(KEY_F10)))Settings.Show();
+        if(Screen==AppScreen::Match && World && World->IsPaused() && Tap(160,182,320,20))Settings.Show();
+        if(Screen==AppScreen::Match && World && SelectedMode==RDA::GameMode::Training && !Settings.open) {
+            if(Tap(180,87,85,23))World->ToggleDebugBoxes();
+            if(Tap(270,87,85,23))World->ResetTrainingPositions();
+            if(Tap(360,87,90,23))bTrainingCpuActive=!bTrainingCpuActive;
+        }
 		if (Screen == AppScreen::MainMenu)
 		{
-			for (int i=0; i<4; ++i) if (Tap(160,132.0f+i*36,320,30)) { MenuCursor=i; P1.confirmPressed=true; }
+			for (int i=0; i<6; ++i) if (Tap(64.f+(i%2)*272,142.f+(i/2)*56,240,44)) { MenuCursor=i; P1.confirmPressed=true; }
 			if (Tap(160,304,320,26)) SelectedDifficulty=static_cast<RDA::AiDifficulty>((static_cast<int>(SelectedDifficulty)+1)%3);
 		}
 		else if (Screen == AppScreen::CharacterSelect)
@@ -873,7 +949,8 @@ int main(int argc, char** argv)
 				if (Tap(160,222,320,20)) Screen=AppScreen::MainMenu;
 			}
 		}
-		const RDA::InputFrame P2Key = ReadPlayerTwoKeyboardInput();
+		RDA::InputFrame P2Key = ReadPlayerTwoKeyboardInput();
+        if(Settings.open||SettingsWasOpen)P2Key={};
 		if (Screen != LoggedScreen) { TraceLog(LOG_INFO,"RDA_SCREEN: %d",static_cast<int>(Screen)); LoggedScreen=Screen; }
 		if (World && World->IsPaused()!=LoggedPause) { LoggedPause=World->IsPaused(); TraceLog(LOG_INFO,"RDA_PAUSE: %d",LoggedPause?1:0); }
 
@@ -885,10 +962,11 @@ int main(int argc, char** argv)
 		else if (bHasMenuMusic && IsMusicStreamPlaying(MenuMusic)) StopMusicStream(MenuMusic);
 		if (Screen != AppScreen::Match) for (auto& StageVisual : StageVisuals) if(StageVisual.hasMusic && IsMusicStreamPlaying(StageVisual.music)) StopMusicStream(StageVisual.music);
 
+        if(!Settings.open && !SettingsWasOpen) {
 		if (Screen == AppScreen::MainMenu)
 		{
-			if (P1.upPressed || P2Key.upPressed) MenuCursor = (MenuCursor + 3) % 4;
-			if (P1.downPressed || P2Key.downPressed) MenuCursor = (MenuCursor + 1) % 4;
+			if (P1.upPressed || P2Key.upPressed) MenuCursor = (MenuCursor + 5) % 6;
+			if (P1.downPressed || P2Key.downPressed) MenuCursor = (MenuCursor + 1) % 6;
 			if (P1.leftPressed || P1.rightPressed)
 			{
 				const int NextDiff = (static_cast<int>(SelectedDifficulty) + 1) % 3;
@@ -896,15 +974,19 @@ int main(int argc, char** argv)
 			}
 			if (P1.confirmPressed || P1.punchPressed)
 			{
-				if (MenuCursor == 3)
+				if (MenuCursor == 5)
 				{
 					break;
 				}
+				if(MenuCursor==3)LaunchOnline();
+                else if(MenuCursor==4)Settings.Show();
+                else {
 				SelectedMode = MenuCursor == 0 ? RDA::GameMode::VsCpu :
 					(MenuCursor == 1 ? RDA::GameMode::LocalVersus : RDA::GameMode::Training);
 				SelectStep = 0;
 				Screen = AppScreen::CharacterSelect;
 				PlayWorldSound(Sounds, RDA::SoundEvent::HitLight, RDA::FighterId::GutoBarba);
+                }
 			}
 		}
 		else if (Screen == AppScreen::CharacterSelect)
@@ -1033,7 +1115,9 @@ int main(int argc, char** argv)
 			}
 		}
 
+        }
 		BeginTextureMode(Canvas);
+        rlPushMatrix();rlScalef(static_cast<float>(Settings.RenderScale()),static_cast<float>(Settings.RenderScale()),1);
 		ClearBackground(kInk);
 
 		if (Screen == AppScreen::MainMenu)
@@ -1064,29 +1148,24 @@ int main(int argc, char** argv)
 				DrawText("RUA DE ACO", 218, 28, 30, kCyan);
 			}
 
-			DrawRectangle(160, 118, 320, 184, kPanel);
-			DrawRectangleLinesEx(Rectangle{160, 118, 320, 184}, 1.0f, kCyan);
-
+            DrawRectangle(52,130,536,184,kPanel);
 			const char* DiffNames[] = {"FACIL", "NORMAL", "DIFICIL"};
 			const char* Items[] = {
 				TextFormat("1. VS CPU (%s)", DiffNames[static_cast<int>(SelectedDifficulty)]),
 				"2. VERSUS LOCAL (2 JOGADORES)",
-				"3. MODO TREINAMENTO (FRAME DATA + BOXES)",
-				"4. SAIR PARA O DESKTOP"
+				"3. TREINAMENTO",
+				"4. JOGAR ONLINE",
+                "5. CONFIGURACOES",
+                SLTPrefs::Mobile?"6. FECHAR JOGO":"6. SAIR"
 			};
-			for (int i = 0; i < 4; ++i)
-			{
-				const bool bSel = MenuCursor == i;
-				const int Y = 136 + i * 36;
-				if (bSel)
-				{
-					DrawRectangle(174, Y - 4, 292, 24, Color{41, 217, 255, 45});
-					DrawRectangleLinesEx(Rectangle{174.0f, static_cast<float>(Y - 4), 292.0f, 24.0f}, 1.0f, kYellow);
-				}
-				DrawText(Items[i], 186, Y + 2, 10, bSel ? kYellow : kWhite);
-			}
+            for(int i=0;i<6;i++) {
+                int x=64+(i%2)*272,y=142+(i/2)*56;
+                DrawRectangle(x,y,240,44,MenuCursor==i?Color{40,63,87,250}:Color{16,25,44,245});
+                DrawRectangleLines(x,y,240,44,MenuCursor==i?kYellow:kCyan);
+                int font=10;DrawText(Items[i],x+12,y+17,font,MenuCursor==i?kYellow:kWhite);
+            }
 
-			DrawText("W/S ou Setas: Navegar | A/D: Dificuldade CPU | ENTER/F: Confirmar | F4: Touch HUD | F11: Tela Cheia",
+			DrawText(SLTPrefs::Mobile?"TOQUE PARA ESCOLHER O MODO | CONFIGURACOES: TELA, AUDIO E CONTROLES":"Setas: navegar | Enter: confirmar | Configuracoes: tela, audio e controles",
 				38, 336, 10, kMuted);
 			if (bShowTouchOverlay) DrawText("TOQUE PARA ESCOLHER | TOQUE AQUI: DIFICULDADE", 166, 310, 8, kCyan);
 		}
@@ -1134,7 +1213,7 @@ int main(int argc, char** argv)
 			DrawText(TextFormat("P1: %s (%s)", F1.name, F1.archetype), 34, 182, 10, kCyan);
 			DrawText(TextFormat("Especiais: %s | %s", F1.special1.label, F1.special2.label), 34, 198, 8, kWhite);
 			DrawText(TextFormat("Super (50 barra): %s", F1.superMove.label), 34, 212, 8, kYellow);
-			DrawText("Agarrao Universal: F+G / T", 34, 226, 8, kGreen);
+			DrawText(SLTPrefs::Mobile?"Agarrar: toque AG | Super: toque SUP":"Agarrar e Super: veja suas teclas em Configuracoes", 34, 226, 8, kGreen);
 
 			DrawRectangle(328, 174, 286, 76, kPanel);
 			DrawRectangleLinesEx(Rectangle{328, 174, 286, 76}, 1.0f, kPink);
@@ -1168,7 +1247,8 @@ int main(int argc, char** argv)
 		else if (Screen == AppScreen::Match && World)
 		{
 			const RDA::WorldSnapshot Snap = World->Snapshot();
-			StageRenderer.Update(static_cast<float>(FrameSeconds),Snap);
+			StageRenderer.decorativeEffects=Settings.value.particles;
+            StageRenderer.Update(static_cast<float>(FrameSeconds),Snap);
 			StageRenderer.DrawBack(Snap);
 			const bool VictimInStage = RDAStageVisuals::StageRenderer::VictimInStageLayer(Snap) && Snap.finisherWinner >= 0;
 			if (VictimInStage)
@@ -1272,12 +1352,17 @@ int main(int argc, char** argv)
 						F1.moveTotalFrames),
 					188, 63, 8, kCyan);
 				DrawText(
-					TextFormat("F1: Hitboxes (%s) | F2: Reset Pos | F3: Dummy CPU (%s)",
+					TextFormat("Caixas (%s) | Resetar posicao | CPU (%s)",
 						Snap.debugBoxes ? "ON" : "OFF",
 						bTrainingCpuActive ? "ON" : "OFF"),
 					188, 74, 8, kMuted);
 			}
 
+            if(SelectedMode==RDA::GameMode::Training) {
+                DrawRectangle(180,87,85,23,kPanel);DrawText("CAIXAS",192,94,9,kCyan);
+                DrawRectangle(270,87,85,23,kPanel);DrawText("RESET",285,94,9,kWhite);
+                DrawRectangle(360,87,90,23,kPanel);DrawText("CPU ON/OFF",367,94,8,kYellow);
+            }
 			std::string DisplayBanner = Snap.banner ? Snap.banner : "";
 			if (Snap.phase==RDA::CombatPhase::Intro) DisplayBanner=Snap.phaseFrame<60 ? "ROUND "+std::to_string(Snap.round) : "FIGHT";
 			else if (Snap.phase==RDA::CombatPhase::FinishReady) DisplayBanner="FINALIZE!  FRACO + FORTE  "+std::to_string(std::max(0,(480-Snap.phaseFrame+59)/60));
@@ -1295,7 +1380,7 @@ int main(int argc, char** argv)
 				DrawRectangleLines((RDA::kLogicalWidth - BW) / 2 - 14, Y, BW + 28, 34, kYellow);
 				DrawText(DisplayBanner.c_str(), (RDA::kLogicalWidth - BW) / 2, Y+8, 18, kYellow);
 			}
-			if(Snap.phase==RDA::CombatPhase::MatchOver) DrawText("ENTER / F / LEVE: REVANCHE | PAUSA: MENU",182,342,8,kWhite);
+			if(Snap.phase==RDA::CombatPhase::MatchOver) DrawText("LEVE / CONFIRMAR: REVANCHE | PAUSA: MENU",182,342,8,kWhite);
 
 			if (Snap.paused)
 			{
@@ -1304,19 +1389,19 @@ int main(int argc, char** argv)
 				DrawText("JOGO PAUSADO", 252, 98, 16, kYellow);
 				if (!bShowMoveList)
 				{
-					DrawText("ESC / P : Continuar a Luta", 164, 128, 10, kWhite);
-					DrawText("M       : Ver Lista de Golpes dos Lutadores", 164, 148, 10, kCyan);
-					DrawText("F1      : Alternar Visualizador de Hitboxes", 164, 168, 10, kWhite);
-					DrawText("F4      : Alternar Controles Touch na Tela", 164, 188, 10, kWhite);
-					DrawText("C       : Voltar para Selecao de Lutadores/Arena", 164, 208, 10, kYellow);
-					DrawText("Q       : Voltar ao Menu Principal", 164, 228, 10, kPink);
+					DrawText("CONTINUAR A LUTA", 164, 128, 10, kWhite);
+					DrawText("LISTA DE GOLPES", 164, 148, 10, kCyan);
+					DrawText("ALTERNAR CAIXAS DE COLISAO", 164, 168, 10, kWhite);
+					DrawText("CONFIGURACOES: TELA, AUDIO E CONTROLES",164,188,10,kWhite);
+					DrawText("ESCOLHER LUTADORES E ARENA", 164, 208, 10, kYellow);
+					DrawText("VOLTAR AO MENU PRINCIPAL", 164, 228, 10, kPink);
 				}
 				else
 				{
 					const RDA::FighterDef& P1Def = RDA::GetFighterDef(F1.id);
 					DrawText(TextFormat("LISTA DE GOLPES — %s", P1Def.name), 160, 122, 10, kCyan);
-					DrawText("LEVE F/J/L(touch) | FORTE G/K/H(touch) | DEFESA R/U/B",160,138,8,kWhite);
-					DrawText("AGARRAO: F+G / J+K / GRAB | SUPER: Y / O / SUP",160,151,8,kGreen);
+					DrawText("LEVE / FORTE / DEFESA: botoes na tela ou seu controle",160,138,8,kWhite);
+					DrawText("AGARRAR: AG | SUPER: SUP | Veja suas teclas nas configuracoes",160,151,8,kGreen);
 					int Row=0;
 					for(const auto& Move:P1Def.canonicalMoves) if((Move.isSpecial || Move.isSuper) && Row<3)
 					{
@@ -1324,12 +1409,12 @@ int main(int argc, char** argv)
 						const char* Digits[]={"5","2","3","1","6","4","8"};
 						for(int D:Move.command.directions) if(D>=0 && D<7) Command+=Digits[D];
 						if(Command.empty()) Command="NEUTRO";
-						Command+=" + ESPECIAL (H / L / S)";
+						Command+=" + ESPECIAL";
 						DrawText(TextFormat("%s%s",Move.label,Move.isSuper?" [50 BARRA]":""),160,168+Row*24,8,Move.isSuper?kPink:kYellow);
 						DrawText(Command.c_str(),160,179+Row*24,8,kWhite); ++Row;
 					}
 					DrawText("236 = BAIXO > BAIXO+FRENTE > FRENTE | 214 = PARA TRAS",160,243,8,kMuted);
-					DrawText("FINALIZE: perto + GRAB | Toque lista / M para voltar",160,256,8,kCyan);
+					DrawText("FINALIZE: perto + AGARRAR | Toque na lista para voltar",160,256,8,kCyan);
 				}
 			}
 
@@ -1337,6 +1422,8 @@ int main(int argc, char** argv)
 			if (bShowTouchOverlay) { DrawRectangle(590,0,50,40,kPanel); DrawText("II",608,12,16,kWhite); }
 		}
 
+        if(Screen!=AppScreen::Match){DrawRectangle(548,326,88,30,kPanel);DrawText("CONFIGURAR",555,337,10,kCyan);}
+        rlDrawRenderBatchActive();rlPopMatrix();
 		EndTextureMode();
 		const int FinisherFrame = !RenderSmokeDirectory.empty() && World ? World->Snapshot().visualFinisher.frame : -1;
 		const bool CaptureFinisher = SmokeFinisher>=0 && FinisherFrame!=LastSmokeFinisherFrame && (FinisherFrame==34 || FinisherFrame==72 || FinisherFrame==112 || FinisherFrame==144 || FinisherFrame==190 || FinisherFrame==260 || FinisherFrame==300);
@@ -1352,8 +1439,20 @@ int main(int argc, char** argv)
 		BeginDrawing();
 		ClearBackground(BLACK);
 		Rectangle Src{0.0f, 0.0f, static_cast<float>(Canvas.texture.width), -static_cast<float>(Canvas.texture.height)};
-		DrawTexturePro(Canvas.texture, Src, DestViewport, Vector2{0.0f, 0.0f}, 0.0f, WHITE);
+		Rectangle PresentationViewport=DestViewport;
+        if(Settings.value.shake && Screen==AppScreen::Match && World && !World->IsPaused())PresentationViewport.x+=std::sin(GetTime()*70)*CameraTrauma*18;
+        DrawTexturePro(Canvas.texture, Src, PresentationViewport, Vector2{0.0f, 0.0f}, 0.0f, WHITE);
+        if(Settings.value.brightness<1)DrawRectangle(0,0,GetScreenWidth(),GetScreenHeight(),Fade(BLACK,1-Settings.value.brightness));
+        else if(Settings.value.brightness>1)DrawRectangle(0,0,GetScreenWidth(),GetScreenHeight(),Fade(WHITE,(Settings.value.brightness-1)*.45f));
+        if(Settings.value.showFps)DrawFPS(8,GetScreenHeight()-22);
+
+        Settings.Draw();
+        #if defined(PLATFORM_ANDROID)
+        if(GlobalTicks<=3)TraceLog(LOG_INFO,"RDA_PRESENTED_FRAME: %d screen=%dx%d render=%dx%d viewport=%.0fx%.0f focused=%d",GlobalTicks,GetScreenWidth(),GetScreenHeight(),GetRenderWidth(),GetRenderHeight(),DestViewport.width,DestViewport.height,IsWindowFocused());
+        #endif
 		EndDrawing();
+        if(!SettingsSmokeDirectory.empty() && GlobalTicks%2==0){Image capture=LoadImageFromScreen();std::string file=(fs::path(SettingsSmokeDirectory)/("settings-"+std::to_string((GlobalTicks-1)/2)+".png")).string();bool saved=ExportImage(capture,file.c_str());UnloadImage(capture);if(!saved)return 9;if(GlobalTicks>=10)break;}
+
 	}
 
 	if (bHasMenuMusic) UnloadMusicStream(MenuMusic);
@@ -1375,6 +1474,9 @@ int main(int argc, char** argv)
 	Sounds.Unload();
 	UnloadRenderTexture(Canvas);
 	if (IsAudioDeviceReady()) CloseAudioDevice();
+#if defined(_WIN32)
+    RDAOnline::Close();
+#endif
 	CloseWindow();
 	return 0;
 }

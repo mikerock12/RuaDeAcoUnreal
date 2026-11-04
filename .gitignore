@@ -36,3 +36,4 @@ $RECYCLE.BIN/
 # Local tool extracts
 ThirdParty/raylib-extract/
 *.zip
+__pycache__/

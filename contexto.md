@@ -1,4 +1,11 @@
 # Contexto do Projeto — Rua de Aço Nativo (`contexto.md`)
+## Plataforma e icones Android — 03/11/2026
+
+Configuracoes persistentes e icones APK tradicionais/adaptativos implementados em 0.4.0. Windows tem modos de tela, VSync/FPS e render interno ate4K; Android tem HUD sempre visivel, controles por toque ajustaveis/canhoto, vibracao e instrucoes proprias. Volumes musica/voz/efeitos ligam aos respectivos buses com ganhos canonicos. CTest4/4 e CI41756265525 aprovados, com93capturas/9percursos Android e preferencias apos reinicio. Cliente oficial online integrado ao Windows/WebView2 e Android/WebView, alternativa de navegador e bootstrapper Microsoft assinado; teste adicional de abrir/retornar OnlineActivity esta em CI. Salas e inicio identico em Windows integrado/navegador foram observados; a janela oculta de QA limitou rAF a cerca1FPS e a partida foi interrompida sem resultado. Nao afirmar homologacao de luta sustentada nesse host oculto. As instalacoes existentes foram preservadas; Windows portatil gerou29quadros+5settings, quatroEXEs PE(icon) e APKs comparados com arte aprovada. APK ARM64 assinado com certificado anterior v2/v3 e alinhamento16KiB. Release, merge e backup coordenados no portal.
+
+Sem homologacao Android fisica, audio ouvido, desempenho/toque fisicos ou dupla Wi-Fi. Responsavel: Codex.
+
+
 
 ## Versão de entrega 0.3.0 — resultado de 03/11/2026
 
@@ -90,3 +97,22 @@ Este repositório contém a implementação nativa em C++20 do jogo de luta **Ru
 Preparada versão 0.3.1. Logo original Rua de Aço preservado, com origem e SHA-256 registrados. ICO com dez tamanhos (16–256 px) incorporado ao jogo e instalador; PNG incorporado ao PE para SetWindowIcon, atalhos e desinstalação apontam ao EXE. CMake/MSVC e Inno Setup compilam os recursos; o script direto do Rua de Aço também. Verificação PE dos quatro executáveis comparou todas as imagens ao ICO aprovado; as duas janelas reais devolveram ícone 256×256 e logs de aplicação. Instalador RDA: 342 arquivos iguais ao ZIP, headless, 29 capturas e desinstalação aprovados. Nightfall: instalador compilado e ícone extraído; execução portátil com ícone conferida. Instalação Nightfall 1.0.1 já existe em Program Files e foi preservada, impedindo repetir o teste de instalação neste host.
 
 APKs recebem apenas versão de manutenção, com a mesma assinatura v2/v3 anterior e alinhamento 16 KiB; gameplay permanece o da correção anterior. PR/CI, releases, portal e backup desta etapa serão consolidados pelo coordenador no contexto do portal. Testes físicos Android continuam pendentes. Responsável: Codex.
+
+
+## Atualizacao de plataforma 0.4.0 — em validacao, 03/11/2026
+
+Configuracoes persistentes de tela, qualidade, audio, teclado/controle e touch integradas ao frontend compartilhado. Android tem HUD sempre visivel, tamanho/opacidade/margem/canhoto e vibracao; icones tradicionais e adaptativos derivam da mesma arte Windows aprovada, com procedencia em Platform/Android/Branding (NightfallNative no Nightfall). Windows oferece resolucao, modos de janela, VSync, limites FPS e render interno ate 4K. Nightfall usa subsistema GUI e simulacao fixa 60Hz. Rua de Aco abre o cliente Web oficial integrado para compatibilidade de salas; combate offline continua C++.
+
+Candidatos locais compilaram para Windows e Android x86_64; CTest anterior 4/4 RDA e 3/3 Nightfall. QA ampliado exige configuracoes por toque e persistencia apos reiniciar; CI, online real, empacotamento final, novas capturas, releases, portal e backups ainda pendentes. Suno fica por ultimo por instrucao do usuario, indisponivel por verificacao do site; nenhum audio novo gerado. Sem homologacao Android fisica. Responsavel: Codex.
+
+
+### Configuracoes e icones APK — 03/11/2026, em validacao
+Configuracoes de plataforma e touch persistentes, icones Android da arte Windows aprovada, pausa de audio no background e executavel Windows GUI implementados. Simulacao de frontend desacoplada do FPS; P2 aceita segundo gamepad. QA passou a conferir 15 recursos PNG compilados por jogo, dois XML adaptativos, preferencias apos reinicio e gestos reais no emulador. Primeiro CI encontrou falta de carregamento explicito da biblioteca para o JNI de lifecycle no Nightfall e seletor de borda obsoleto no driver RDA; corrigidos, gates serao repetidos. Nao ha nova release ainda. Audio Suno adiado para o fim pelo usuario, sem clips gerados; nao expor ajustes sem audio correspondente. Sem Android fisico/dupla Wi-Fi. Responsavel: Codex.
+
+
+## Superficie Android — 03/11/2026
+
+O gate pos-merge encontrou inicializacao intermitente com a imagem comprimida verticalmente, enquanto as areas de toque permaneciam nas coordenadas esperadas. A inicializacao passa a obter as dimensoes fisicas da janela Android via WindowMetrics/Display antes de InitWindow, evitando dimensoes zero e a orientacao ambigua da raylib. O QA de Nightfall exige o titulo na posicao correta e a abertura real das configuracoes. No RDA, o teste online aguarda o jogo terminar o preload antes de capturar. Nao afrouxar assertions nem atribuir o problema a persistencia sem examinar a imagem. Nightfall prepara1.1.1/code16, preservando release1.1.0; RDA0.4.0 ainda candidato. CI/build/publicacao desta correcao pendentes. Responsavel: Codex.
+
+
+Em 04/11/2026, o log do segundo formato Nightfall comprovou NativeWindow temporaria de1x1, apesar de WindowMetrics1000x600. A raylib5.5 calculava screenScale com esse buffer temporario e mantinha o jogo preto/comprimido. cmake/AndroidSurface.cmake preserva o upstream imutavel (SHA-256 a17a8c75...) e compila apenas uma copia de rcore com ANativeWindow_setBuffersGeometry aplicado antes da consulta inicial de dimensoes. A alteracao e marcada no codigo gerado e no log SLT_BUFFER_GEOMETRY. Validacao em andamento, sem nova publicacao desta manutencao. Responsavel: Codex.
